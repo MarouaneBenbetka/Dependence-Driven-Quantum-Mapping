@@ -11,7 +11,7 @@ def access_to_gates( read_dependencies_map , schedule_map):
     return schedule_map.reverse().apply_range(read_dependencies_map)
 
 
-def filter_two_qubit_gates(schedule_map,read_dependencies_map,domain):
+def filter_multi_qubit_gates(schedule_map,read_dependencies_map,domain):
     new_domain = extract_multi_qubit_gates(read_dependencies_map)
     new_schedule = access_to_gates(read_dependencies_map,schedule_map.intersect_domain(new_domain))
     new_read_dependicies = read_dependencies_map.intersect_domain(new_domain)

@@ -1,6 +1,6 @@
 import islpy as isl
-from lib.graph_tools import *
-from lib.swap_tools import *
+from src.graph_tools import *
+from src.swap_tools import *
 
 def main():
 
@@ -17,7 +17,9 @@ def main():
     graph['Q[6]'] = ['Q[4]', 'Q[5]', 'Q[8]']
     graph['Q[7]'] = ['Q[5]']
     graph['Q[8]'] = ['Q[6]']
-
+    
+    print(extract_edges_map(graph))
+    return
 
     shortest_paths = extract_shortest_paths(graph)
     swap_map = swaps_to_isl_map(shortest_paths['Q[2]']['paths']['Q[3]'])
@@ -35,8 +37,8 @@ def main():
     schedule_with_multi_qubits_gates = access_to_gates(read_dependencies,schedule.intersect_domain(domain_with_multi_qubits_gates))
     read_dependencies_with_multi_qubits_ = read_dependencies.intersect_domain(domain_with_multi_qubits_gates)
 
-    
-    gates = access_to_gates(read_dependencies,schedule.intersect_domain(domain_with_multi_qubits_gates))
+
+    access_to_gates_mapping = access_to_gates(read_dependencies,schedule.intersect_domain(domain_with_multi_qubits_gates))
     print(schedule.intersect_domain(domain_with_multi_qubits_gates))
 
 if __name__ == "__main__":

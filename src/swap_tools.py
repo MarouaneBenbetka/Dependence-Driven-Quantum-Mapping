@@ -29,3 +29,14 @@ def apply_swaps_to_logical_qubits_map(swaps_map,logical_qubits_map,physical_qubi
     return logical_qubits_map.apply_range(swaps_map).union(logical_qubits_map.intersect_range(swap_complement_domain))
 
 
+def first_disconnection(paths,logical_to_physical_mapping ):
+
+
+
+    # S1->[Q1->Q2]
+    # S2->[Q4,Q6]
+    # S3->[Q3,Q5]
+    # S4->[Q7,Q8]
+    # S5->[Q9,Q10]
+
+    pass

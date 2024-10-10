@@ -1,23 +1,24 @@
 
 from heapq import heappush, heappop
 from collections import defaultdict
-from lib.swap_tools import swaps_to_isl_map
-from lib.graph_tools import *
-from lib.io_tools import *
-from lib.circuit_tools import *
+from src.swap_tools import swaps_to_isl_map
+from src.io_tools import *
+from src.circuit_tools import *
+import re
+
+
+
+def extract_coordinates(text):
+    match = re.search(r'\[(.*?)\]', text)
+    if match:
+        return match.group(1)  
+    
+    raise ValueError("No content inside square brackets found")
+
+
 
 def extract_shortest_paths(graph:defaultdict) -> dict:
-    """
-    Extracts shortest paths from a graph.
-
-    Args:
-        graph: A graph.
-
-    Returns:
-        A dictionary of shortest paths.
-    """
     all_shortest_paths = {}
-
     for src in graph:
         shortest = {}  
         paths = {src: [src]} 
@@ -42,6 +43,22 @@ def extract_shortest_paths(graph:defaultdict) -> dict:
 
     return all_shortest_paths
 
+def extract_edges_map(graph:defaultdict):
+    edges = []
+    for src in graph:
+        for dst in graph[src]:
+            edges.append((extract_coordinates(src),extract_coordinates(dst)))
+    
+    edges_str =  "{" + ";".join([f'[{src},{dst}]' for src,dst in edges]) + "}"
+    print(edges_str)
+    connected_edges_set = isl.Set(edges_str)
+    
+    all_connections = isl.Set(f"{{  [i,j] : 1 <= i,j <= {len(graph)} }}")
+
+    disconnected_edges = all_connections.subtract(connected_edges_set)
+
+    return isl.Map.from_domain_and_range(disconnected_edges, isl.Set("{[1]}"))
+    
 
 if __name__ == "__main__":
 
@@ -58,6 +75,8 @@ if __name__ == "__main__":
 
 
     shortest_paths = extract_shortest_paths(graph)
+
+    print(extract_edges_map(graph))
 
     
 
