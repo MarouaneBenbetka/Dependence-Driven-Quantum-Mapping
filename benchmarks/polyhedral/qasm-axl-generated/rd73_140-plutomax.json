@@ -1,0 +1,12 @@
+{
+    "Domain": null,
+    "Read": null,
+    "Write": null,
+    "Call": null,
+    "RecoveredSchedule": null,
+    "Stats": {},
+    "DomainBreakdown": {},
+    "Timing": {},
+    "Chunk": "100",
+    "Search": "0"
+}
