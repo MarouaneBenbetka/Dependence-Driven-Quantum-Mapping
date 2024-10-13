@@ -50,7 +50,6 @@ def extract_edges_map(graph:defaultdict):
             edges.append((extract_coordinates(src),extract_coordinates(dst)))
     
     edges_str =  "{" + ";".join([f'[{src},{dst}]' for src,dst in edges]) + "}"
-    print(edges_str)
     connected_edges_set = isl.Set(edges_str)
     
     all_connections = isl.Set(f"{{  [i,j] : 1 <= i,j <= {len(graph)} }}")

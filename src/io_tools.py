@@ -13,5 +13,6 @@ def json_file_to_isl(path:str):
         "read_dependencies": isl.UnionMap(data["Read"]),
         "write_dependencies": isl.UnionMap(data["Write"]),
         "call": isl.UnionMap(data["Call"]),
-        "schedule":isl.UnionMap(data["RecoveredSchedule"])
+        "schedule":isl.UnionMap(data["RecoveredSchedule"]),
+        "Qops":data["Stats"]["Qops"]
     }
