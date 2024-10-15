@@ -19,7 +19,7 @@ def extract_coordinates(text):
 
 def extract_shortest_paths(graph:defaultdict) -> dict:
     all_shortest_paths = {}
-    for src in graph:
+    for src in range(len(graph)):
         shortest = {}  
         paths = {src: [src]} 
         heap = [(0, src)]  
@@ -43,11 +43,11 @@ def extract_shortest_paths(graph:defaultdict) -> dict:
 
     return all_shortest_paths
 
-def extract_edges_map(graph:defaultdict):
+def extract_edges_map(graph:list[list]):
     edges = []
-    for src in graph:
+    for src in range(len(graph)):
         for dst in graph[src]:
-            edges.append((extract_coordinates(src),extract_coordinates(dst)))
+            edges.append((src,dst))
     
     edges_str =  "{" + ";".join([f'[{src},{dst}]' for src,dst in edges]) + "}"
     connected_edges_set = isl.Set(edges_str)
@@ -56,7 +56,7 @@ def extract_edges_map(graph:defaultdict):
 
     disconnected_edges = all_connections.subtract(connected_edges_set)
 
-    return isl.Map.from_domain_and_range(disconnected_edges, isl.Set("{[1]}"))
+    return disconnected_edges
     
 
 if __name__ == "__main__":

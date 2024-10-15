@@ -14,9 +14,9 @@ def swaps_to_isl_map(path:list)  :
         return isl.UnionMap("{}") 
     
     n = len(path) - 1
-    map_str = f"{path[0]}->{path[n-1]}"
+    map_str = f"[{path[0]}]->[{path[n-1]}]"
     for i in range(1,n):
-        map_str += f";{path[i]}->{path[i-1]}"
+        map_str += f";[{path[i]}]->[{path[i-1]}]"
 
     
     return isl.UnionMap("{"+map_str+"}")
@@ -29,14 +29,5 @@ def apply_swaps_to_logical_qubits_map(swaps_map,logical_qubits_map,physical_qubi
     return logical_qubits_map.apply_range(swaps_map).union(logical_qubits_map.intersect_range(swap_complement_domain))
 
 
-def first_disconnection(paths,logical_to_physical_mapping ):
-
-
-
-    # S1->[Q1->Q2]
-    # S2->[Q4,Q6]
-    # S3->[Q3,Q5]
-    # S4->[Q7,Q8]
-    # S5->[Q9,Q10]
-
-    pass
+# def first_disconnection(paths,logical_to_physical_mapping ):
+#     programme_access.intersect_range(backend_disconnected_edges).domain().lexmin()
