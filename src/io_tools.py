@@ -16,3 +16,11 @@ def json_file_to_isl(path:str):
         "schedule":isl.UnionMap(data["RecoveredSchedule"]),
         "Qops":data["Stats"]["Qops"]
     }
+
+
+def json_file_qasm(path:str):
+
+    with open(path) as f:
+        data = json.load(f)
+
+    return data["qasm_code"]
