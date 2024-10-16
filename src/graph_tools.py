@@ -15,8 +15,6 @@ def extract_coordinates(text):
     
     raise ValueError("No content inside square brackets found")
 
-
-
 def extract_shortest_paths(graph:defaultdict) -> dict:
     all_shortest_paths = {}
     for src in range(len(graph)):
@@ -36,9 +34,10 @@ def extract_shortest_paths(graph:defaultdict) -> dict:
                     heappush(heap, (new_cost, neighbor))
                     paths[neighbor] = paths[node] + [neighbor]
         
-        isl_maps = []
+        isl_maps = {}
         for path in paths:
-            isl_maps.append(swaps_to_isl_map(paths[path]))
+            isl_maps[path] =  swaps_to_isl_map(paths[path])
+
         all_shortest_paths[src] = {'costs': shortest, 'paths': paths, 'isl_maps': isl_maps}  
 
     return all_shortest_paths
@@ -49,34 +48,31 @@ def extract_edges_map(graph:list[list]):
         for dst in graph[src]:
             edges.append((src,dst))
     
-    edges_str =  "{" + ";".join([f'[{src},{dst}]' for src,dst in edges]) + "}"
+    edges_str =  "{" + ";".join([f'[[{src}] -> [{dst}]]' for src,dst in edges if src < dst]) + "}"
     connected_edges_set = isl.Set(edges_str)
     
-    all_connections = isl.Set(f"{{  [i,j] : 1 <= i,j <= {len(graph)} }}")
+    all_connections = isl.Set(f"{{  [[i] -> [j]] : 1 <= i < j <= {len(graph)} }}")
 
     disconnected_edges = all_connections.subtract(connected_edges_set)
 
     return disconnected_edges
     
 
-if __name__ == "__main__":
-
-    graph = defaultdict(list)
+def generate_2d_grid(num_rows = 4, num_cols = 4):
+    num_qubits = num_rows * num_cols
+    graph = [[] for _ in range(num_qubits)]
     
-    graph['Q[1]'] = ['Q[2]', 'Q[4]']
-    graph['Q[2]'] = ['Q[1]']
-    graph['Q[3]'] = ['Q[4]']
-    graph['Q[4]'] = ['Q[1]', 'Q[3]', 'Q[6]']
-    graph['Q[5]'] = ['Q[6]', 'Q[7]']
-    graph['Q[6]'] = ['Q[4]', 'Q[5]', 'Q[8]']
-    graph['Q[7]'] = ['Q[5]']
-    graph['Q[8]'] = ['Q[6]']
-
-
-    shortest_paths = extract_shortest_paths(graph)
-
-    print(extract_edges_map(graph))
-
+    for i in range(num_rows):
+        for j in range(num_cols):
+            index = i * num_cols + j
+            if j > 0:
+                graph[index].append(index - 1)
+            if j + 1 < num_cols:
+                graph[index].append(index + 1)
+            if i > 0:
+                graph[index].append(index - num_cols)
+            if i + 1 < num_rows:
+                graph[index].append(index + num_cols)
     
-
+    return graph
 
