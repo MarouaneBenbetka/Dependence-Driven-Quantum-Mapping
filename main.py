@@ -6,49 +6,86 @@ import time
 
 def main():
 
-    json_file_path = 'benchmarks/polyhedral/queko-bss-16qbt/16QBT_100CYC_QSE_7.json'
+    json_file_path = 'benchmarks/polyhedral/queko-bss-20qbt/20QBT_100CYC_QSE_9.json'
     data = json_file_to_isl(json_file_path)
     domain, read_dep, access = filter_multi_qubit_gates(data["domain"], data["read_dependencies"], data["schedule"])
-    num_qubits = get_qubits_needed(read_dep)
-    physical_qubits_domain = isl.Set(f"{{ [i] : 1 <= i <= {num_qubits} }}")
-    backend_graph = generate_2d_grid()
+    num_qubits = get_qubits_needed(read_dep)+1
+    physical_qubits_domain = isl.Set(f"{{ [i] : 0 <= i <= {num_qubits} }}")
+    backend_graph = generate_2d_grid(num_rows=4, num_cols=5)
 
     backend_disconnected_edges =  extract_edges_map(backend_graph)
-    shortest_paths = extract_shortest_paths(backend_graph)
+    shortest_paths = extract_shortest_paths(backend_graph, physical_qubits_domain)
 
 
-    mapping = isl.Map(f"{{ q[i] -> [i] : 1<=i<={num_qubits} }}")
+    mapping = isl.Map(f"{{ q[i] -> [i] : 0<=i<={num_qubits} }}")
+    
+    access = access.apply_range(mapping).coalesce()
+
+
     swap_count = 0
 
     iteration = 0
-
-    access1 = access.lexmin()
-    access2 = access.lexmax()
+    
+    access1 = access.lexmin().coalesce()
+    access2 = access.lexmax().coalesce()
+    transform_map = isl.Map(" { [[[a]->[b]] -> [c]] -> [[a] -> [[b]->[c]]]}").coalesce()
 
     global_start = time.time()
-    while not access.is_empty():
-        iteration += 1
-        access_to_physical1 = access1.apply_range(mapping)
-        access_to_physical2 = access2.apply_range(mapping)
 
-        programme_access = access_to_physical1.range_product(access_to_physical2)
+    disconnection_time_global = 0
+    range_product_time = 0
+    while not access1.is_empty():
+        iteration += 1
+
+        start = time.time()
+
+        # access1 , acces 2  => disconnection time
+
+        # programme_access = access1.range_product(access2)
+        programme_access = access1.domain_map().apply_range(access2).wrap().apply(transform_map).unwrap()
+        
+        range_product_time += time.time() - start
+        print("range product time: ", time.time() - start)
+
+
+        start = time.time()
         disconnection_time = programme_access.intersect_range(backend_disconnected_edges).domain().lexmin()
         if disconnection_time.is_empty():
             break
+        disconnection_time_global += time.time() - start
+        print("disconnection time: ", time.time() - start)
             
-        
-        q1 = access_to_physical1.intersect_domain(disconnection_time).range().as_set().dim_max_val(0).to_python()
-        q2 = access_to_physical2.intersect_domain(disconnection_time).range().as_set().dim_max_val(0).to_python()
+        # start = time.time()
+        q1 = access1.intersect_domain(disconnection_time).range().dim_max_val(0).to_python()
+        q2 = access2.intersect_domain(disconnection_time).range().dim_max_val(0).to_python()
+        # print("diconnected qubit finding ", time.time() - start)
 
         swap_count += shortest_paths[q1]['costs'][q2] -1
-        new_domain = access.domain().as_set().lex_gt_set(disconnection_time.as_set()).domain()
-        access1 = access1.intersect_domain(new_domain).coalesce()
-        access2 = access2.intersect_domain(new_domain).coalesce()
-        mapping = apply_swaps_to_logical_qubits_map(shortest_paths[q1]['isl_maps'][q2],mapping,physical_qubits_domain)
+        # start = time.time()
+        disconnection_time_point = disconnection_time.dim_max_val(0).to_python()
+        new_domain = isl.Set(f"{{ [i] : i> {disconnection_time_point} }}") 
+
+        # print("new domain time: ", time.time() - start)
+
+        # start = time.time()
+        access1 = access1.intersect_domain(new_domain)
+        access2 = access2.intersect_domain(new_domain)
+        # print("new access time: ", time.time() - start)
+
+        # start = time.time()
+        swap_map = shortest_paths[q1]['isl_maps'][q2]
+        access1 = apply_swaps_to_logical_qubits_map(swap_map,access1)
+        access2 = apply_swaps_to_logical_qubits_map(swap_map,access2)
+
+        # print("find mapping time: ", time.time() - start)
+
+        # print("+================================+")
 
     print(f"Total time taken: {time.time() - global_start}")
     print(f"Total number of swaps: {swap_count}")
-
+    print(f"Total number of iterations: {iteration}")
+    print(f"Total disconnection time: {disconnection_time_global}")
+    print(f"Total range product time: {range_product_time}")
 
 if __name__ == "__main__":
     main()

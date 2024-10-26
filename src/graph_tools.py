@@ -15,7 +15,7 @@ def extract_coordinates(text):
     
     raise ValueError("No content inside square brackets found")
 
-def extract_shortest_paths(graph:defaultdict) -> dict:
+def extract_shortest_paths(graph:defaultdict, physical_qubits_domain) -> dict:
     all_shortest_paths = {}
     for src in range(len(graph)):
         shortest = {}  
@@ -36,9 +36,11 @@ def extract_shortest_paths(graph:defaultdict) -> dict:
         
         isl_maps = {}
         for path in paths:
-            isl_maps[path] =  swaps_to_isl_map(paths[path])
+            isl_maps[path] =  swaps_to_isl_map(paths[path], physical_qubits_domain)
 
-        all_shortest_paths[src] = {'costs': shortest, 'paths': paths, 'isl_maps': isl_maps}  
+
+
+        all_shortest_paths[src] = {'costs': shortest, 'paths': paths, 'isl_maps': isl_maps }  
 
     return all_shortest_paths
 
@@ -48,16 +50,15 @@ def extract_edges_map(graph:list[list]):
         for dst in graph[src]:
             edges.append((src,dst))
     
-    edges_str =  "{" + ";".join([f'[[{src}] -> [{dst}]]' for src,dst in edges if src < dst]) + "}"
+    edges_str =  "{" + ";".join([f'[[{src}]->[{dst}]]' for src,dst in edges if src < dst]) + "}"
     connected_edges_set = isl.Set(edges_str)
     
-    all_connections = isl.Set(f"{{  [[i] -> [j]] : 1 <= i < j <= {len(graph)} }}")
+    all_connections = isl.Set(f"{{  [[i]->[j]] : 0 <= i < j <= {len(graph)} }}")
 
-    disconnected_edges = all_connections.subtract(connected_edges_set)
+    disconnected_edges = all_connections.subtract(connected_edges_set).coalesce()
 
     return disconnected_edges
     
-
 def generate_2d_grid(num_rows = 4, num_cols = 4):
     num_qubits = num_rows * num_cols
     graph = [[] for _ in range(num_qubits)]
@@ -76,3 +77,20 @@ def generate_2d_grid(num_rows = 4, num_cols = 4):
     
     return graph
 
+
+def apply_swaps_to_logical_qubits_map(swaps_map,logical_qubits_map,physical_qubits_domain) :
+    swap_domain = swaps_map.domain()
+    swap_complement_domain = physical_qubits_domain.subtract(swap_domain)
+
+    return logical_qubits_map.apply_range(swaps_map).union(logical_qubits_map.intersect_range(swap_complement_domain)).coalesce()
+
+
+
+def all_isl_mapping(swaps_map, physical_qubits_domain):
+    swap_domain = swaps_map.domain()
+    swap_complement_domain = physical_qubits_domain.subtract(swap_domain)
+
+    return swaps_map.union(isl.Map("{ [i]-> [i] }").intersect_domain(swap_complement_domain)).coalesce()
+
+
+    

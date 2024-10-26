@@ -19,5 +19,4 @@ def filter_multi_qubit_gates(domain,access,schedule):
     return new_domain,new_read_dependicies,new_schedule
 
 def get_qubits_needed(read_dependencies):
-    regex = re.compile(r'(?<=\[)(.*?)(?=\])')
-    return int(regex.findall(read_dependencies.range().as_set().lexmax().to_str())[0]) + 1
+    return read_dependencies.range().as_set().lexmax().dim_max_val(0).to_python()+1
