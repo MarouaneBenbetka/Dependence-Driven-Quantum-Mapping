@@ -44,17 +44,14 @@ def main():
         # programme_access = access1.range_product(access2)
         programme_access = access1.domain_map().apply_range(access2).wrap().apply(transform_map).unwrap()
         
-        range_product_time += time.time() - start
-        print("range product time: ", time.time() - start)
+
 
 
         start = time.time()
         disconnection_time = programme_access.intersect_range(backend_disconnected_edges).domain().lexmin()
         if disconnection_time.is_empty():
             break
-        disconnection_time_global += time.time() - start
-        print("disconnection time: ", time.time() - start)
-            
+
         # start = time.time()
         q1 = access1.intersect_domain(disconnection_time).range().dim_max_val(0).to_python()
         q2 = access2.intersect_domain(disconnection_time).range().dim_max_val(0).to_python()
