@@ -17,5 +17,5 @@
     },
     "Chunk": "1000",
     "Search": "0",
-    "qasm_code": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[9];\n\ncx q[2], q[3];\ncx q[3], q[5];\ncx q[1], q[18];\ncx q[2], q[20];"
+    "qasm_code": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[23];\n\ncx q[2], q[3];\ncx q[3], q[5];\ncx q[1], q[18];\ncx q[2], q[20];"
 }
