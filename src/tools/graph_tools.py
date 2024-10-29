@@ -1,9 +1,9 @@
 
 from heapq import heappush, heappop
 from collections import defaultdict
-from src.swap_tools import swaps_to_isl_map
-from src.io_tools import *
-from src.circuit_tools import *
+from src.tools.swap_tools import swaps_to_isl_map
+from src.tools.io_tools import *
+from src.tools.circuit_tools import *
 import re
 
 
@@ -76,13 +76,6 @@ def generate_2d_grid(num_rows = 4, num_cols = 4):
                 graph[index].append(index + num_cols)
     
     return graph
-
-
-def apply_swaps_to_logical_qubits_map(swaps_map,logical_qubits_map,physical_qubits_domain) :
-    swap_domain = swaps_map.domain()
-    swap_complement_domain = physical_qubits_domain.subtract(swap_domain)
-
-    return logical_qubits_map.apply_range(swaps_map).union(logical_qubits_map.intersect_range(swap_complement_domain)).coalesce()
 
 
 

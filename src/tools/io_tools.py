@@ -14,7 +14,8 @@ def json_file_to_isl(path:str):
         "write_dependencies": isl.UnionMap(data["Write"]),
         "call": isl.UnionMap(data["Call"]),
         "schedule":isl.UnionMap(data["RecoveredSchedule"]),
-        "Qops":data["Stats"]["Qops"]
+        "Qops":data["Stats"]["Qops"],
+        "qasm_code":data["qasm_code"]
     }
 
 

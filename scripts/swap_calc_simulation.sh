@@ -7,9 +7,9 @@
 #SBATCH --nodes=1
 #SBATCH -c 28
 #SBATCH --mem=64G
-#SBATCH -t 2
-#SBATCH -o /scratch/mb10324/Poly-Swap/scripts/job1.out
-#SBATCH -e /scratch/mb10324/Poly-Swap/scripts/job1.err
+#SBATCH -t 2-1
+#SBATCH -o /scratch/mb10324/Poly-Swap/scripts/swap_calc_simulation.out
+#SBATCH -e /scratch/mb10324/Poly-Swap/scripts/swap_calc_simulation.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=mb10324@nyu.edu
 

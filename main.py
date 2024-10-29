@@ -1,105 +1,84 @@
-import islpy as isl
-from src.io_tools import *
-from src.graph_tools import *
-from src.swap_tools import *
 import time 
+import csv
+import os
 
-def backend():
-    physical_qubits_domain = isl.Set(f"{{ [i] : 0 <= i <= {100} }}")
-    backend_graph = generate_2d_grid(num_rows=10, num_cols=10)
+import islpy as isl
 
-    backend_disconnected_edges =  extract_edges_map(backend_graph)
-    shortest_paths = extract_shortest_paths(backend_graph, physical_qubits_domain)
-
-    return backend_disconnected_edges, shortest_paths
-
-backend_disconnected_edges , shortest_paths = backend()
-def main(json_file_path):
-
-    #json_file_path = 'benchmarks/polyhedral/queko-bss-20qbt/20QBT_100CYC_QSE_9.json'
-    data = json_file_to_isl(json_file_path)
-    domain, read_dep, access = filter_multi_qubit_gates(data["domain"], data["read_dependencies"], data["schedule"])
-    if domain is None:
-        return 0, 0, 0
-    num_qubits = get_qubits_needed(read_dep)+1
-    #physical_qubits_domain = isl.Set(f"{{ [i] : 0 <= i <= {num_qubits} }}")
-    #backend_graph = generate_2d_grid(num_rows=10, num_cols=10)
-
-    #backend_disconnected_edges =  extract_edges_map(backend_graph)
-    #shortest_paths = extract_shortest_paths(backend_graph, physical_qubits_domain)
+from src.tools.io_tools import *
+from src.tools.graph_tools import *
+from src.tools.swap_tools import *
+from src.tools.backend_generation import *
+from src.swap_calc.simulation import *
+from src.swap_calc.sabre import *
 
 
-    mapping = isl.Map(f"{{ q[i] -> [i] : 0<=i<={num_qubits} }}")
-    
-    access = access.apply_range(mapping).coalesce()
+ROOT_FOLDER_PATH = "benchmarks/polyhedral"
+LOG_FILE = "benchmark_results.csv"
+ERROR_LOG_FILE = 'error_log.csv'
 
+def main():
 
-    swap_count = 0
+    N, edges = generate_backend_edges()
+    topology = edges_adjancy_list(N, edges)
 
-    iteration = 0
-    
-    access1 = access.lexmin().coalesce()
-    access2 = access.lexmax().coalesce()
-    transform_map = isl.Map(" { [[[a]->[b]] -> [c]] -> [[a] -> [[b]->[c]]]}").coalesce()
+    sc = SwapCalculator(topology)
 
-    global_start = time.time()
+    with open(LOG_FILE, mode='w', newline='') as log_file, open(ERROR_LOG_FILE, mode='w', newline='') as error_log_file:
+        writer = csv.writer(log_file)
+        error_writer = csv.writer(error_log_file)
+        writer.writerow(["Benchmark", "File", "Execution Time", "Swap Count", "SABRE Execution Time", "SABRE Swap Count"])
+        error_writer.writerow(["Benchmark", "File", "Error"])
 
-    #disconnection_time_global = 0
-    #range_product_time = 0
-    while not access1.is_empty():
-        iteration += 1
-
-        #start = time.time()
-
-        # access1 , acces 2  => disconnection time
-
-        # programme_access = access1.range_product(access2)
-        programme_access = access1.domain_map().apply_range(access2).wrap().apply(transform_map).unwrap()
-        
-        #range_product_time += time.time() - start
-        #print("range product time: ", time.time() - start)
-
-
-        #start = time.time()
-        disconnection_time = programme_access.intersect_range(backend_disconnected_edges).domain().lexmin()
-        if disconnection_time.is_empty():
-            break
-        #disconnection_time_global += time.time() - start
-        #print("disconnection time: ", time.time() - start)
+        for root, _, files in os.walk(ROOT_FOLDER_PATH):
+            benchmark_name = os.path.basename(root)
             
-        # start = time.time()
-        q1 = access1.intersect_domain(disconnection_time).range().dim_max_val(0).to_python()
-        q2 = access2.intersect_domain(disconnection_time).range().dim_max_val(0).to_python()
-        # print("diconnected qubit finding ", time.time() - start)
-        swap_count += shortest_paths[q1]['costs'][q2] -1
-        # start = time.time()
-        disconnection_time_point = disconnection_time.dim_max_val(0).to_python()
-        new_domain = isl.Set(f"{{ [i] : i> {disconnection_time_point} }}") 
+            for filename in files:
+                if filename.endswith(".json"):
+                    file_path = os.path.join(root, filename)
+                    print(f"Processing {file_path} in benchmark {benchmark_name}...")
+                    try:
+                        data = json_file_to_isl(file_path)
+                        domain, read_dep, access = filter_multi_qubit_gates(data["domain"], data["read_dependencies"], data["schedule"])
+                        
+                        if domain is None:
+                            continue
 
-        # print("new domain time: ", time.time() - start)
+                        num_qubits = get_qubits_needed(read_dep)+1
+                        mapping = isl.Map(f"{{ q[i] -> [i] : 0<=i<={num_qubits} }}")
+                        
+                        access = access.apply_range(mapping).coalesce()
+                        access1 = access.lexmin().coalesce()
+                        access2 = access.lexmax().coalesce()
 
-        # start = time.time()
-        access1 = access1.intersect_domain(new_domain)
-        access2 = access2.intersect_domain(new_domain)
-        # print("new access time: ", time.time() - start)
+                        start = time.time()
+                        saber_swap_count = run_saber(edges,data['qasm_code'])
+                        saber_time = time.time()-start
+                        
+                        print(f"Sabber Swap Count {saber_swap_count}")
 
-        # start = time.time()
-        swap_map = shortest_paths[q1]['isl_maps'][q2]
-        access1 = apply_swaps_to_logical_qubits_map(swap_map,access1)
-        access2 = apply_swaps_to_logical_qubits_map(swap_map,access2)
 
-        # print("find mapping time: ", time.time() - start)
+                        start = time.time()
+                        simulation_swap_count = sc.run(access1, access2, mapping)
+                        simulation_time = time.time()-start
+                        print(f"Simulation Swap Count {simulation_swap_count}")
 
-        # print("+================================+")
+                    
+                        writer.writerow([benchmark_name, filename, simulation_time, simulation_swap_count ,saber_time, saber_swap_count])
+                        log_file.flush() 
 
-    return time.time() - global_start, swap_count, iteration
-    print(f"Total time taken: {time.time() - global_start}")
-    print(f"Total number of swaps: {swap_count}")
-    print(f"Total number of iterations: {iteration}")
-    print(f"Total disconnection time: {disconnection_time_global}")
-    print(f"Total range product time: {range_product_time}")
+                    except Exception as e:
+                        error_writer.writerow([benchmark_name, filename, str(e)])
+                        error_log_file.flush()
+                        print(f"Error processing {file_path}: {e}")
+
+
+                    
+
+
+
+
+
 
 if __name__ == "__main__":
-    json_file_path = 'benchmarks/polyhedral/queko-bss-20qbt/20QBT_100CYC_QSE_9.json'
-    main(json_file_path)
+    main()
 
