@@ -1,2 +1,3 @@
 Loading module 'miniconda-nobashrc/3-4.11.0'
 Loading module 'gcc/9.2.0'
+slurmstepd: error: *** JOB 9366213 ON dn328 CANCELLED AT 2024-11-01T03:48:44 DUE TO TIME LIMIT ***

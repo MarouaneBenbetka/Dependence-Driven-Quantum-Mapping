@@ -1,7 +1,7 @@
 
 from heapq import heappush, heappop
 from collections import defaultdict
-from src.tools.swap_tools import swaps_to_isl_map
+from src.tools.swap_tools import *
 from src.tools.io_tools import *
 from src.tools.circuit_tools import *
 import re
@@ -15,7 +15,7 @@ def extract_coordinates(text):
     
     raise ValueError("No content inside square brackets found")
 
-def extract_shortest_paths(graph:defaultdict, physical_qubits_domain) -> dict:
+def extract_shortest_paths(graph:defaultdict, physical_qubits_domain, physical_qubits_domain_set) -> dict:
     all_shortest_paths = {}
     for src in range(len(graph)):
         shortest = {}  
@@ -38,9 +38,12 @@ def extract_shortest_paths(graph:defaultdict, physical_qubits_domain) -> dict:
         for path in paths:
             isl_maps[path] =  swaps_to_isl_map(paths[path], physical_qubits_domain)
 
+        gate_isl_maps = {}
+        for path in paths:
+            gate_isl_maps[path] =  gate_swaps_to_isl_map(paths[path], physical_qubits_domain_set)
 
 
-        all_shortest_paths[src] = {'costs': shortest, 'paths': paths, 'isl_maps': isl_maps }  
+        all_shortest_paths[src] = {'costs': shortest, 'paths': paths, 'isl_maps': isl_maps , 'gate_isl_maps':gate_isl_maps}  
 
     return all_shortest_paths
 
@@ -50,10 +53,10 @@ def extract_edges_map(graph:list[list]):
         for dst in graph[src]:
             edges.append((src,dst))
     
-    edges_str =  "{" + ";".join([f'[[{src}]->[{dst}]]' for src,dst in edges if src < dst]) + "}"
+    edges_str =  "{" + ";".join([f'[{src},{dst}]' for src,dst in edges if src < dst]) + "}"
     connected_edges_set = isl.Set(edges_str)
     
-    all_connections = isl.Set(f"{{  [[i]->[j]] : 0 <= i < j <= {len(graph)} }}")
+    all_connections = isl.Set(f"{{  [i,j] : 0 <= i < j <= {len(graph)} }}")
 
     disconnected_edges = all_connections.subtract(connected_edges_set).coalesce()
 

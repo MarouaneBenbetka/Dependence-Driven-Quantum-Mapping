@@ -19,7 +19,7 @@ def run_saber(edges, qasm_code):
  
     pass_manager = PassManager()
 
-    pass_manager.append(SabreSwap(coupling_map))
+    pass_manager.append(SabreSwap(coupling_map,seed=42))
 
     transpiled_circuit = transpile(
         circuit,
@@ -33,8 +33,3 @@ def run_saber(edges, qasm_code):
     
     return swap_count
 
-# Example usage
-if __name__ == "__main__":
-    json_file_path = "benchmarks/polyhedral/cases/backward.json"  # Specify the path to your JSON file
-    time,swaps = sabre_main(json_file_path)
-    print(f"Number of SWAP gates: {swaps}")

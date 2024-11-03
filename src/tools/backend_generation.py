@@ -1,15 +1,19 @@
 from qiskit_ibm_runtime import QiskitRuntimeService
+from qiskit.providers.fake_provider import Fake27QPulseV1
 
 
 
 
 
+def generate_backend_edges(name="ibm_sherbrooke",num_qubits=5):
+    if name == "fake":
+        backend_config = Fake27QPulseV1().configuration()
+    else:
+        service = QiskitRuntimeService()
+        backend = service.backend(name)
+        backend_config = backend.configuration()
 
-def generate_backend_edges(name="ibm_sherbrooke"):
-    service = QiskitRuntimeService()
-    backend = service.backend(name)
-
-    return backend.configuration().num_qubits, backend.configuration().coupling_map
+    return backend_config.num_qubits, backend_config.coupling_map
 
 def edges_adjancy_list(N,edges):
     
