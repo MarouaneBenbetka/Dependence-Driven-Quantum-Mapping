@@ -4,6 +4,8 @@ import islpy as isl
 import networkx as nx
 import itertools
 import numpy as np
+from .dag import DAG
+from .isl_to_python import isl_map_to_dict_optimized2, dict_to_isl_map
 
 
 def get_poly_initial_mapping(coupling_graph: Graph) -> dict:
@@ -149,27 +151,6 @@ def get_front_layer(dependencies, schedule):
     return front_layer.union(single_nodes)
 
 
-def generate_dag_front_layer(read_dep, schedule):
-    dag = get_dag(read_dep, schedule)
-    # dag = transitive_reduction(dag)
-    front_layer = get_front_layer(dag, schedule)
-    return dag, front_layer
-
-
-def transitive_reduction(R):
-    """
-    R2 = R.apply_range(R)
-    R3 = R2.apply_range(R)
-    R23 = R2.union(R3)
-    R2n = R23.transitive_closure()[0]
-    return R.subtract(R2n)
-    """
-
-    R_plus = R.transitive_closure()[0]
-    R_composed = R.apply_range(R_plus)
-    return R.subtract(R_composed)
-
-
 def distance_map(distance_matrix):
     n = len(distance_matrix)
     map_str = ""
@@ -177,3 +158,10 @@ def distance_map(distance_matrix):
         for j in range(i+1, n):
             map_str += f"[{i},{j}]->[{int(distance_matrix[i,j])}];"
     return isl.Map("{"+map_str+"}")
+
+
+def generate_dag(access):
+    _map = isl_map_to_dict_optimized2(access)
+    dag = DAG(num_qubits=access.range().dim_max_val(
+        0).to_python() + 1, nodes_dict=_map)
+    return dict_to_isl_map(dag.successors)
