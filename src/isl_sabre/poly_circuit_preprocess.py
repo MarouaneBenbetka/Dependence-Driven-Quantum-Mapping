@@ -145,7 +145,7 @@ def get_front_layer(dependencies, schedule):
     domain = dependencies.domain()
     range = dependencies.range()
     front_layer = domain.subtract(range)
-
+   
     single_nodes = schedule.range().subtract(domain.union(range))
 
     return front_layer.union(single_nodes)
@@ -160,8 +160,10 @@ def distance_map(distance_matrix):
     return isl.Map("{"+map_str+"}")
 
 
-def generate_dag(access):
+def generate_dag(access,write):
     _map = isl_map_to_dict_optimized2(access)
+    _write = isl_map_to_dict_optimized2(write)
+
     dag = DAG(num_qubits=access.range().dim_max_val(
-        0).to_python() + 1, nodes_dict=_map)
+        0).to_python() + 1, nodes_dict=_map,write=_write)
     return dict_to_isl_map(dag.successors)
