@@ -63,15 +63,19 @@ def rescheduling(schedule):
 
 
 def read_data(data):
-    qops = data["Qops"]
+
     domain, read_dep, schedule = filter_multi_qubit_gates(
         data["domain"], data["read_dependencies"], data["schedule"])
 
     access = access_to_gates(read_dep, schedule)
 
-    map_str = f"{{ [i] -> [{qops}-i - 1] : 0 <= i < {qops} }}"
+    qops = access.domain().count_val().to_python()
+    write_dep = data["write_dependencies"]
+    write_dep = schedule.reverse().apply_range(write_dep).as_map()
+
+    map_str = f"{{ [i] -> [{qops}-i - 1] : 0 <= i <= {qops} }}"
     reverse_map = isl.Map(map_str)
     reverse_access = access.apply_domain(reverse_map)
     reverse_schedule = schedule.apply_range(reverse_map)
 
-    return qops, read_dep, access, reverse_access, schedule, reverse_schedule
+    return qops, read_dep, access, reverse_access, schedule, reverse_schedule,write_dep
