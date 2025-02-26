@@ -6,18 +6,19 @@ import itertools
 import numpy as np
 from .dag import DAG
 from .isl_to_python import isl_map_to_dict_optimized2, dict_to_isl_map
+import time
 
+def get_poly_initial_mapping(num_qubit: Graph) -> dict:
 
-def get_poly_initial_mapping(coupling_graph: Graph) -> dict:
-
-    physical_qubits = list(coupling_graph.nodes())
-    num_qubit = max(physical_qubits)
+    physical_qubits = list(range(num_qubit+1))
     logical_qubits = list(range(num_qubit+1))
     random.shuffle(physical_qubits)
+    start_time = time.time()
     map_str = ""
     for logical_qubit, physical_qubit in zip(logical_qubits, physical_qubits):
         map_str += f"q[{logical_qubit}] -> [{physical_qubit}];"
-    return isl.Map("{"+map_str+"}")
+    mapping = isl.Map("{"+map_str+"}")
+    return mapping, time.time() - start_time
 
 
 def ploy_initial_mapping(layout) -> dict:
@@ -106,9 +107,12 @@ def swaps_to_isl_map(path: list, connect, physical_qubits_domain):
 
 
 def generate_swap_mappings(graph, source, target, physical_qubits_domain):
-    paths = list(nx.all_simple_paths(graph, source, target))
+    path_generator = nx.shortest_simple_paths(graph, source, target)
+    
     swap_mappings = []
-    for path in paths:
+    # Limit to only the first k shortest paths.
+    k = 1
+    for path in itertools.islice(path_generator, k):
         for connect in range(len(path)-1):
             swap_mappings.append(
                 (swaps_to_isl_map(path, connect, physical_qubits_domain), len(path)-2, path))
@@ -151,6 +155,15 @@ def get_front_layer(dependencies, schedule):
     return front_layer.union(single_nodes)
 
 
+def compute_circuit_depth(dependencies):
+    current_depth = 1
+    remaining_dependencies = dependencies  
+    while not remaining_dependencies.is_empty():
+        front_layer = remaining_dependencies.domain().subtract(remaining_dependencies.range())
+        remaining_dependencies = remaining_dependencies.subtract_domain(front_layer)
+        current_depth += 1
+    return current_depth
+
 def distance_map(distance_matrix):
     n = len(distance_matrix)
     map_str = ""
@@ -160,10 +173,10 @@ def distance_map(distance_matrix):
     return isl.Map("{"+map_str+"}")
 
 
-def generate_dag(access,write):
-    _map = isl_map_to_dict_optimized2(access)
+def generate_dag(read,write,no_read_dep):
+    _map = isl_map_to_dict_optimized2(read)
     _write = isl_map_to_dict_optimized2(write)
 
-    dag = DAG(num_qubits=access.range().dim_max_val(
-        0).to_python() + 1, nodes_dict=_map,write=_write)
+    dag = DAG(num_qubits=read.range().dim_max_val(0).to_python() + 1, nodes_dict=_map,write=_write,no_read_dep=no_read_dep)
+
     return dict_to_isl_map(dag.successors)

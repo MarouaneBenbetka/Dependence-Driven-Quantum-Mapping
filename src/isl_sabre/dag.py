@@ -2,7 +2,7 @@ from collections import defaultdict
 from typing import Dict, List, Set, DefaultDict, Optional
 
 class DAG:
-    def __init__(self, num_qubits: int, nodes_dict: Dict[int, List[int]], write: Dict[int, List[int]]):
+    def __init__(self, num_qubits: int, nodes_dict: Dict[int, List[int]], write: Dict[int, List[int]], no_read_dep: Optional[bool] = False):
 
 
         self.num_qubits = num_qubits
@@ -15,28 +15,40 @@ class DAG:
         self.successors: DefaultDict[int, Set[int]] = defaultdict(set)
         self.first_layer: List[int] = []
 
+        if no_read_dep:
+            qubit_history: List[List[int]] = [[] for _ in range(num_qubits)]
+            for node in self.nodes_order:
+                for q in self.nodes_dict[node]:
+                    if q in self.write[node]:
+                        for prev_node in qubit_history[q]:
+                            if q not in self.write[prev_node]:
+                                self._add_edge(prev_node, node)
+                        qubit_history[q] = [node]  
+                    else:
+                        for prev_node in qubit_history[q]:
+                            if q in self.write[prev_node]:
+                                self._add_edge(prev_node, node)
+                        qubit_history[q].append(node) 
+                if not self.predecessors[node]:
+                    self.first_layer.append(node)
 
-        qubit_history: List[List[int]] = [[] for _ in range(num_qubits)]
+        else:
+            qubit_pos: List[Optional[int]] = [None] * num_qubits
+            for node_key in self.nodes_order:
+                qubits = self.nodes_dict[node_key]
+                if len(qubits) == 2:
+                    for q_idx in qubits:
+                        if q_idx >= num_qubits:
+                            raise IndexError(
+                                f"Qubit index {q_idx} is out of range for {num_qubits} qubits."
+                            )
+                        prev_node = qubit_pos[q_idx]
+                        if prev_node is not None:
+                            self._add_edge(prev_node, node_key)
+                        qubit_pos[q_idx] = node_key
 
-
-        for node in self.nodes_order:
-
-            for q in self.nodes_dict[node]:
-
-
-                if q in self.write[node]:
-                    for prev_node in qubit_history[q]:
-                        self._add_edge(prev_node, node)
-                    qubit_history[q] = [node]
-                else:
-                    
-                    for prev_node in qubit_history[q]:
-                        if q in self.write[prev_node]:
-                            self._add_edge(prev_node, node)
-                    qubit_history[q].append(node)
-
-            if not self.predecessors[node]:
-                self.first_layer.append(node)
+                    if not self.predecessors[node_key]:
+                        self.first_layer.append(node_key)
 
 
     def _add_edge(self, from_node: int, to_node: int) -> None:
