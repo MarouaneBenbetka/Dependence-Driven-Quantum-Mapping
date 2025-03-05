@@ -1,3 +1,0 @@
-Benchmark,File,Execution Time,Swap Count,SABRE Execution Time,SABRE Swap Count
-ibmqx_big,urf1_278.json,10086.90842962265,27556,9.290855407714844,23727
-ibmqx_big,plus63mod4096_163.json,38229.85076069832,59244,20.66506338119507,47034
