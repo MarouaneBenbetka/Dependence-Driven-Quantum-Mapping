@@ -121,20 +121,19 @@ def generate_swap_mappings(graph, source, target, physical_qubits_domain):
 
 def get_distance_matrix(graph):
 
-    nodes = list(graph.nodes)
-    num_nodes = len(nodes)
-    distance_matrix = np.zeros((num_nodes, num_nodes))
-
-    for i, node_i in enumerate(nodes):
-        for j, node_j in enumerate(nodes):
+    distance_dict = {}
+    for i in graph.nodes():
+        point_i = isl.Set("{["+str(i)+"]}")
+        distance_dict[point_i] = {}
+        for j in graph.nodes():
+            point_j = isl.Set("{["+str(j)+"]}")
             if i != j:
                 try:
-                    distance_matrix[i, j] = nx.shortest_path_length(
-                        graph, source=i, target=j)
+                    distance = nx.shortest_path_length(graph, source=i, target=j)
                 except nx.NetworkXNoPath:
-                    distance_matrix[i, j] = float(
-                        'inf')  # No path between nodes
-    return distance_matrix
+                    distance = float('inf')  # No path between nodes
+                distance_dict[point_i][point_j] = distance
+    return distance_dict
 
 
 def get_dag(read_dep, schedule):

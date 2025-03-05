@@ -14,7 +14,7 @@ def dict_to_isl_map(input_dict: dict) -> str:
     if not entries:
         return isl.UnionMap("{}")
 
-    return isl.Map("{" + ";".join(entries) + "}")
+    return isl.Map("{" + ";".join(entries) + "}").coalesce()
 
 
 def list_to_isl_set(input_list):
@@ -28,3 +28,6 @@ def list_to_isl_set(input_list):
     set_str = "{" + ";".join(point_strings) + "}"
 
     return isl.Set(set_str)
+
+def int_to_isl_set(input):
+    return isl.Set("{" + f"[{input}]" + "}")

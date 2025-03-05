@@ -61,6 +61,16 @@ def isl_set_to_python_list(_set):
     return points
 
 
+def isl_set_to_list_points(_set):
+    points = []
+
+    def point_to_int(point):
+        points.append(point.to_set())
+
+    _set.foreach_point(point_to_int)
+
+    return points
+
 if __name__ == "__main__":
     # print("1>Test set to list")
     # access = isl.Set("{ [1];[2];[3];[6];[5]}")
