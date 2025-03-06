@@ -1,0 +1,4 @@
+Running benchmarks/polyhedral/queko-bss-20qbt/20QBT_600CYC_QSE_2.json
+Running benchmarks/polyhedral/queko-bss-20qbt/20QBT_600CYC_QSE_2.json
+Running benchmarks/polyhedral/queko-bss-20qbt/20QBT_500CYC_QSE_5.json
+Running benchmarks/polyhedral/queko-bss-20qbt/20QBT_700CYC_QSE_5.json

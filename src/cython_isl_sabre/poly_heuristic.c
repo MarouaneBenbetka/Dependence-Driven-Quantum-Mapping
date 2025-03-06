@@ -7248,8 +7248,8 @@ if (!__Pyx_RefNanny) {
  * # cython: language_level=3, boundscheck=False, wraparound=False
  * 
  * import islpy as isl             # <<<<<<<<<<<<<<
- * from python_to_isl import list_to_isl_set
- * from isl_to_python import isl_set_to_python_list, isl_set_to_list_points
+ * from .python_to_isl import list_to_isl_set
+ * from .isl_to_python import isl_set_to_python_list, isl_set_to_list_points
  */
   __pyx_t_2 = __Pyx_ImportDottedModule(__pyx_n_s_islpy, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -7259,8 +7259,8 @@ if (!__Pyx_RefNanny) {
   /* "poly_heuristic.pyx":5
  * 
  * import islpy as isl
- * from python_to_isl import list_to_isl_set             # <<<<<<<<<<<<<<
- * from isl_to_python import isl_set_to_python_list, isl_set_to_list_points
+ * from .python_to_isl import list_to_isl_set             # <<<<<<<<<<<<<<
+ * from .isl_to_python import isl_set_to_python_list, isl_set_to_list_points
  * 
  */
   __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 5, __pyx_L1_error)
@@ -7268,7 +7268,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_INCREF(__pyx_n_s_list_to_isl_set);
   __Pyx_GIVEREF(__pyx_n_s_list_to_isl_set);
   if (__Pyx_PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_list_to_isl_set)) __PYX_ERR(0, 5, __pyx_L1_error);
-  __pyx_t_3 = __Pyx_Import(__pyx_n_s_python_to_isl, __pyx_t_2, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 5, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_Import(__pyx_n_s_python_to_isl, __pyx_t_2, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 5, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_3, __pyx_n_s_list_to_isl_set); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 5, __pyx_L1_error)
@@ -7279,8 +7279,8 @@ if (!__Pyx_RefNanny) {
 
   /* "poly_heuristic.pyx":6
  * import islpy as isl
- * from python_to_isl import list_to_isl_set
- * from isl_to_python import isl_set_to_python_list, isl_set_to_list_points             # <<<<<<<<<<<<<<
+ * from .python_to_isl import list_to_isl_set
+ * from .isl_to_python import isl_set_to_python_list, isl_set_to_list_points             # <<<<<<<<<<<<<<
  * 
  * 
  */
@@ -7292,7 +7292,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_INCREF(__pyx_n_s_isl_set_to_list_points);
   __Pyx_GIVEREF(__pyx_n_s_isl_set_to_list_points);
   if (__Pyx_PyList_SET_ITEM(__pyx_t_3, 1, __pyx_n_s_isl_set_to_list_points)) __PYX_ERR(0, 6, __pyx_L1_error);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_isl_to_python, __pyx_t_3, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_isl_to_python, __pyx_t_3, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_isl_set_to_python_list); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 6, __pyx_L1_error)

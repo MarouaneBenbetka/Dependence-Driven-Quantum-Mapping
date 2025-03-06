@@ -3,7 +3,6 @@
 
 import json
 import islpy as isl
-from isl_to_python import isl_set_to_python_list
 
 cpdef object json_file_to_isl(str path):
     """

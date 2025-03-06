@@ -1,8 +1,8 @@
 # isl_utils.pyx
 # cython: language_level=3, boundscheck=False, wraparound=False
 
-from python_to_isl import dict_to_isl_map
-from dag import DAG
+from .python_to_isl import dict_to_isl_map
+from .dag import DAG
 import islpy as isl
 from collections import defaultdict
 

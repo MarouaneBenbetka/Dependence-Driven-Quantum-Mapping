@@ -1895,9 +1895,6 @@ static PyObject *__Pyx_ImportDottedModule(PyObject *name, PyObject *parts_tuple)
 static PyObject *__Pyx_ImportDottedModule_WalkParts(PyObject *module, PyObject *name, PyObject *parts_tuple);
 #endif
 
-/* ImportFrom.proto */
-static PyObject* __Pyx_ImportFrom(PyObject* module, PyObject* name);
-
 /* IncludeStructmemberH.proto */
 #include <structmember.h>
 
@@ -2144,9 +2141,8 @@ static PyObject *__pyx_builtin_open;
 static const char __pyx_k_i[] = "{ [i] -> [";
 static const char __pyx_k__2[] = " }";
 static const char __pyx_k__3[] = "*";
-static const char __pyx_k__4[] = ".";
 static const char __pyx_k_Map[] = "Map";
-static const char __pyx_k__15[] = "?";
+static const char __pyx_k__14[] = "?";
 static const char __pyx_k_isl[] = "isl";
 static const char __pyx_k_Call[] = "Call";
 static const char __pyx_k_Qops[] = "Qops";
@@ -2191,7 +2187,6 @@ static const char __pyx_k_apply_domain[] = "apply_domain";
 static const char __pyx_k_initializing[] = "_initializing";
 static const char __pyx_k_is_coroutine[] = "_is_coroutine";
 static const char __pyx_k_schedule_map[] = "schedule_map";
-static const char __pyx_k_isl_to_python[] = "isl_to_python";
 static const char __pyx_k_access_to_gates[] = "access_to_gates";
 static const char __pyx_k_intersect_domain[] = "intersect_domain";
 static const char __pyx_k_json_file_to_isl[] = "json_file_to_isl";
@@ -2202,7 +2197,6 @@ static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_poly_circuit_utils[] = "poly_circuit_utils";
 static const char __pyx_k_write_dependencies[] = "write_dependencies";
 static const char __pyx_k_read_dependencies_map[] = "read_dependencies_map";
-static const char __pyx_k_isl_set_to_python_list[] = "isl_set_to_python_list";
 static const char __pyx_k_poly_circuit_utils_pyx[] = "poly_circuit_utils.pyx";
 static const char __pyx_k_filter_multi_qubit_gates[] = "filter_multi_qubit_gates";
 static const char __pyx_k_extract_multi_qubit_gates[] = "extract_multi_qubit_gates";
@@ -2251,10 +2245,9 @@ typedef struct {
   PyObject *__pyx_n_s_UnionMap;
   PyObject *__pyx_n_s_UnionSet;
   PyObject *__pyx_n_u_Write;
-  PyObject *__pyx_n_s__15;
+  PyObject *__pyx_n_s__14;
   PyObject *__pyx_kp_u__2;
   PyObject *__pyx_n_s__3;
-  PyObject *__pyx_kp_u__4;
   PyObject *__pyx_n_s_access_map;
   PyObject *__pyx_n_s_access_to_gates;
   PyObject *__pyx_n_s_apply_domain;
@@ -2281,8 +2274,6 @@ typedef struct {
   PyObject *__pyx_n_s_is_coroutine;
   PyObject *__pyx_n_s_is_empty;
   PyObject *__pyx_n_s_isl;
-  PyObject *__pyx_n_s_isl_set_to_python_list;
-  PyObject *__pyx_n_s_isl_to_python;
   PyObject *__pyx_n_s_islpy;
   PyObject *__pyx_n_s_json;
   PyObject *__pyx_n_s_json_file_to_isl;
@@ -2311,16 +2302,16 @@ typedef struct {
   PyObject *__pyx_n_u_write_dependencies;
   PyObject *__pyx_int_0;
   PyObject *__pyx_tuple_;
-  PyObject *__pyx_tuple__5;
-  PyObject *__pyx_tuple__7;
-  PyObject *__pyx_tuple__9;
-  PyObject *__pyx_tuple__11;
-  PyObject *__pyx_tuple__13;
-  PyObject *__pyx_codeobj__6;
-  PyObject *__pyx_codeobj__8;
-  PyObject *__pyx_codeobj__10;
-  PyObject *__pyx_codeobj__12;
-  PyObject *__pyx_codeobj__14;
+  PyObject *__pyx_tuple__4;
+  PyObject *__pyx_tuple__6;
+  PyObject *__pyx_tuple__8;
+  PyObject *__pyx_tuple__10;
+  PyObject *__pyx_tuple__12;
+  PyObject *__pyx_codeobj__5;
+  PyObject *__pyx_codeobj__7;
+  PyObject *__pyx_codeobj__9;
+  PyObject *__pyx_codeobj__11;
+  PyObject *__pyx_codeobj__13;
 } __pyx_mstate;
 
 #if CYTHON_USE_MODULE_STATE
@@ -2373,10 +2364,9 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_UnionMap);
   Py_CLEAR(clear_module_state->__pyx_n_s_UnionSet);
   Py_CLEAR(clear_module_state->__pyx_n_u_Write);
-  Py_CLEAR(clear_module_state->__pyx_n_s__15);
+  Py_CLEAR(clear_module_state->__pyx_n_s__14);
   Py_CLEAR(clear_module_state->__pyx_kp_u__2);
   Py_CLEAR(clear_module_state->__pyx_n_s__3);
-  Py_CLEAR(clear_module_state->__pyx_kp_u__4);
   Py_CLEAR(clear_module_state->__pyx_n_s_access_map);
   Py_CLEAR(clear_module_state->__pyx_n_s_access_to_gates);
   Py_CLEAR(clear_module_state->__pyx_n_s_apply_domain);
@@ -2403,8 +2393,6 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_is_coroutine);
   Py_CLEAR(clear_module_state->__pyx_n_s_is_empty);
   Py_CLEAR(clear_module_state->__pyx_n_s_isl);
-  Py_CLEAR(clear_module_state->__pyx_n_s_isl_set_to_python_list);
-  Py_CLEAR(clear_module_state->__pyx_n_s_isl_to_python);
   Py_CLEAR(clear_module_state->__pyx_n_s_islpy);
   Py_CLEAR(clear_module_state->__pyx_n_s_json);
   Py_CLEAR(clear_module_state->__pyx_n_s_json_file_to_isl);
@@ -2433,16 +2421,16 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_u_write_dependencies);
   Py_CLEAR(clear_module_state->__pyx_int_0);
   Py_CLEAR(clear_module_state->__pyx_tuple_);
-  Py_CLEAR(clear_module_state->__pyx_tuple__5);
-  Py_CLEAR(clear_module_state->__pyx_tuple__7);
-  Py_CLEAR(clear_module_state->__pyx_tuple__9);
-  Py_CLEAR(clear_module_state->__pyx_tuple__11);
-  Py_CLEAR(clear_module_state->__pyx_tuple__13);
-  Py_CLEAR(clear_module_state->__pyx_codeobj__6);
-  Py_CLEAR(clear_module_state->__pyx_codeobj__8);
-  Py_CLEAR(clear_module_state->__pyx_codeobj__10);
-  Py_CLEAR(clear_module_state->__pyx_codeobj__12);
-  Py_CLEAR(clear_module_state->__pyx_codeobj__14);
+  Py_CLEAR(clear_module_state->__pyx_tuple__4);
+  Py_CLEAR(clear_module_state->__pyx_tuple__6);
+  Py_CLEAR(clear_module_state->__pyx_tuple__8);
+  Py_CLEAR(clear_module_state->__pyx_tuple__10);
+  Py_CLEAR(clear_module_state->__pyx_tuple__12);
+  Py_CLEAR(clear_module_state->__pyx_codeobj__5);
+  Py_CLEAR(clear_module_state->__pyx_codeobj__7);
+  Py_CLEAR(clear_module_state->__pyx_codeobj__9);
+  Py_CLEAR(clear_module_state->__pyx_codeobj__11);
+  Py_CLEAR(clear_module_state->__pyx_codeobj__13);
   return 0;
 }
 #endif
@@ -2473,10 +2461,9 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_UnionMap);
   Py_VISIT(traverse_module_state->__pyx_n_s_UnionSet);
   Py_VISIT(traverse_module_state->__pyx_n_u_Write);
-  Py_VISIT(traverse_module_state->__pyx_n_s__15);
+  Py_VISIT(traverse_module_state->__pyx_n_s__14);
   Py_VISIT(traverse_module_state->__pyx_kp_u__2);
   Py_VISIT(traverse_module_state->__pyx_n_s__3);
-  Py_VISIT(traverse_module_state->__pyx_kp_u__4);
   Py_VISIT(traverse_module_state->__pyx_n_s_access_map);
   Py_VISIT(traverse_module_state->__pyx_n_s_access_to_gates);
   Py_VISIT(traverse_module_state->__pyx_n_s_apply_domain);
@@ -2503,8 +2490,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_is_coroutine);
   Py_VISIT(traverse_module_state->__pyx_n_s_is_empty);
   Py_VISIT(traverse_module_state->__pyx_n_s_isl);
-  Py_VISIT(traverse_module_state->__pyx_n_s_isl_set_to_python_list);
-  Py_VISIT(traverse_module_state->__pyx_n_s_isl_to_python);
   Py_VISIT(traverse_module_state->__pyx_n_s_islpy);
   Py_VISIT(traverse_module_state->__pyx_n_s_json);
   Py_VISIT(traverse_module_state->__pyx_n_s_json_file_to_isl);
@@ -2533,16 +2518,16 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_u_write_dependencies);
   Py_VISIT(traverse_module_state->__pyx_int_0);
   Py_VISIT(traverse_module_state->__pyx_tuple_);
-  Py_VISIT(traverse_module_state->__pyx_tuple__5);
-  Py_VISIT(traverse_module_state->__pyx_tuple__7);
-  Py_VISIT(traverse_module_state->__pyx_tuple__9);
-  Py_VISIT(traverse_module_state->__pyx_tuple__11);
-  Py_VISIT(traverse_module_state->__pyx_tuple__13);
-  Py_VISIT(traverse_module_state->__pyx_codeobj__6);
-  Py_VISIT(traverse_module_state->__pyx_codeobj__8);
-  Py_VISIT(traverse_module_state->__pyx_codeobj__10);
-  Py_VISIT(traverse_module_state->__pyx_codeobj__12);
-  Py_VISIT(traverse_module_state->__pyx_codeobj__14);
+  Py_VISIT(traverse_module_state->__pyx_tuple__4);
+  Py_VISIT(traverse_module_state->__pyx_tuple__6);
+  Py_VISIT(traverse_module_state->__pyx_tuple__8);
+  Py_VISIT(traverse_module_state->__pyx_tuple__10);
+  Py_VISIT(traverse_module_state->__pyx_tuple__12);
+  Py_VISIT(traverse_module_state->__pyx_codeobj__5);
+  Py_VISIT(traverse_module_state->__pyx_codeobj__7);
+  Py_VISIT(traverse_module_state->__pyx_codeobj__9);
+  Py_VISIT(traverse_module_state->__pyx_codeobj__11);
+  Py_VISIT(traverse_module_state->__pyx_codeobj__13);
   return 0;
 }
 #endif
@@ -2583,10 +2568,9 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_UnionMap __pyx_mstate_global->__pyx_n_s_UnionMap
 #define __pyx_n_s_UnionSet __pyx_mstate_global->__pyx_n_s_UnionSet
 #define __pyx_n_u_Write __pyx_mstate_global->__pyx_n_u_Write
-#define __pyx_n_s__15 __pyx_mstate_global->__pyx_n_s__15
+#define __pyx_n_s__14 __pyx_mstate_global->__pyx_n_s__14
 #define __pyx_kp_u__2 __pyx_mstate_global->__pyx_kp_u__2
 #define __pyx_n_s__3 __pyx_mstate_global->__pyx_n_s__3
-#define __pyx_kp_u__4 __pyx_mstate_global->__pyx_kp_u__4
 #define __pyx_n_s_access_map __pyx_mstate_global->__pyx_n_s_access_map
 #define __pyx_n_s_access_to_gates __pyx_mstate_global->__pyx_n_s_access_to_gates
 #define __pyx_n_s_apply_domain __pyx_mstate_global->__pyx_n_s_apply_domain
@@ -2613,8 +2597,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_is_coroutine __pyx_mstate_global->__pyx_n_s_is_coroutine
 #define __pyx_n_s_is_empty __pyx_mstate_global->__pyx_n_s_is_empty
 #define __pyx_n_s_isl __pyx_mstate_global->__pyx_n_s_isl
-#define __pyx_n_s_isl_set_to_python_list __pyx_mstate_global->__pyx_n_s_isl_set_to_python_list
-#define __pyx_n_s_isl_to_python __pyx_mstate_global->__pyx_n_s_isl_to_python
 #define __pyx_n_s_islpy __pyx_mstate_global->__pyx_n_s_islpy
 #define __pyx_n_s_json __pyx_mstate_global->__pyx_n_s_json
 #define __pyx_n_s_json_file_to_isl __pyx_mstate_global->__pyx_n_s_json_file_to_isl
@@ -2643,20 +2625,20 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_u_write_dependencies __pyx_mstate_global->__pyx_n_u_write_dependencies
 #define __pyx_int_0 __pyx_mstate_global->__pyx_int_0
 #define __pyx_tuple_ __pyx_mstate_global->__pyx_tuple_
-#define __pyx_tuple__5 __pyx_mstate_global->__pyx_tuple__5
-#define __pyx_tuple__7 __pyx_mstate_global->__pyx_tuple__7
-#define __pyx_tuple__9 __pyx_mstate_global->__pyx_tuple__9
-#define __pyx_tuple__11 __pyx_mstate_global->__pyx_tuple__11
-#define __pyx_tuple__13 __pyx_mstate_global->__pyx_tuple__13
-#define __pyx_codeobj__6 __pyx_mstate_global->__pyx_codeobj__6
-#define __pyx_codeobj__8 __pyx_mstate_global->__pyx_codeobj__8
-#define __pyx_codeobj__10 __pyx_mstate_global->__pyx_codeobj__10
-#define __pyx_codeobj__12 __pyx_mstate_global->__pyx_codeobj__12
-#define __pyx_codeobj__14 __pyx_mstate_global->__pyx_codeobj__14
+#define __pyx_tuple__4 __pyx_mstate_global->__pyx_tuple__4
+#define __pyx_tuple__6 __pyx_mstate_global->__pyx_tuple__6
+#define __pyx_tuple__8 __pyx_mstate_global->__pyx_tuple__8
+#define __pyx_tuple__10 __pyx_mstate_global->__pyx_tuple__10
+#define __pyx_tuple__12 __pyx_mstate_global->__pyx_tuple__12
+#define __pyx_codeobj__5 __pyx_mstate_global->__pyx_codeobj__5
+#define __pyx_codeobj__7 __pyx_mstate_global->__pyx_codeobj__7
+#define __pyx_codeobj__9 __pyx_mstate_global->__pyx_codeobj__9
+#define __pyx_codeobj__11 __pyx_mstate_global->__pyx_codeobj__11
+#define __pyx_codeobj__13 __pyx_mstate_global->__pyx_codeobj__13
 /* #### Code section: module_code ### */
 
-/* "poly_circuit_utils.pyx":8
- * from isl_to_python import isl_set_to_python_list
+/* "poly_circuit_utils.pyx":7
+ * import islpy as isl
  * 
  * cpdef object json_file_to_isl(str path):             # <<<<<<<<<<<<<<
  *     """
@@ -2693,7 +2675,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_json_file_to_isl(PyObject *__pyx_v
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("json_file_to_isl", 1);
 
-  /* "poly_circuit_utils.pyx":13
+  /* "poly_circuit_utils.pyx":12
  *     of ISL objects and other values.
  *     """
  *     with open(path) as f:             # <<<<<<<<<<<<<<
@@ -2701,11 +2683,11 @@ static PyObject *__pyx_f_18poly_circuit_utils_json_file_to_isl(PyObject *__pyx_v
  *     return {
  */
   /*with:*/ {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_builtin_open, __pyx_v_path); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 13, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_builtin_open, __pyx_v_path); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 12, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_n_s_exit); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 13, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_n_s_exit); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 12, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_4 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_n_s_enter); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 13, __pyx_L3_error)
+    __pyx_t_4 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_n_s_enter); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 12, __pyx_L3_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_5 = NULL;
     __pyx_t_6 = 0;
@@ -2725,7 +2707,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_json_file_to_isl(PyObject *__pyx_v
       PyObject *__pyx_callargs[2] = {__pyx_t_5, NULL};
       __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_6, 0+__pyx_t_6);
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-      if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 13, __pyx_L3_error)
+      if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 12, __pyx_L3_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     }
@@ -2744,16 +2726,16 @@ static PyObject *__pyx_f_18poly_circuit_utils_json_file_to_isl(PyObject *__pyx_v
           __pyx_v_f = __pyx_t_4;
           __pyx_t_4 = 0;
 
-          /* "poly_circuit_utils.pyx":14
+          /* "poly_circuit_utils.pyx":13
  *     """
  *     with open(path) as f:
  *         data = json.load(f)             # <<<<<<<<<<<<<<
  *     return {
  *         "domain": isl.UnionSet(data["Domain"]),
  */
-          __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_json); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 14, __pyx_L7_error)
+          __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_json); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 13, __pyx_L7_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_load); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 14, __pyx_L7_error)
+          __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_load); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 13, __pyx_L7_error)
           __Pyx_GOTREF(__pyx_t_3);
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
           __pyx_t_1 = NULL;
@@ -2774,14 +2756,14 @@ static PyObject *__pyx_f_18poly_circuit_utils_json_file_to_isl(PyObject *__pyx_v
             PyObject *__pyx_callargs[2] = {__pyx_t_1, __pyx_v_f};
             __pyx_t_4 = __Pyx_PyObject_FastCall(__pyx_t_3, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
             __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-            if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 14, __pyx_L7_error)
+            if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 13, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_4);
             __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           }
           __pyx_v_data = __pyx_t_4;
           __pyx_t_4 = 0;
 
-          /* "poly_circuit_utils.pyx":13
+          /* "poly_circuit_utils.pyx":12
  *     of ISL objects and other values.
  *     """
  *     with open(path) as f:             # <<<<<<<<<<<<<<
@@ -2800,20 +2782,20 @@ static PyObject *__pyx_f_18poly_circuit_utils_json_file_to_isl(PyObject *__pyx_v
         __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
         /*except:*/ {
           __Pyx_AddTraceback("poly_circuit_utils.json_file_to_isl", __pyx_clineno, __pyx_lineno, __pyx_filename);
-          if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_3, &__pyx_t_1) < 0) __PYX_ERR(0, 13, __pyx_L9_except_error)
+          if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_3, &__pyx_t_1) < 0) __PYX_ERR(0, 12, __pyx_L9_except_error)
           __Pyx_XGOTREF(__pyx_t_4);
           __Pyx_XGOTREF(__pyx_t_3);
           __Pyx_XGOTREF(__pyx_t_1);
-          __pyx_t_5 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 13, __pyx_L9_except_error)
+          __pyx_t_5 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 12, __pyx_L9_except_error)
           __Pyx_GOTREF(__pyx_t_5);
           __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_5, NULL);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 13, __pyx_L9_except_error)
+          if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 12, __pyx_L9_except_error)
           __Pyx_GOTREF(__pyx_t_10);
           __pyx_t_11 = __Pyx_PyObject_IsTrue(__pyx_t_10);
           __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-          if (__pyx_t_11 < 0) __PYX_ERR(0, 13, __pyx_L9_except_error)
+          if (__pyx_t_11 < 0) __PYX_ERR(0, 12, __pyx_L9_except_error)
           __pyx_t_12 = (!__pyx_t_11);
           if (unlikely(__pyx_t_12)) {
             __Pyx_GIVEREF(__pyx_t_4);
@@ -2821,7 +2803,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_json_file_to_isl(PyObject *__pyx_v
             __Pyx_XGIVEREF(__pyx_t_1);
             __Pyx_ErrRestoreWithState(__pyx_t_4, __pyx_t_3, __pyx_t_1);
             __pyx_t_4 = 0; __pyx_t_3 = 0; __pyx_t_1 = 0; 
-            __PYX_ERR(0, 13, __pyx_L9_except_error)
+            __PYX_ERR(0, 12, __pyx_L9_except_error)
           }
           __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -2847,7 +2829,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_json_file_to_isl(PyObject *__pyx_v
         if (__pyx_t_2) {
           __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple_, NULL);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-          if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 13, __pyx_L1_error)
+          if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 12, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_9);
           __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
         }
@@ -2862,7 +2844,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_json_file_to_isl(PyObject *__pyx_v
     __pyx_L16:;
   }
 
-  /* "poly_circuit_utils.pyx":15
+  /* "poly_circuit_utils.pyx":14
  *     with open(path) as f:
  *         data = json.load(f)
  *     return {             # <<<<<<<<<<<<<<
@@ -2871,22 +2853,22 @@ static PyObject *__pyx_f_18poly_circuit_utils_json_file_to_isl(PyObject *__pyx_v
  */
   __Pyx_XDECREF(__pyx_r);
 
-  /* "poly_circuit_utils.pyx":16
+  /* "poly_circuit_utils.pyx":15
  *         data = json.load(f)
  *     return {
  *         "domain": isl.UnionSet(data["Domain"]),             # <<<<<<<<<<<<<<
  *         "read_dependencies": isl.UnionMap(data["Read"]),
  *         "write_dependencies": isl.UnionMap(data["Write"]),
  */
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_isl); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_isl); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_UnionSet); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_UnionSet); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (unlikely(!__pyx_v_data)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 16, __pyx_L1_error) }
-  __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_Domain); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 16, __pyx_L1_error)
+  if (unlikely(!__pyx_v_data)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 15, __pyx_L1_error) }
+  __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_Domain); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_13 = NULL;
   __pyx_t_6 = 0;
@@ -2907,27 +2889,27 @@ static PyObject *__pyx_f_18poly_circuit_utils_json_file_to_isl(PyObject *__pyx_v
     __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
     __Pyx_XDECREF(__pyx_t_13); __pyx_t_13 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 16, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 15, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_u_domain, __pyx_t_3) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_u_domain, __pyx_t_3) < 0) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "poly_circuit_utils.pyx":17
+  /* "poly_circuit_utils.pyx":16
  *     return {
  *         "domain": isl.UnionSet(data["Domain"]),
  *         "read_dependencies": isl.UnionMap(data["Read"]),             # <<<<<<<<<<<<<<
  *         "write_dependencies": isl.UnionMap(data["Write"]),
  *         "call": isl.UnionMap(data["Call"]),
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_isl); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_isl); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 16, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_UnionMap); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_UnionMap); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 16, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (unlikely(!__pyx_v_data)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 17, __pyx_L1_error) }
-  __pyx_t_5 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_Read); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 17, __pyx_L1_error)
+  if (unlikely(!__pyx_v_data)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 16, __pyx_L1_error) }
+  __pyx_t_5 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_Read); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 16, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_t_13 = NULL;
   __pyx_t_6 = 0;
@@ -2948,27 +2930,27 @@ static PyObject *__pyx_f_18poly_circuit_utils_json_file_to_isl(PyObject *__pyx_v
     __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
     __Pyx_XDECREF(__pyx_t_13); __pyx_t_13 = 0;
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 17, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 16, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_u_read_dependencies, __pyx_t_3) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_u_read_dependencies, __pyx_t_3) < 0) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "poly_circuit_utils.pyx":18
+  /* "poly_circuit_utils.pyx":17
  *         "domain": isl.UnionSet(data["Domain"]),
  *         "read_dependencies": isl.UnionMap(data["Read"]),
  *         "write_dependencies": isl.UnionMap(data["Write"]),             # <<<<<<<<<<<<<<
  *         "call": isl.UnionMap(data["Call"]),
  *         "schedule": isl.UnionMap(data["RecoveredSchedule"]),
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_isl); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 18, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_isl); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_UnionMap); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 18, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_UnionMap); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (unlikely(!__pyx_v_data)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 18, __pyx_L1_error) }
-  __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_Write); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 18, __pyx_L1_error)
+  if (unlikely(!__pyx_v_data)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 17, __pyx_L1_error) }
+  __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_Write); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_13 = NULL;
   __pyx_t_6 = 0;
@@ -2989,27 +2971,27 @@ static PyObject *__pyx_f_18poly_circuit_utils_json_file_to_isl(PyObject *__pyx_v
     __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
     __Pyx_XDECREF(__pyx_t_13); __pyx_t_13 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 18, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 17, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_u_write_dependencies, __pyx_t_3) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_u_write_dependencies, __pyx_t_3) < 0) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "poly_circuit_utils.pyx":19
+  /* "poly_circuit_utils.pyx":18
  *         "read_dependencies": isl.UnionMap(data["Read"]),
  *         "write_dependencies": isl.UnionMap(data["Write"]),
  *         "call": isl.UnionMap(data["Call"]),             # <<<<<<<<<<<<<<
  *         "schedule": isl.UnionMap(data["RecoveredSchedule"]),
  *         "Qops": data["Stats"]["Qops"],
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_isl); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_isl); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 18, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_UnionMap); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_UnionMap); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 18, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (unlikely(!__pyx_v_data)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 19, __pyx_L1_error) }
-  __pyx_t_5 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_Call); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 19, __pyx_L1_error)
+  if (unlikely(!__pyx_v_data)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 18, __pyx_L1_error) }
+  __pyx_t_5 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_Call); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 18, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_t_13 = NULL;
   __pyx_t_6 = 0;
@@ -3030,27 +3012,27 @@ static PyObject *__pyx_f_18poly_circuit_utils_json_file_to_isl(PyObject *__pyx_v
     __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
     __Pyx_XDECREF(__pyx_t_13); __pyx_t_13 = 0;
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 19, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 18, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_u_call, __pyx_t_3) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_u_call, __pyx_t_3) < 0) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "poly_circuit_utils.pyx":20
+  /* "poly_circuit_utils.pyx":19
  *         "write_dependencies": isl.UnionMap(data["Write"]),
  *         "call": isl.UnionMap(data["Call"]),
  *         "schedule": isl.UnionMap(data["RecoveredSchedule"]),             # <<<<<<<<<<<<<<
  *         "Qops": data["Stats"]["Qops"],
  *         "qasm_code": data["qasm_code"]
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_isl); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 20, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_isl); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 19, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_UnionMap); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 20, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_UnionMap); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 19, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (unlikely(!__pyx_v_data)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 20, __pyx_L1_error) }
-  __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_RecoveredSchedule); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 20, __pyx_L1_error)
+  if (unlikely(!__pyx_v_data)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 19, __pyx_L1_error) }
+  __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_RecoveredSchedule); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 19, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_13 = NULL;
   __pyx_t_6 = 0;
@@ -3071,47 +3053,47 @@ static PyObject *__pyx_f_18poly_circuit_utils_json_file_to_isl(PyObject *__pyx_v
     __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_6, 1+__pyx_t_6);
     __Pyx_XDECREF(__pyx_t_13); __pyx_t_13 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 20, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 19, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_u_schedule, __pyx_t_3) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_u_schedule, __pyx_t_3) < 0) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "poly_circuit_utils.pyx":21
+  /* "poly_circuit_utils.pyx":20
  *         "call": isl.UnionMap(data["Call"]),
  *         "schedule": isl.UnionMap(data["RecoveredSchedule"]),
  *         "Qops": data["Stats"]["Qops"],             # <<<<<<<<<<<<<<
  *         "qasm_code": data["qasm_code"]
  *     }
  */
-  if (unlikely(!__pyx_v_data)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 21, __pyx_L1_error) }
-  __pyx_t_3 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_Stats); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 21, __pyx_L1_error)
+  if (unlikely(!__pyx_v_data)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 20, __pyx_L1_error) }
+  __pyx_t_3 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_Stats); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 20, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = __Pyx_PyObject_Dict_GetItem(__pyx_t_3, __pyx_n_u_Qops); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_Dict_GetItem(__pyx_t_3, __pyx_n_u_Qops); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 20, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_u_Qops, __pyx_t_5) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_u_Qops, __pyx_t_5) < 0) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "poly_circuit_utils.pyx":22
+  /* "poly_circuit_utils.pyx":21
  *         "schedule": isl.UnionMap(data["RecoveredSchedule"]),
  *         "Qops": data["Stats"]["Qops"],
  *         "qasm_code": data["qasm_code"]             # <<<<<<<<<<<<<<
  *     }
  * 
  */
-  if (unlikely(!__pyx_v_data)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 22, __pyx_L1_error) }
-  __pyx_t_5 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_qasm_code); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 22, __pyx_L1_error)
+  if (unlikely(!__pyx_v_data)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 21, __pyx_L1_error) }
+  __pyx_t_5 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_qasm_code); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_u_qasm_code, __pyx_t_5) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_u_qasm_code, __pyx_t_5) < 0) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "poly_circuit_utils.pyx":8
- * from isl_to_python import isl_set_to_python_list
+  /* "poly_circuit_utils.pyx":7
+ * import islpy as isl
  * 
  * cpdef object json_file_to_isl(str path):             # <<<<<<<<<<<<<<
  *     """
@@ -3189,12 +3171,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 8, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 7, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "json_file_to_isl") < 0)) __PYX_ERR(0, 8, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "json_file_to_isl") < 0)) __PYX_ERR(0, 7, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 1)) {
       goto __pyx_L5_argtuple_error;
@@ -3205,7 +3187,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("json_file_to_isl", 1, 1, 1, __pyx_nargs); __PYX_ERR(0, 8, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("json_file_to_isl", 1, 1, 1, __pyx_nargs); __PYX_ERR(0, 7, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -3219,7 +3201,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_path), (&PyUnicode_Type), 1, "path", 1))) __PYX_ERR(0, 8, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_path), (&PyUnicode_Type), 1, "path", 1))) __PYX_ERR(0, 7, __pyx_L1_error)
   __pyx_r = __pyx_pf_18poly_circuit_utils_json_file_to_isl(__pyx_self, __pyx_v_path);
 
   /* function exit code */
@@ -3246,7 +3228,7 @@ static PyObject *__pyx_pf_18poly_circuit_utils_json_file_to_isl(CYTHON_UNUSED Py
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("json_file_to_isl", 1);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_18poly_circuit_utils_json_file_to_isl(__pyx_v_path, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 8, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_18poly_circuit_utils_json_file_to_isl(__pyx_v_path, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -3263,7 +3245,7 @@ static PyObject *__pyx_pf_18poly_circuit_utils_json_file_to_isl(CYTHON_UNUSED Py
   return __pyx_r;
 }
 
-/* "poly_circuit_utils.pyx":25
+/* "poly_circuit_utils.pyx":24
  *     }
  * 
  * cpdef object extract_multi_qubit_gates(object access_map):             # <<<<<<<<<<<<<<
@@ -3295,7 +3277,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_extract_multi_qubit_gates(PyObject
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("extract_multi_qubit_gates", 1);
 
-  /* "poly_circuit_utils.pyx":29
+  /* "poly_circuit_utils.pyx":28
  *     Extracts multi-qubit gates from an access map.
  *     """
  *     return access_map.subtract(access_map.lexmin().intersect(access_map.lexmax())).domain()             # <<<<<<<<<<<<<<
@@ -3303,9 +3285,9 @@ static PyObject *__pyx_f_18poly_circuit_utils_extract_multi_qubit_gates(PyObject
  * cpdef object access_to_gates(object read_dependencies_map, object schedule_map):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_access_map, __pyx_n_s_subtract); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 29, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_access_map, __pyx_n_s_subtract); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 28, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_access_map, __pyx_n_s_lexmin); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 29, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_access_map, __pyx_n_s_lexmin); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 28, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __pyx_t_7 = NULL;
   __pyx_t_8 = 0;
@@ -3325,14 +3307,14 @@ static PyObject *__pyx_f_18poly_circuit_utils_extract_multi_qubit_gates(PyObject
     PyObject *__pyx_callargs[2] = {__pyx_t_7, NULL};
     __pyx_t_5 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_8, 0+__pyx_t_8);
     __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 29, __pyx_L1_error)
+    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 28, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   }
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_intersect); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 29, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_intersect); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 28, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_access_map, __pyx_n_s_lexmax); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 29, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_access_map, __pyx_n_s_lexmax); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 28, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __pyx_t_9 = NULL;
   __pyx_t_8 = 0;
@@ -3352,7 +3334,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_extract_multi_qubit_gates(PyObject
     PyObject *__pyx_callargs[2] = {__pyx_t_9, NULL};
     __pyx_t_5 = __Pyx_PyObject_FastCall(__pyx_t_7, __pyx_callargs+1-__pyx_t_8, 0+__pyx_t_8);
     __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
-    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 29, __pyx_L1_error)
+    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 28, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   }
@@ -3375,7 +3357,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_extract_multi_qubit_gates(PyObject
     __pyx_t_4 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_8, 1+__pyx_t_8);
     __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 29, __pyx_L1_error)
+    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 28, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   }
@@ -3398,11 +3380,11 @@ static PyObject *__pyx_f_18poly_circuit_utils_extract_multi_qubit_gates(PyObject
     __pyx_t_2 = __Pyx_PyObject_FastCall(__pyx_t_3, __pyx_callargs+1-__pyx_t_8, 1+__pyx_t_8);
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 29, __pyx_L1_error)
+    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 28, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   }
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_domain); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 29, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_domain); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 28, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_2 = NULL;
@@ -3423,7 +3405,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_extract_multi_qubit_gates(PyObject
     PyObject *__pyx_callargs[2] = {__pyx_t_2, NULL};
     __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_3, __pyx_callargs+1-__pyx_t_8, 0+__pyx_t_8);
     __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 29, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 28, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   }
@@ -3431,7 +3413,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_extract_multi_qubit_gates(PyObject
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "poly_circuit_utils.pyx":25
+  /* "poly_circuit_utils.pyx":24
  *     }
  * 
  * cpdef object extract_multi_qubit_gates(object access_map):             # <<<<<<<<<<<<<<
@@ -3511,12 +3493,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 25, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 24, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "extract_multi_qubit_gates") < 0)) __PYX_ERR(0, 25, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "extract_multi_qubit_gates") < 0)) __PYX_ERR(0, 24, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 1)) {
       goto __pyx_L5_argtuple_error;
@@ -3527,7 +3509,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("extract_multi_qubit_gates", 1, 1, 1, __pyx_nargs); __PYX_ERR(0, 25, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("extract_multi_qubit_gates", 1, 1, 1, __pyx_nargs); __PYX_ERR(0, 24, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -3563,7 +3545,7 @@ static PyObject *__pyx_pf_18poly_circuit_utils_2extract_multi_qubit_gates(CYTHON
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("extract_multi_qubit_gates", 1);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_18poly_circuit_utils_extract_multi_qubit_gates(__pyx_v_access_map, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 25, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_18poly_circuit_utils_extract_multi_qubit_gates(__pyx_v_access_map, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 24, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -3580,7 +3562,7 @@ static PyObject *__pyx_pf_18poly_circuit_utils_2extract_multi_qubit_gates(CYTHON
   return __pyx_r;
 }
 
-/* "poly_circuit_utils.pyx":31
+/* "poly_circuit_utils.pyx":30
  *     return access_map.subtract(access_map.lexmin().intersect(access_map.lexmax())).domain()
  * 
  * cpdef object access_to_gates(object read_dependencies_map, object schedule_map):             # <<<<<<<<<<<<<<
@@ -3610,14 +3592,14 @@ static PyObject *__pyx_f_18poly_circuit_utils_access_to_gates(PyObject *__pyx_v_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("access_to_gates", 1);
 
-  /* "poly_circuit_utils.pyx":35
+  /* "poly_circuit_utils.pyx":34
  *     Returns the gate access map given the read dependencies and schedule.
  *     """
  *     if schedule_map.is_empty():             # <<<<<<<<<<<<<<
  *         return None
  *     return schedule_map.reverse().apply_range(read_dependencies_map).as_map()
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_schedule_map, __pyx_n_s_is_empty); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 35, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_schedule_map, __pyx_n_s_is_empty); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 34, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   __pyx_t_4 = 0;
@@ -3637,15 +3619,15 @@ static PyObject *__pyx_f_18poly_circuit_utils_access_to_gates(PyObject *__pyx_v_
     PyObject *__pyx_callargs[2] = {__pyx_t_3, NULL};
     __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_2, __pyx_callargs+1-__pyx_t_4, 0+__pyx_t_4);
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 35, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 34, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
-  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 35, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely((__pyx_t_5 < 0))) __PYX_ERR(0, 34, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (__pyx_t_5) {
 
-    /* "poly_circuit_utils.pyx":36
+    /* "poly_circuit_utils.pyx":35
  *     """
  *     if schedule_map.is_empty():
  *         return None             # <<<<<<<<<<<<<<
@@ -3656,7 +3638,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_access_to_gates(PyObject *__pyx_v_
     __pyx_r = Py_None; __Pyx_INCREF(Py_None);
     goto __pyx_L0;
 
-    /* "poly_circuit_utils.pyx":35
+    /* "poly_circuit_utils.pyx":34
  *     Returns the gate access map given the read dependencies and schedule.
  *     """
  *     if schedule_map.is_empty():             # <<<<<<<<<<<<<<
@@ -3665,7 +3647,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_access_to_gates(PyObject *__pyx_v_
  */
   }
 
-  /* "poly_circuit_utils.pyx":37
+  /* "poly_circuit_utils.pyx":36
  *     if schedule_map.is_empty():
  *         return None
  *     return schedule_map.reverse().apply_range(read_dependencies_map).as_map()             # <<<<<<<<<<<<<<
@@ -3673,7 +3655,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_access_to_gates(PyObject *__pyx_v_
  * cpdef tuple filter_multi_qubit_gates(object domain, object read_dependencies, object schedule):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_schedule_map, __pyx_n_s_reverse); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 37, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_schedule_map, __pyx_n_s_reverse); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 36, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __pyx_t_7 = NULL;
   __pyx_t_4 = 0;
@@ -3693,11 +3675,11 @@ static PyObject *__pyx_f_18poly_circuit_utils_access_to_gates(PyObject *__pyx_v_
     PyObject *__pyx_callargs[2] = {__pyx_t_7, NULL};
     __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_4, 0+__pyx_t_4);
     __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 37, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 36, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   }
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_apply_range); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 37, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_apply_range); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 36, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = NULL;
@@ -3718,11 +3700,11 @@ static PyObject *__pyx_f_18poly_circuit_utils_access_to_gates(PyObject *__pyx_v_
     PyObject *__pyx_callargs[2] = {__pyx_t_3, __pyx_v_read_dependencies_map};
     __pyx_t_2 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_4, 1+__pyx_t_4);
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 37, __pyx_L1_error)
+    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 36, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   }
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_as_map); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 37, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_as_map); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 36, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_2 = NULL;
@@ -3743,7 +3725,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_access_to_gates(PyObject *__pyx_v_
     PyObject *__pyx_callargs[2] = {__pyx_t_2, NULL};
     __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_6, __pyx_callargs+1-__pyx_t_4, 0+__pyx_t_4);
     __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 37, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 36, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   }
@@ -3751,7 +3733,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_access_to_gates(PyObject *__pyx_v_
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "poly_circuit_utils.pyx":31
+  /* "poly_circuit_utils.pyx":30
  *     return access_map.subtract(access_map.lexmin().intersect(access_map.lexmax())).domain()
  * 
  * cpdef object access_to_gates(object read_dependencies_map, object schedule_map):             # <<<<<<<<<<<<<<
@@ -3831,7 +3813,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 31, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 30, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -3839,14 +3821,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 31, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 30, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("access_to_gates", 1, 2, 2, 1); __PYX_ERR(0, 31, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("access_to_gates", 1, 2, 2, 1); __PYX_ERR(0, 30, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "access_to_gates") < 0)) __PYX_ERR(0, 31, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "access_to_gates") < 0)) __PYX_ERR(0, 30, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 2)) {
       goto __pyx_L5_argtuple_error;
@@ -3859,7 +3841,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("access_to_gates", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 31, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("access_to_gates", 1, 2, 2, __pyx_nargs); __PYX_ERR(0, 30, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -3895,7 +3877,7 @@ static PyObject *__pyx_pf_18poly_circuit_utils_4access_to_gates(CYTHON_UNUSED Py
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("access_to_gates", 1);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_18poly_circuit_utils_access_to_gates(__pyx_v_read_dependencies_map, __pyx_v_schedule_map, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 31, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_18poly_circuit_utils_access_to_gates(__pyx_v_read_dependencies_map, __pyx_v_schedule_map, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 30, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -3912,7 +3894,7 @@ static PyObject *__pyx_pf_18poly_circuit_utils_4access_to_gates(CYTHON_UNUSED Py
   return __pyx_r;
 }
 
-/* "poly_circuit_utils.pyx":39
+/* "poly_circuit_utils.pyx":38
  *     return schedule_map.reverse().apply_range(read_dependencies_map).as_map()
  * 
  * cpdef tuple filter_multi_qubit_gates(object domain, object read_dependencies, object schedule):             # <<<<<<<<<<<<<<
@@ -3945,16 +3927,16 @@ static PyObject *__pyx_f_18poly_circuit_utils_filter_multi_qubit_gates(CYTHON_UN
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("filter_multi_qubit_gates", 1);
 
-  /* "poly_circuit_utils.pyx":45
+  /* "poly_circuit_utils.pyx":44
  *     Returns a tuple: (new_domain, new_read_dependencies, new_schedule)
  *     """
  *     cdef object new_domain = extract_multi_qubit_gates(read_dependencies).coalesce()             # <<<<<<<<<<<<<<
  *     cdef object filtered_schedule = schedule.intersect_domain(new_domain)
  *     if filtered_schedule is None:
  */
-  __pyx_t_2 = __pyx_f_18poly_circuit_utils_extract_multi_qubit_gates(__pyx_v_read_dependencies, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_t_2 = __pyx_f_18poly_circuit_utils_extract_multi_qubit_gates(__pyx_v_read_dependencies, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 44, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_coalesce); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_coalesce); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 44, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_2 = NULL;
@@ -3975,21 +3957,21 @@ static PyObject *__pyx_f_18poly_circuit_utils_filter_multi_qubit_gates(CYTHON_UN
     PyObject *__pyx_callargs[2] = {__pyx_t_2, NULL};
     __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_3, __pyx_callargs+1-__pyx_t_4, 0+__pyx_t_4);
     __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 45, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 44, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   }
   __pyx_v_new_domain = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "poly_circuit_utils.pyx":46
+  /* "poly_circuit_utils.pyx":45
  *     """
  *     cdef object new_domain = extract_multi_qubit_gates(read_dependencies).coalesce()
  *     cdef object filtered_schedule = schedule.intersect_domain(new_domain)             # <<<<<<<<<<<<<<
  *     if filtered_schedule is None:
  *         return None, None, None
  */
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_schedule, __pyx_n_s_intersect_domain); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 46, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_schedule, __pyx_n_s_intersect_domain); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_2 = NULL;
   __pyx_t_4 = 0;
@@ -4009,14 +3991,14 @@ static PyObject *__pyx_f_18poly_circuit_utils_filter_multi_qubit_gates(CYTHON_UN
     PyObject *__pyx_callargs[2] = {__pyx_t_2, __pyx_v_new_domain};
     __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_3, __pyx_callargs+1-__pyx_t_4, 1+__pyx_t_4);
     __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 46, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 45, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   }
   __pyx_v_filtered_schedule = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "poly_circuit_utils.pyx":47
+  /* "poly_circuit_utils.pyx":46
  *     cdef object new_domain = extract_multi_qubit_gates(read_dependencies).coalesce()
  *     cdef object filtered_schedule = schedule.intersect_domain(new_domain)
  *     if filtered_schedule is None:             # <<<<<<<<<<<<<<
@@ -4026,7 +4008,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_filter_multi_qubit_gates(CYTHON_UN
   __pyx_t_5 = (__pyx_v_filtered_schedule == Py_None);
   if (__pyx_t_5) {
 
-    /* "poly_circuit_utils.pyx":48
+    /* "poly_circuit_utils.pyx":47
  *     cdef object filtered_schedule = schedule.intersect_domain(new_domain)
  *     if filtered_schedule is None:
  *         return None, None, None             # <<<<<<<<<<<<<<
@@ -4038,7 +4020,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_filter_multi_qubit_gates(CYTHON_UN
     __pyx_r = __pyx_tuple_;
     goto __pyx_L0;
 
-    /* "poly_circuit_utils.pyx":47
+    /* "poly_circuit_utils.pyx":46
  *     cdef object new_domain = extract_multi_qubit_gates(read_dependencies).coalesce()
  *     cdef object filtered_schedule = schedule.intersect_domain(new_domain)
  *     if filtered_schedule is None:             # <<<<<<<<<<<<<<
@@ -4047,14 +4029,14 @@ static PyObject *__pyx_f_18poly_circuit_utils_filter_multi_qubit_gates(CYTHON_UN
  */
   }
 
-  /* "poly_circuit_utils.pyx":49
+  /* "poly_circuit_utils.pyx":48
  *     if filtered_schedule is None:
  *         return None, None, None
  *     cdef object new_read_dependencies = read_dependencies.intersect_domain(new_domain).coalesce()             # <<<<<<<<<<<<<<
  *     # Uncomment the following line if you have a rescheduling function.
  *     # new_schedule = rescheduling(filtered_schedule)
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_read_dependencies, __pyx_n_s_intersect_domain); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 49, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_read_dependencies, __pyx_n_s_intersect_domain); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 48, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_6 = NULL;
   __pyx_t_4 = 0;
@@ -4074,11 +4056,11 @@ static PyObject *__pyx_f_18poly_circuit_utils_filter_multi_qubit_gates(CYTHON_UN
     PyObject *__pyx_callargs[2] = {__pyx_t_6, __pyx_v_new_domain};
     __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_2, __pyx_callargs+1-__pyx_t_4, 1+__pyx_t_4);
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 49, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 48, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_coalesce); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 49, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_coalesce); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 48, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = NULL;
@@ -4099,14 +4081,14 @@ static PyObject *__pyx_f_18poly_circuit_utils_filter_multi_qubit_gates(CYTHON_UN
     PyObject *__pyx_callargs[2] = {__pyx_t_3, NULL};
     __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_2, __pyx_callargs+1-__pyx_t_4, 0+__pyx_t_4);
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 49, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 48, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
   __pyx_v_new_read_dependencies = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "poly_circuit_utils.pyx":52
+  /* "poly_circuit_utils.pyx":51
  *     # Uncomment the following line if you have a rescheduling function.
  *     # new_schedule = rescheduling(filtered_schedule)
  *     cdef object new_schedule = filtered_schedule             # <<<<<<<<<<<<<<
@@ -4116,7 +4098,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_filter_multi_qubit_gates(CYTHON_UN
   __Pyx_INCREF(__pyx_v_filtered_schedule);
   __pyx_v_new_schedule = __pyx_v_filtered_schedule;
 
-  /* "poly_circuit_utils.pyx":53
+  /* "poly_circuit_utils.pyx":52
  *     # new_schedule = rescheduling(filtered_schedule)
  *     cdef object new_schedule = filtered_schedule
  *     return new_domain, new_read_dependencies, new_schedule             # <<<<<<<<<<<<<<
@@ -4124,22 +4106,22 @@ static PyObject *__pyx_f_18poly_circuit_utils_filter_multi_qubit_gates(CYTHON_UN
  * cpdef tuple read_data(object data):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyTuple_New(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 53, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 52, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_v_new_domain);
   __Pyx_GIVEREF(__pyx_v_new_domain);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_v_new_domain)) __PYX_ERR(0, 53, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_v_new_domain)) __PYX_ERR(0, 52, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_new_read_dependencies);
   __Pyx_GIVEREF(__pyx_v_new_read_dependencies);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_new_read_dependencies)) __PYX_ERR(0, 53, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 1, __pyx_v_new_read_dependencies)) __PYX_ERR(0, 52, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_new_schedule);
   __Pyx_GIVEREF(__pyx_v_new_schedule);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 2, __pyx_v_new_schedule)) __PYX_ERR(0, 53, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_1, 2, __pyx_v_new_schedule)) __PYX_ERR(0, 52, __pyx_L1_error);
   __pyx_r = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "poly_circuit_utils.pyx":39
+  /* "poly_circuit_utils.pyx":38
  *     return schedule_map.reverse().apply_range(read_dependencies_map).as_map()
  * 
  * cpdef tuple filter_multi_qubit_gates(object domain, object read_dependencies, object schedule):             # <<<<<<<<<<<<<<
@@ -4225,7 +4207,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 39, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -4233,9 +4215,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 39, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("filter_multi_qubit_gates", 1, 3, 3, 1); __PYX_ERR(0, 39, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("filter_multi_qubit_gates", 1, 3, 3, 1); __PYX_ERR(0, 38, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -4243,14 +4225,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 39, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("filter_multi_qubit_gates", 1, 3, 3, 2); __PYX_ERR(0, 39, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("filter_multi_qubit_gates", 1, 3, 3, 2); __PYX_ERR(0, 38, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "filter_multi_qubit_gates") < 0)) __PYX_ERR(0, 39, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "filter_multi_qubit_gates") < 0)) __PYX_ERR(0, 38, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 3)) {
       goto __pyx_L5_argtuple_error;
@@ -4265,7 +4247,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("filter_multi_qubit_gates", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 39, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("filter_multi_qubit_gates", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 38, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4301,7 +4283,7 @@ static PyObject *__pyx_pf_18poly_circuit_utils_6filter_multi_qubit_gates(CYTHON_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("filter_multi_qubit_gates", 1);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_18poly_circuit_utils_filter_multi_qubit_gates(__pyx_v_domain, __pyx_v_read_dependencies, __pyx_v_schedule, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_18poly_circuit_utils_filter_multi_qubit_gates(__pyx_v_domain, __pyx_v_read_dependencies, __pyx_v_schedule, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 38, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -4318,7 +4300,7 @@ static PyObject *__pyx_pf_18poly_circuit_utils_6filter_multi_qubit_gates(CYTHON_
   return __pyx_r;
 }
 
-/* "poly_circuit_utils.pyx":55
+/* "poly_circuit_utils.pyx":54
  *     return new_domain, new_read_dependencies, new_schedule
  * 
  * cpdef tuple read_data(object data):             # <<<<<<<<<<<<<<
@@ -4362,20 +4344,20 @@ static PyObject *__pyx_f_18poly_circuit_utils_read_data(PyObject *__pyx_v_data, 
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("read_data", 1);
 
-  /* "poly_circuit_utils.pyx":60
+  /* "poly_circuit_utils.pyx":59
  *       qops, read_dependencies, access, reverse_access, schedule, reverse_schedule, write_dependencies
  *     """
  *     cdef tuple filt = filter_multi_qubit_gates(data["domain"], data["read_dependencies"], data["schedule"])             # <<<<<<<<<<<<<<
  *     if filt[0] is None:
  *         return None
  */
-  __pyx_t_1 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_domain); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 60, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_domain); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 59, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_read_dependencies); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 60, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_read_dependencies); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 59, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_schedule); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 60, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_schedule); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 59, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __pyx_f_18poly_circuit_utils_filter_multi_qubit_gates(__pyx_t_1, __pyx_t_2, __pyx_t_3, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 60, __pyx_L1_error)
+  __pyx_t_4 = __pyx_f_18poly_circuit_utils_filter_multi_qubit_gates(__pyx_t_1, __pyx_t_2, __pyx_t_3, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 59, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -4383,7 +4365,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_read_data(PyObject *__pyx_v_data, 
   __pyx_v_filt = ((PyObject*)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "poly_circuit_utils.pyx":61
+  /* "poly_circuit_utils.pyx":60
  *     """
  *     cdef tuple filt = filter_multi_qubit_gates(data["domain"], data["read_dependencies"], data["schedule"])
  *     if filt[0] is None:             # <<<<<<<<<<<<<<
@@ -4392,12 +4374,12 @@ static PyObject *__pyx_f_18poly_circuit_utils_read_data(PyObject *__pyx_v_data, 
  */
   if (unlikely(__pyx_v_filt == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(0, 61, __pyx_L1_error)
+    __PYX_ERR(0, 60, __pyx_L1_error)
   }
   __pyx_t_5 = (PyTuple_GET_ITEM(__pyx_v_filt, 0) == Py_None);
   if (__pyx_t_5) {
 
-    /* "poly_circuit_utils.pyx":62
+    /* "poly_circuit_utils.pyx":61
  *     cdef tuple filt = filter_multi_qubit_gates(data["domain"], data["read_dependencies"], data["schedule"])
  *     if filt[0] is None:
  *         return None             # <<<<<<<<<<<<<<
@@ -4408,7 +4390,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_read_data(PyObject *__pyx_v_data, 
     __pyx_r = ((PyObject*)Py_None); __Pyx_INCREF(Py_None);
     goto __pyx_L0;
 
-    /* "poly_circuit_utils.pyx":61
+    /* "poly_circuit_utils.pyx":60
  *     """
  *     cdef tuple filt = filter_multi_qubit_gates(data["domain"], data["read_dependencies"], data["schedule"])
  *     if filt[0] is None:             # <<<<<<<<<<<<<<
@@ -4417,7 +4399,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_read_data(PyObject *__pyx_v_data, 
  */
   }
 
-  /* "poly_circuit_utils.pyx":64
+  /* "poly_circuit_utils.pyx":63
  *         return None
  * 
  *     domain = filt[0]             # <<<<<<<<<<<<<<
@@ -4426,14 +4408,14 @@ static PyObject *__pyx_f_18poly_circuit_utils_read_data(PyObject *__pyx_v_data, 
  */
   if (unlikely(__pyx_v_filt == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(0, 64, __pyx_L1_error)
+    __PYX_ERR(0, 63, __pyx_L1_error)
   }
   __pyx_t_4 = PyTuple_GET_ITEM(__pyx_v_filt, 0);
   __Pyx_INCREF(__pyx_t_4);
   __pyx_v_domain = __pyx_t_4;
   __pyx_t_4 = 0;
 
-  /* "poly_circuit_utils.pyx":65
+  /* "poly_circuit_utils.pyx":64
  * 
  *     domain = filt[0]
  *     read_dep = filt[1]             # <<<<<<<<<<<<<<
@@ -4442,14 +4424,14 @@ static PyObject *__pyx_f_18poly_circuit_utils_read_data(PyObject *__pyx_v_data, 
  */
   if (unlikely(__pyx_v_filt == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(0, 65, __pyx_L1_error)
+    __PYX_ERR(0, 64, __pyx_L1_error)
   }
   __pyx_t_4 = PyTuple_GET_ITEM(__pyx_v_filt, 1);
   __Pyx_INCREF(__pyx_t_4);
   __pyx_v_read_dep = __pyx_t_4;
   __pyx_t_4 = 0;
 
-  /* "poly_circuit_utils.pyx":66
+  /* "poly_circuit_utils.pyx":65
  *     domain = filt[0]
  *     read_dep = filt[1]
  *     schedule = filt[2]             # <<<<<<<<<<<<<<
@@ -4458,33 +4440,33 @@ static PyObject *__pyx_f_18poly_circuit_utils_read_data(PyObject *__pyx_v_data, 
  */
   if (unlikely(__pyx_v_filt == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(0, 66, __pyx_L1_error)
+    __PYX_ERR(0, 65, __pyx_L1_error)
   }
   __pyx_t_4 = PyTuple_GET_ITEM(__pyx_v_filt, 2);
   __Pyx_INCREF(__pyx_t_4);
   __pyx_v_schedule = __pyx_t_4;
   __pyx_t_4 = 0;
 
-  /* "poly_circuit_utils.pyx":68
+  /* "poly_circuit_utils.pyx":67
  *     schedule = filt[2]
  * 
  *     cdef object access = access_to_gates(read_dep, schedule)             # <<<<<<<<<<<<<<
  *     # You can choose between count_val() or dim_max_val(0) depending on your needs.
  *     cdef int qops = access.domain().dim_max_val(0).to_python()
  */
-  __pyx_t_4 = __pyx_f_18poly_circuit_utils_access_to_gates(__pyx_v_read_dep, __pyx_v_schedule, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __pyx_t_4 = __pyx_f_18poly_circuit_utils_access_to_gates(__pyx_v_read_dep, __pyx_v_schedule, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 67, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_v_access = __pyx_t_4;
   __pyx_t_4 = 0;
 
-  /* "poly_circuit_utils.pyx":70
+  /* "poly_circuit_utils.pyx":69
  *     cdef object access = access_to_gates(read_dep, schedule)
  *     # You can choose between count_val() or dim_max_val(0) depending on your needs.
  *     cdef int qops = access.domain().dim_max_val(0).to_python()             # <<<<<<<<<<<<<<
  *     cdef object write_dep = data["write_dependencies"]
  *     write_dep = schedule.reverse().apply_range(write_dep).as_map()
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_access, __pyx_n_s_domain); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_access, __pyx_n_s_domain); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 69, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_6 = NULL;
   __pyx_t_7 = 0;
@@ -4504,11 +4486,11 @@ static PyObject *__pyx_f_18poly_circuit_utils_read_data(PyObject *__pyx_v_data, 
     PyObject *__pyx_callargs[2] = {__pyx_t_6, NULL};
     __pyx_t_2 = __Pyx_PyObject_FastCall(__pyx_t_1, __pyx_callargs+1-__pyx_t_7, 0+__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 70, __pyx_L1_error)
+    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 69, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_dim_max_val); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_dim_max_val); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 69, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_2 = NULL;
@@ -4529,11 +4511,11 @@ static PyObject *__pyx_f_18poly_circuit_utils_read_data(PyObject *__pyx_v_data, 
     PyObject *__pyx_callargs[2] = {__pyx_t_2, __pyx_int_0};
     __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_1, __pyx_callargs+1-__pyx_t_7, 1+__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 70, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 69, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_to_python); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_to_python); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 69, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = NULL;
@@ -4554,34 +4536,34 @@ static PyObject *__pyx_f_18poly_circuit_utils_read_data(PyObject *__pyx_v_data, 
     PyObject *__pyx_callargs[2] = {__pyx_t_3, NULL};
     __pyx_t_4 = __Pyx_PyObject_FastCall(__pyx_t_1, __pyx_callargs+1-__pyx_t_7, 0+__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 70, __pyx_L1_error)
+    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 69, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
-  __pyx_t_8 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_8 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 70, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_8 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 69, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_qops = __pyx_t_8;
 
-  /* "poly_circuit_utils.pyx":71
+  /* "poly_circuit_utils.pyx":70
  *     # You can choose between count_val() or dim_max_val(0) depending on your needs.
  *     cdef int qops = access.domain().dim_max_val(0).to_python()
  *     cdef object write_dep = data["write_dependencies"]             # <<<<<<<<<<<<<<
  *     write_dep = schedule.reverse().apply_range(write_dep).as_map()
  *     read_dep = access_to_gates(data["read_dependencies"], data["schedule"])
  */
-  __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_write_dependencies); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 71, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_write_dependencies); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 70, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_v_write_dep = __pyx_t_4;
   __pyx_t_4 = 0;
 
-  /* "poly_circuit_utils.pyx":72
+  /* "poly_circuit_utils.pyx":71
  *     cdef int qops = access.domain().dim_max_val(0).to_python()
  *     cdef object write_dep = data["write_dependencies"]
  *     write_dep = schedule.reverse().apply_range(write_dep).as_map()             # <<<<<<<<<<<<<<
  *     read_dep = access_to_gates(data["read_dependencies"], data["schedule"])
  *     cdef str map_str = f"{{ [i] -> [{qops}-i - 1] : 0 <= i <= {qops} }}"
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_schedule, __pyx_n_s_reverse); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 72, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_schedule, __pyx_n_s_reverse); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 71, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_6 = NULL;
   __pyx_t_7 = 0;
@@ -4601,11 +4583,11 @@ static PyObject *__pyx_f_18poly_circuit_utils_read_data(PyObject *__pyx_v_data, 
     PyObject *__pyx_callargs[2] = {__pyx_t_6, NULL};
     __pyx_t_3 = __Pyx_PyObject_FastCall(__pyx_t_2, __pyx_callargs+1-__pyx_t_7, 0+__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 72, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 71, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_apply_range); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 72, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_apply_range); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 71, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = NULL;
@@ -4626,11 +4608,11 @@ static PyObject *__pyx_f_18poly_circuit_utils_read_data(PyObject *__pyx_v_data, 
     PyObject *__pyx_callargs[2] = {__pyx_t_3, __pyx_v_write_dep};
     __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_2, __pyx_callargs+1-__pyx_t_7, 1+__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 72, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 71, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_as_map); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 72, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_as_map); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 71, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = NULL;
@@ -4651,39 +4633,39 @@ static PyObject *__pyx_f_18poly_circuit_utils_read_data(PyObject *__pyx_v_data, 
     PyObject *__pyx_callargs[2] = {__pyx_t_1, NULL};
     __pyx_t_4 = __Pyx_PyObject_FastCall(__pyx_t_2, __pyx_callargs+1-__pyx_t_7, 0+__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 72, __pyx_L1_error)
+    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 71, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
   __Pyx_DECREF_SET(__pyx_v_write_dep, __pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "poly_circuit_utils.pyx":73
+  /* "poly_circuit_utils.pyx":72
  *     cdef object write_dep = data["write_dependencies"]
  *     write_dep = schedule.reverse().apply_range(write_dep).as_map()
  *     read_dep = access_to_gates(data["read_dependencies"], data["schedule"])             # <<<<<<<<<<<<<<
  *     cdef str map_str = f"{{ [i] -> [{qops}-i - 1] : 0 <= i <= {qops} }}"
  *     cdef reverse_map = isl.Map(map_str)
  */
-  __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_read_dependencies); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_read_dependencies); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 72, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_schedule); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data, __pyx_n_u_schedule); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 72, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __pyx_f_18poly_circuit_utils_access_to_gates(__pyx_t_4, __pyx_t_2, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_18poly_circuit_utils_access_to_gates(__pyx_t_4, __pyx_t_2, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 72, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF_SET(__pyx_v_read_dep, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "poly_circuit_utils.pyx":74
+  /* "poly_circuit_utils.pyx":73
  *     write_dep = schedule.reverse().apply_range(write_dep).as_map()
  *     read_dep = access_to_gates(data["read_dependencies"], data["schedule"])
  *     cdef str map_str = f"{{ [i] -> [{qops}-i - 1] : 0 <= i <= {qops} }}"             # <<<<<<<<<<<<<<
  *     cdef reverse_map = isl.Map(map_str)
  *     cdef object reverse_access = access.apply_domain(reverse_map)
  */
-  __pyx_t_1 = PyTuple_New(5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_9 = 0;
   __pyx_t_10 = 127;
@@ -4691,7 +4673,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_read_data(PyObject *__pyx_v_data, 
   __pyx_t_9 += 10;
   __Pyx_GIVEREF(__pyx_kp_u_i);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_kp_u_i);
-  __pyx_t_2 = __Pyx_PyUnicode_From_int(__pyx_v_qops, 0, ' ', 'd'); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyUnicode_From_int(__pyx_v_qops, 0, ' ', 'd'); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_9 += __Pyx_PyUnicode_GET_LENGTH(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_2);
@@ -4701,7 +4683,7 @@ static PyObject *__pyx_f_18poly_circuit_utils_read_data(PyObject *__pyx_v_data, 
   __pyx_t_9 += 20;
   __Pyx_GIVEREF(__pyx_kp_u_i_1_0_i);
   PyTuple_SET_ITEM(__pyx_t_1, 2, __pyx_kp_u_i_1_0_i);
-  __pyx_t_2 = __Pyx_PyUnicode_From_int(__pyx_v_qops, 0, ' ', 'd'); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyUnicode_From_int(__pyx_v_qops, 0, ' ', 'd'); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_9 += __Pyx_PyUnicode_GET_LENGTH(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_2);
@@ -4711,22 +4693,22 @@ static PyObject *__pyx_f_18poly_circuit_utils_read_data(PyObject *__pyx_v_data, 
   __pyx_t_9 += 2;
   __Pyx_GIVEREF(__pyx_kp_u__2);
   PyTuple_SET_ITEM(__pyx_t_1, 4, __pyx_kp_u__2);
-  __pyx_t_2 = __Pyx_PyUnicode_Join(__pyx_t_1, 5, __pyx_t_9, __pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyUnicode_Join(__pyx_t_1, 5, __pyx_t_9, __pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_map_str = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "poly_circuit_utils.pyx":75
+  /* "poly_circuit_utils.pyx":74
  *     read_dep = access_to_gates(data["read_dependencies"], data["schedule"])
  *     cdef str map_str = f"{{ [i] -> [{qops}-i - 1] : 0 <= i <= {qops} }}"
  *     cdef reverse_map = isl.Map(map_str)             # <<<<<<<<<<<<<<
  *     cdef object reverse_access = access.apply_domain(reverse_map)
  *     cdef object reverse_schedule = schedule.apply_range(reverse_map)
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_isl); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 75, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_isl); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 74, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_Map); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 75, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_Map); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 74, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = NULL;
@@ -4747,21 +4729,54 @@ static PyObject *__pyx_f_18poly_circuit_utils_read_data(PyObject *__pyx_v_data, 
     PyObject *__pyx_callargs[2] = {__pyx_t_1, __pyx_v_map_str};
     __pyx_t_2 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_7, 1+__pyx_t_7);
     __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 75, __pyx_L1_error)
+    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 74, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
   __pyx_v_reverse_map = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "poly_circuit_utils.pyx":76
+  /* "poly_circuit_utils.pyx":75
  *     cdef str map_str = f"{{ [i] -> [{qops}-i - 1] : 0 <= i <= {qops} }}"
  *     cdef reverse_map = isl.Map(map_str)
  *     cdef object reverse_access = access.apply_domain(reverse_map)             # <<<<<<<<<<<<<<
  *     cdef object reverse_schedule = schedule.apply_range(reverse_map)
  *     return qops, read_dep, access, reverse_access, schedule, reverse_schedule, write_dep
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_access, __pyx_n_s_apply_domain); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 76, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_access, __pyx_n_s_apply_domain); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 75, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_1 = NULL;
+  __pyx_t_7 = 0;
+  #if CYTHON_UNPACK_METHODS
+  if (likely(PyMethod_Check(__pyx_t_4))) {
+    __pyx_t_1 = PyMethod_GET_SELF(__pyx_t_4);
+    if (likely(__pyx_t_1)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_4, function);
+      __pyx_t_7 = 1;
+    }
+  }
+  #endif
+  {
+    PyObject *__pyx_callargs[2] = {__pyx_t_1, __pyx_v_reverse_map};
+    __pyx_t_2 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_7, 1+__pyx_t_7);
+    __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
+    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 75, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  }
+  __pyx_v_reverse_access = __pyx_t_2;
+  __pyx_t_2 = 0;
+
+  /* "poly_circuit_utils.pyx":76
+ *     cdef reverse_map = isl.Map(map_str)
+ *     cdef object reverse_access = access.apply_domain(reverse_map)
+ *     cdef object reverse_schedule = schedule.apply_range(reverse_map)             # <<<<<<<<<<<<<<
+ *     return qops, read_dep, access, reverse_access, schedule, reverse_schedule, write_dep
+ */
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_schedule, __pyx_n_s_apply_range); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_1 = NULL;
   __pyx_t_7 = 0;
@@ -4785,78 +4800,45 @@ static PyObject *__pyx_f_18poly_circuit_utils_read_data(PyObject *__pyx_v_data, 
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
-  __pyx_v_reverse_access = __pyx_t_2;
-  __pyx_t_2 = 0;
-
-  /* "poly_circuit_utils.pyx":77
- *     cdef reverse_map = isl.Map(map_str)
- *     cdef object reverse_access = access.apply_domain(reverse_map)
- *     cdef object reverse_schedule = schedule.apply_range(reverse_map)             # <<<<<<<<<<<<<<
- *     return qops, read_dep, access, reverse_access, schedule, reverse_schedule, write_dep
- */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_schedule, __pyx_n_s_apply_range); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 77, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = NULL;
-  __pyx_t_7 = 0;
-  #if CYTHON_UNPACK_METHODS
-  if (likely(PyMethod_Check(__pyx_t_4))) {
-    __pyx_t_1 = PyMethod_GET_SELF(__pyx_t_4);
-    if (likely(__pyx_t_1)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
-      __Pyx_INCREF(__pyx_t_1);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_4, function);
-      __pyx_t_7 = 1;
-    }
-  }
-  #endif
-  {
-    PyObject *__pyx_callargs[2] = {__pyx_t_1, __pyx_v_reverse_map};
-    __pyx_t_2 = __Pyx_PyObject_FastCall(__pyx_t_4, __pyx_callargs+1-__pyx_t_7, 1+__pyx_t_7);
-    __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 77, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  }
   __pyx_v_reverse_schedule = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "poly_circuit_utils.pyx":78
+  /* "poly_circuit_utils.pyx":77
  *     cdef object reverse_access = access.apply_domain(reverse_map)
  *     cdef object reverse_schedule = schedule.apply_range(reverse_map)
  *     return qops, read_dep, access, reverse_access, schedule, reverse_schedule, write_dep             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_qops); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 78, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_qops); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 77, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = PyTuple_New(7); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 78, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(7); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 77, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_2);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2)) __PYX_ERR(0, 78, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2)) __PYX_ERR(0, 77, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_read_dep);
   __Pyx_GIVEREF(__pyx_v_read_dep);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_v_read_dep)) __PYX_ERR(0, 78, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_v_read_dep)) __PYX_ERR(0, 77, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_access);
   __Pyx_GIVEREF(__pyx_v_access);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 2, __pyx_v_access)) __PYX_ERR(0, 78, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 2, __pyx_v_access)) __PYX_ERR(0, 77, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_reverse_access);
   __Pyx_GIVEREF(__pyx_v_reverse_access);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 3, __pyx_v_reverse_access)) __PYX_ERR(0, 78, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 3, __pyx_v_reverse_access)) __PYX_ERR(0, 77, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_schedule);
   __Pyx_GIVEREF(__pyx_v_schedule);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 4, __pyx_v_schedule)) __PYX_ERR(0, 78, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 4, __pyx_v_schedule)) __PYX_ERR(0, 77, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_reverse_schedule);
   __Pyx_GIVEREF(__pyx_v_reverse_schedule);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 5, __pyx_v_reverse_schedule)) __PYX_ERR(0, 78, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 5, __pyx_v_reverse_schedule)) __PYX_ERR(0, 77, __pyx_L1_error);
   __Pyx_INCREF(__pyx_v_write_dep);
   __Pyx_GIVEREF(__pyx_v_write_dep);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 6, __pyx_v_write_dep)) __PYX_ERR(0, 78, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 6, __pyx_v_write_dep)) __PYX_ERR(0, 77, __pyx_L1_error);
   __pyx_t_2 = 0;
   __pyx_r = ((PyObject*)__pyx_t_4);
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "poly_circuit_utils.pyx":55
+  /* "poly_circuit_utils.pyx":54
  *     return new_domain, new_read_dependencies, new_schedule
  * 
  * cpdef tuple read_data(object data):             # <<<<<<<<<<<<<<
@@ -4943,12 +4925,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 55, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 54, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "read_data") < 0)) __PYX_ERR(0, 55, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "read_data") < 0)) __PYX_ERR(0, 54, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 1)) {
       goto __pyx_L5_argtuple_error;
@@ -4959,7 +4941,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("read_data", 1, 1, 1, __pyx_nargs); __PYX_ERR(0, 55, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("read_data", 1, 1, 1, __pyx_nargs); __PYX_ERR(0, 54, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4995,7 +4977,7 @@ static PyObject *__pyx_pf_18poly_circuit_utils_8read_data(CYTHON_UNUSED PyObject
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("read_data", 1);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_18poly_circuit_utils_read_data(__pyx_v_data, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_18poly_circuit_utils_read_data(__pyx_v_data, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -5038,10 +5020,9 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_UnionMap, __pyx_k_UnionMap, sizeof(__pyx_k_UnionMap), 0, 0, 1, 1},
     {&__pyx_n_s_UnionSet, __pyx_k_UnionSet, sizeof(__pyx_k_UnionSet), 0, 0, 1, 1},
     {&__pyx_n_u_Write, __pyx_k_Write, sizeof(__pyx_k_Write), 0, 1, 0, 1},
-    {&__pyx_n_s__15, __pyx_k__15, sizeof(__pyx_k__15), 0, 0, 1, 1},
+    {&__pyx_n_s__14, __pyx_k__14, sizeof(__pyx_k__14), 0, 0, 1, 1},
     {&__pyx_kp_u__2, __pyx_k__2, sizeof(__pyx_k__2), 0, 1, 0, 0},
     {&__pyx_n_s__3, __pyx_k__3, sizeof(__pyx_k__3), 0, 0, 1, 1},
-    {&__pyx_kp_u__4, __pyx_k__4, sizeof(__pyx_k__4), 0, 1, 0, 0},
     {&__pyx_n_s_access_map, __pyx_k_access_map, sizeof(__pyx_k_access_map), 0, 0, 1, 1},
     {&__pyx_n_s_access_to_gates, __pyx_k_access_to_gates, sizeof(__pyx_k_access_to_gates), 0, 0, 1, 1},
     {&__pyx_n_s_apply_domain, __pyx_k_apply_domain, sizeof(__pyx_k_apply_domain), 0, 0, 1, 1},
@@ -5068,8 +5049,6 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_is_coroutine, __pyx_k_is_coroutine, sizeof(__pyx_k_is_coroutine), 0, 0, 1, 1},
     {&__pyx_n_s_is_empty, __pyx_k_is_empty, sizeof(__pyx_k_is_empty), 0, 0, 1, 1},
     {&__pyx_n_s_isl, __pyx_k_isl, sizeof(__pyx_k_isl), 0, 0, 1, 1},
-    {&__pyx_n_s_isl_set_to_python_list, __pyx_k_isl_set_to_python_list, sizeof(__pyx_k_isl_set_to_python_list), 0, 0, 1, 1},
-    {&__pyx_n_s_isl_to_python, __pyx_k_isl_to_python, sizeof(__pyx_k_isl_to_python), 0, 0, 1, 1},
     {&__pyx_n_s_islpy, __pyx_k_islpy, sizeof(__pyx_k_islpy), 0, 0, 1, 1},
     {&__pyx_n_s_json, __pyx_k_json, sizeof(__pyx_k_json), 0, 0, 1, 1},
     {&__pyx_n_s_json_file_to_isl, __pyx_k_json_file_to_isl, sizeof(__pyx_k_json_file_to_isl), 0, 0, 1, 1},
@@ -5102,7 +5081,7 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
 }
 /* #### Code section: cached_builtins ### */
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_open = __Pyx_GetBuiltinName(__pyx_n_s_open); if (!__pyx_builtin_open) __PYX_ERR(0, 13, __pyx_L1_error)
+  __pyx_builtin_open = __Pyx_GetBuiltinName(__pyx_n_s_open); if (!__pyx_builtin_open) __PYX_ERR(0, 12, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -5113,76 +5092,76 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "poly_circuit_utils.pyx":13
+  /* "poly_circuit_utils.pyx":12
  *     of ISL objects and other values.
  *     """
  *     with open(path) as f:             # <<<<<<<<<<<<<<
  *         data = json.load(f)
  *     return {
  */
-  __pyx_tuple_ = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 13, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 12, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
 
-  /* "poly_circuit_utils.pyx":8
- * from isl_to_python import isl_set_to_python_list
+  /* "poly_circuit_utils.pyx":7
+ * import islpy as isl
  * 
  * cpdef object json_file_to_isl(str path):             # <<<<<<<<<<<<<<
  *     """
  *     Reads a JSON file at 'path' and converts its content into a dictionary
  */
-  __pyx_tuple__5 = PyTuple_Pack(1, __pyx_n_s_path); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 8, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__5);
-  __Pyx_GIVEREF(__pyx_tuple__5);
-  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(1, 0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_poly_circuit_utils_pyx, __pyx_n_s_json_file_to_isl, 8, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 8, __pyx_L1_error)
+  __pyx_tuple__4 = PyTuple_Pack(1, __pyx_n_s_path); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 7, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__4);
+  __Pyx_GIVEREF(__pyx_tuple__4);
+  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(1, 0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__4, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_poly_circuit_utils_pyx, __pyx_n_s_json_file_to_isl, 7, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(0, 7, __pyx_L1_error)
 
-  /* "poly_circuit_utils.pyx":25
+  /* "poly_circuit_utils.pyx":24
  *     }
  * 
  * cpdef object extract_multi_qubit_gates(object access_map):             # <<<<<<<<<<<<<<
  *     """
  *     Extracts multi-qubit gates from an access map.
  */
-  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_n_s_access_map); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 25, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__7);
-  __Pyx_GIVEREF(__pyx_tuple__7);
-  __pyx_codeobj__8 = (PyObject*)__Pyx_PyCode_New(1, 0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__7, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_poly_circuit_utils_pyx, __pyx_n_s_extract_multi_qubit_gates, 25, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__8)) __PYX_ERR(0, 25, __pyx_L1_error)
+  __pyx_tuple__6 = PyTuple_Pack(1, __pyx_n_s_access_map); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(0, 24, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__6);
+  __Pyx_GIVEREF(__pyx_tuple__6);
+  __pyx_codeobj__7 = (PyObject*)__Pyx_PyCode_New(1, 0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__6, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_poly_circuit_utils_pyx, __pyx_n_s_extract_multi_qubit_gates, 24, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__7)) __PYX_ERR(0, 24, __pyx_L1_error)
 
-  /* "poly_circuit_utils.pyx":31
+  /* "poly_circuit_utils.pyx":30
  *     return access_map.subtract(access_map.lexmin().intersect(access_map.lexmax())).domain()
  * 
  * cpdef object access_to_gates(object read_dependencies_map, object schedule_map):             # <<<<<<<<<<<<<<
  *     """
  *     Returns the gate access map given the read dependencies and schedule.
  */
-  __pyx_tuple__9 = PyTuple_Pack(2, __pyx_n_s_read_dependencies_map, __pyx_n_s_schedule_map); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(0, 31, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__9);
-  __Pyx_GIVEREF(__pyx_tuple__9);
-  __pyx_codeobj__10 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__9, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_poly_circuit_utils_pyx, __pyx_n_s_access_to_gates, 31, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__10)) __PYX_ERR(0, 31, __pyx_L1_error)
+  __pyx_tuple__8 = PyTuple_Pack(2, __pyx_n_s_read_dependencies_map, __pyx_n_s_schedule_map); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(0, 30, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__8);
+  __Pyx_GIVEREF(__pyx_tuple__8);
+  __pyx_codeobj__9 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__8, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_poly_circuit_utils_pyx, __pyx_n_s_access_to_gates, 30, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__9)) __PYX_ERR(0, 30, __pyx_L1_error)
 
-  /* "poly_circuit_utils.pyx":39
+  /* "poly_circuit_utils.pyx":38
  *     return schedule_map.reverse().apply_range(read_dependencies_map).as_map()
  * 
  * cpdef tuple filter_multi_qubit_gates(object domain, object read_dependencies, object schedule):             # <<<<<<<<<<<<<<
  *     """
  *     Filters the multi-qubit gates from the given domain, read dependencies,
  */
-  __pyx_tuple__11 = PyTuple_Pack(3, __pyx_n_s_domain, __pyx_n_s_read_dependencies, __pyx_n_s_schedule); if (unlikely(!__pyx_tuple__11)) __PYX_ERR(0, 39, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__11);
-  __Pyx_GIVEREF(__pyx_tuple__11);
-  __pyx_codeobj__12 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__11, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_poly_circuit_utils_pyx, __pyx_n_s_filter_multi_qubit_gates, 39, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__12)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_tuple__10 = PyTuple_Pack(3, __pyx_n_s_domain, __pyx_n_s_read_dependencies, __pyx_n_s_schedule); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__10);
+  __Pyx_GIVEREF(__pyx_tuple__10);
+  __pyx_codeobj__11 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__10, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_poly_circuit_utils_pyx, __pyx_n_s_filter_multi_qubit_gates, 38, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__11)) __PYX_ERR(0, 38, __pyx_L1_error)
 
-  /* "poly_circuit_utils.pyx":55
+  /* "poly_circuit_utils.pyx":54
  *     return new_domain, new_read_dependencies, new_schedule
  * 
  * cpdef tuple read_data(object data):             # <<<<<<<<<<<<<<
  *     """
  *     Reads the data dictionary and returns a tuple containing:
  */
-  __pyx_tuple__13 = PyTuple_Pack(1, __pyx_n_s_data); if (unlikely(!__pyx_tuple__13)) __PYX_ERR(0, 55, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__13);
-  __Pyx_GIVEREF(__pyx_tuple__13);
-  __pyx_codeobj__14 = (PyObject*)__Pyx_PyCode_New(1, 0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__13, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_poly_circuit_utils_pyx, __pyx_n_s_read_data, 55, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__14)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_tuple__12 = PyTuple_Pack(1, __pyx_n_s_data); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(0, 54, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__12);
+  __Pyx_GIVEREF(__pyx_tuple__12);
+  __pyx_codeobj__13 = (PyObject*)__Pyx_PyCode_New(1, 0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__12, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_poly_circuit_utils_pyx, __pyx_n_s_read_data, 54, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__13)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -5432,7 +5411,6 @@ static CYTHON_SMALL_CODE int __pyx_pymod_exec_poly_circuit_utils(PyObject *__pyx
   #endif
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -5553,7 +5531,7 @@ if (!__Pyx_RefNanny) {
  * 
  * import json             # <<<<<<<<<<<<<<
  * import islpy as isl
- * from isl_to_python import isl_set_to_python_list
+ * 
  */
   __pyx_t_2 = __Pyx_ImportDottedModule(__pyx_n_s_json, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -5564,111 +5542,89 @@ if (!__Pyx_RefNanny) {
  * 
  * import json
  * import islpy as isl             # <<<<<<<<<<<<<<
- * from isl_to_python import isl_set_to_python_list
  * 
+ * cpdef object json_file_to_isl(str path):
  */
   __pyx_t_2 = __Pyx_ImportDottedModule(__pyx_n_s_islpy, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 5, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_isl, __pyx_t_2) < 0) __PYX_ERR(0, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "poly_circuit_utils.pyx":6
- * import json
+  /* "poly_circuit_utils.pyx":7
  * import islpy as isl
- * from isl_to_python import isl_set_to_python_list             # <<<<<<<<<<<<<<
- * 
- * cpdef object json_file_to_isl(str path):
- */
-  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_INCREF(__pyx_n_s_isl_set_to_python_list);
-  __Pyx_GIVEREF(__pyx_n_s_isl_set_to_python_list);
-  if (__Pyx_PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_isl_set_to_python_list)) __PYX_ERR(0, 6, __pyx_L1_error);
-  __pyx_t_3 = __Pyx_Import(__pyx_n_s_isl_to_python, __pyx_t_2, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 6, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_3, __pyx_n_s_isl_set_to_python_list); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_isl_set_to_python_list, __pyx_t_2) < 0) __PYX_ERR(0, 6, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-
-  /* "poly_circuit_utils.pyx":8
- * from isl_to_python import isl_set_to_python_list
  * 
  * cpdef object json_file_to_isl(str path):             # <<<<<<<<<<<<<<
  *     """
  *     Reads a JSON file at 'path' and converts its content into a dictionary
  */
-  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_18poly_circuit_utils_1json_file_to_isl, 0, __pyx_n_s_json_file_to_isl, NULL, __pyx_n_s_poly_circuit_utils, __pyx_d, ((PyObject *)__pyx_codeobj__6)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 8, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_json_file_to_isl, __pyx_t_3) < 0) __PYX_ERR(0, 8, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_18poly_circuit_utils_1json_file_to_isl, 0, __pyx_n_s_json_file_to_isl, NULL, __pyx_n_s_poly_circuit_utils, __pyx_d, ((PyObject *)__pyx_codeobj__5)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 7, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_json_file_to_isl, __pyx_t_2) < 0) __PYX_ERR(0, 7, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "poly_circuit_utils.pyx":25
+  /* "poly_circuit_utils.pyx":24
  *     }
  * 
  * cpdef object extract_multi_qubit_gates(object access_map):             # <<<<<<<<<<<<<<
  *     """
  *     Extracts multi-qubit gates from an access map.
  */
-  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_18poly_circuit_utils_3extract_multi_qubit_gates, 0, __pyx_n_s_extract_multi_qubit_gates, NULL, __pyx_n_s_poly_circuit_utils, __pyx_d, ((PyObject *)__pyx_codeobj__8)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 25, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_extract_multi_qubit_gates, __pyx_t_3) < 0) __PYX_ERR(0, 25, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_18poly_circuit_utils_3extract_multi_qubit_gates, 0, __pyx_n_s_extract_multi_qubit_gates, NULL, __pyx_n_s_poly_circuit_utils, __pyx_d, ((PyObject *)__pyx_codeobj__7)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 24, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_extract_multi_qubit_gates, __pyx_t_2) < 0) __PYX_ERR(0, 24, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "poly_circuit_utils.pyx":31
+  /* "poly_circuit_utils.pyx":30
  *     return access_map.subtract(access_map.lexmin().intersect(access_map.lexmax())).domain()
  * 
  * cpdef object access_to_gates(object read_dependencies_map, object schedule_map):             # <<<<<<<<<<<<<<
  *     """
  *     Returns the gate access map given the read dependencies and schedule.
  */
-  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_18poly_circuit_utils_5access_to_gates, 0, __pyx_n_s_access_to_gates, NULL, __pyx_n_s_poly_circuit_utils, __pyx_d, ((PyObject *)__pyx_codeobj__10)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 31, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_access_to_gates, __pyx_t_3) < 0) __PYX_ERR(0, 31, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_18poly_circuit_utils_5access_to_gates, 0, __pyx_n_s_access_to_gates, NULL, __pyx_n_s_poly_circuit_utils, __pyx_d, ((PyObject *)__pyx_codeobj__9)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 30, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_access_to_gates, __pyx_t_2) < 0) __PYX_ERR(0, 30, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "poly_circuit_utils.pyx":39
+  /* "poly_circuit_utils.pyx":38
  *     return schedule_map.reverse().apply_range(read_dependencies_map).as_map()
  * 
  * cpdef tuple filter_multi_qubit_gates(object domain, object read_dependencies, object schedule):             # <<<<<<<<<<<<<<
  *     """
  *     Filters the multi-qubit gates from the given domain, read dependencies,
  */
-  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_18poly_circuit_utils_7filter_multi_qubit_gates, 0, __pyx_n_s_filter_multi_qubit_gates, NULL, __pyx_n_s_poly_circuit_utils, __pyx_d, ((PyObject *)__pyx_codeobj__12)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 39, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_filter_multi_qubit_gates, __pyx_t_3) < 0) __PYX_ERR(0, 39, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_18poly_circuit_utils_7filter_multi_qubit_gates, 0, __pyx_n_s_filter_multi_qubit_gates, NULL, __pyx_n_s_poly_circuit_utils, __pyx_d, ((PyObject *)__pyx_codeobj__11)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_filter_multi_qubit_gates, __pyx_t_2) < 0) __PYX_ERR(0, 38, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "poly_circuit_utils.pyx":55
+  /* "poly_circuit_utils.pyx":54
  *     return new_domain, new_read_dependencies, new_schedule
  * 
  * cpdef tuple read_data(object data):             # <<<<<<<<<<<<<<
  *     """
  *     Reads the data dictionary and returns a tuple containing:
  */
-  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_18poly_circuit_utils_9read_data, 0, __pyx_n_s_read_data, NULL, __pyx_n_s_poly_circuit_utils, __pyx_d, ((PyObject *)__pyx_codeobj__14)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 55, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_read_data, __pyx_t_3) < 0) __PYX_ERR(0, 55, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_18poly_circuit_utils_9read_data, 0, __pyx_n_s_read_data, NULL, __pyx_n_s_poly_circuit_utils, __pyx_d, ((PyObject *)__pyx_codeobj__13)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 54, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_read_data, __pyx_t_2) < 0) __PYX_ERR(0, 54, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "poly_circuit_utils.pyx":1
  * # poly_circuit_utils.pyx             # <<<<<<<<<<<<<<
  * # cython: language_level=3
  * 
  */
-  __pyx_t_3 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_3) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_2) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /*--- Wrapped vars code ---*/
 
   goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
   if (__pyx_m) {
     if (__pyx_d && stringtab_initialized) {
       __Pyx_AddTraceback("init poly_circuit_utils", __pyx_clineno, __pyx_lineno, __pyx_filename);
@@ -7323,49 +7279,6 @@ static PyObject *__Pyx_ImportDottedModule(PyObject *name, PyObject *parts_tuple)
     }
 #endif
     return __Pyx__ImportDottedModule(name, parts_tuple);
-}
-
-/* ImportFrom */
-static PyObject* __Pyx_ImportFrom(PyObject* module, PyObject* name) {
-    PyObject* value = __Pyx_PyObject_GetAttrStr(module, name);
-    if (unlikely(!value) && PyErr_ExceptionMatches(PyExc_AttributeError)) {
-        const char* module_name_str = 0;
-        PyObject* module_name = 0;
-        PyObject* module_dot = 0;
-        PyObject* full_name = 0;
-        PyErr_Clear();
-        module_name_str = PyModule_GetName(module);
-        if (unlikely(!module_name_str)) { goto modbad; }
-        module_name = PyUnicode_FromString(module_name_str);
-        if (unlikely(!module_name)) { goto modbad; }
-        module_dot = PyUnicode_Concat(module_name, __pyx_kp_u__4);
-        if (unlikely(!module_dot)) { goto modbad; }
-        full_name = PyUnicode_Concat(module_dot, name);
-        if (unlikely(!full_name)) { goto modbad; }
-        #if PY_VERSION_HEX < 0x030700A1 || (CYTHON_COMPILING_IN_PYPY && PYPY_VERSION_NUM  < 0x07030400)
-        {
-            PyObject *modules = PyImport_GetModuleDict();
-            if (unlikely(!modules))
-                goto modbad;
-            value = PyObject_GetItem(modules, full_name);
-        }
-        #else
-        value = PyImport_GetModule(full_name);
-        #endif
-      modbad:
-        Py_XDECREF(full_name);
-        Py_XDECREF(module_dot);
-        Py_XDECREF(module_name);
-    }
-    if (unlikely(!value)) {
-        PyErr_Format(PyExc_ImportError,
-        #if PY_MAJOR_VERSION < 3
-            "cannot import name %.230s", PyString_AS_STRING(name));
-        #else
-            "cannot import name %S", name);
-        #endif
-    }
-    return value;
 }
 
 /* FixUpExtensionType */
@@ -9379,7 +9292,7 @@ __Pyx_PyType_GetName(PyTypeObject* tp)
     if (unlikely(name == NULL) || unlikely(!PyUnicode_Check(name))) {
         PyErr_Clear();
         Py_XDECREF(name);
-        name = __Pyx_NewRef(__pyx_n_s__15);
+        name = __Pyx_NewRef(__pyx_n_s__14);
     }
     return name;
 }

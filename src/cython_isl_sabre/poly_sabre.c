@@ -23278,16 +23278,16 @@ if (!__Pyx_RefNanny) {
   /* "poly_sabre.pyx":4
  * # cython: language_level=3
  * 
- * from poly_circuit_preprocess import *             # <<<<<<<<<<<<<<
- * from poly_heuristic import *
- * from poly_circuit_utils import *
+ * from .poly_circuit_preprocess import *             # <<<<<<<<<<<<<<
+ * from .poly_heuristic import *
+ * from .poly_circuit_utils import *
  */
   __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_n_s__21);
   __Pyx_GIVEREF(__pyx_n_s__21);
   if (__Pyx_PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s__21)) __PYX_ERR(0, 4, __pyx_L1_error);
-  __pyx_t_3 = __Pyx_Import(__pyx_n_s_poly_circuit_preprocess, __pyx_t_2, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_Import(__pyx_n_s_poly_circuit_preprocess, __pyx_t_2, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (__pyx_import_star(__pyx_t_3) < 0) __PYX_ERR(0, 4, __pyx_L1_error);
@@ -23295,9 +23295,9 @@ if (!__Pyx_RefNanny) {
 
   /* "poly_sabre.pyx":5
  * 
- * from poly_circuit_preprocess import *
- * from poly_heuristic import *             # <<<<<<<<<<<<<<
- * from poly_circuit_utils import *
+ * from .poly_circuit_preprocess import *
+ * from .poly_heuristic import *             # <<<<<<<<<<<<<<
+ * from .poly_circuit_utils import *
  * 
  */
   __pyx_t_3 = PyList_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 5, __pyx_L1_error)
@@ -23305,16 +23305,16 @@ if (!__Pyx_RefNanny) {
   __Pyx_INCREF(__pyx_n_s__21);
   __Pyx_GIVEREF(__pyx_n_s__21);
   if (__Pyx_PyList_SET_ITEM(__pyx_t_3, 0, __pyx_n_s__21)) __PYX_ERR(0, 5, __pyx_L1_error);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_poly_heuristic, __pyx_t_3, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 5, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_poly_heuristic, __pyx_t_3, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 5, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if (__pyx_import_star(__pyx_t_2) < 0) __PYX_ERR(0, 5, __pyx_L1_error);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "poly_sabre.pyx":6
- * from poly_circuit_preprocess import *
- * from poly_heuristic import *
- * from poly_circuit_utils import *             # <<<<<<<<<<<<<<
+ * from .poly_circuit_preprocess import *
+ * from .poly_heuristic import *
+ * from .poly_circuit_utils import *             # <<<<<<<<<<<<<<
  * 
  * import islpy as isl
  */
@@ -23323,14 +23323,14 @@ if (!__Pyx_RefNanny) {
   __Pyx_INCREF(__pyx_n_s__21);
   __Pyx_GIVEREF(__pyx_n_s__21);
   if (__Pyx_PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s__21)) __PYX_ERR(0, 6, __pyx_L1_error);
-  __pyx_t_3 = __Pyx_Import(__pyx_n_s_poly_circuit_utils, __pyx_t_2, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 6, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_Import(__pyx_n_s_poly_circuit_utils, __pyx_t_2, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 6, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (__pyx_import_star(__pyx_t_3) < 0) __PYX_ERR(0, 6, __pyx_L1_error);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
   /* "poly_sabre.pyx":8
- * from poly_circuit_utils import *
+ * from .poly_circuit_utils import *
  * 
  * import islpy as isl             # <<<<<<<<<<<<<<
  * import networkx as nx

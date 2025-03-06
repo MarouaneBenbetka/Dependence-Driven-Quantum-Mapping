@@ -7147,8 +7147,8 @@ if (!__Pyx_RefNanny) {
   /* "isl_to_python.pyx":4
  * # cython: language_level=3, boundscheck=False, wraparound=False
  * 
- * from python_to_isl import dict_to_isl_map             # <<<<<<<<<<<<<<
- * from dag import DAG
+ * from .python_to_isl import dict_to_isl_map             # <<<<<<<<<<<<<<
+ * from .dag import DAG
  * import islpy as isl
  */
   __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 4, __pyx_L1_error)
@@ -7156,7 +7156,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_INCREF(__pyx_n_s_dict_to_isl_map);
   __Pyx_GIVEREF(__pyx_n_s_dict_to_isl_map);
   if (__Pyx_PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_dict_to_isl_map)) __PYX_ERR(0, 4, __pyx_L1_error);
-  __pyx_t_3 = __Pyx_Import(__pyx_n_s_python_to_isl, __pyx_t_2, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_Import(__pyx_n_s_python_to_isl, __pyx_t_2, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_3, __pyx_n_s_dict_to_isl_map); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 4, __pyx_L1_error)
@@ -7167,8 +7167,8 @@ if (!__Pyx_RefNanny) {
 
   /* "isl_to_python.pyx":5
  * 
- * from python_to_isl import dict_to_isl_map
- * from dag import DAG             # <<<<<<<<<<<<<<
+ * from .python_to_isl import dict_to_isl_map
+ * from .dag import DAG             # <<<<<<<<<<<<<<
  * import islpy as isl
  * from collections import defaultdict
  */
@@ -7177,7 +7177,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_INCREF(__pyx_n_s_DAG);
   __Pyx_GIVEREF(__pyx_n_s_DAG);
   if (__Pyx_PyList_SET_ITEM(__pyx_t_3, 0, __pyx_n_s_DAG)) __PYX_ERR(0, 5, __pyx_L1_error);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_dag, __pyx_t_3, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 5, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_dag, __pyx_t_3, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 5, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_DAG); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 5, __pyx_L1_error)
@@ -7187,8 +7187,8 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "isl_to_python.pyx":6
- * from python_to_isl import dict_to_isl_map
- * from dag import DAG
+ * from .python_to_isl import dict_to_isl_map
+ * from .dag import DAG
  * import islpy as isl             # <<<<<<<<<<<<<<
  * from collections import defaultdict
  * 
@@ -7199,7 +7199,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "isl_to_python.pyx":7
- * from dag import DAG
+ * from .dag import DAG
  * import islpy as isl
  * from collections import defaultdict             # <<<<<<<<<<<<<<
  * 

@@ -1,9 +1,9 @@
 # poly_sabre.pyx
 # cython: language_level=3
 
-from poly_circuit_preprocess import *
-from poly_heuristic import *
-from poly_circuit_utils import *
+from .poly_circuit_preprocess import *
+from .poly_heuristic import *
+from .poly_circuit_utils import *
 
 import islpy as isl
 import networkx as nx

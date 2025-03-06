@@ -2,8 +2,8 @@
 # cython: language_level=3, boundscheck=False, wraparound=False
 
 import islpy as isl
-from python_to_isl import list_to_isl_set
-from isl_to_python import isl_set_to_python_list, isl_set_to_list_points
+from .python_to_isl import list_to_isl_set
+from .isl_to_python import isl_set_to_python_list, isl_set_to_list_points
 
 
 def paths_poly_heuristic(F, dag, mapping, distance_matrix, access, swaps):

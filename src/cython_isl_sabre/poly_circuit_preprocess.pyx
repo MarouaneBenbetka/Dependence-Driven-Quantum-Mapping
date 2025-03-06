@@ -9,8 +9,8 @@ import islpy as isl
 import networkx as nx
 
 # Assuming your package structure compiles dag.pyx and python_to_isl.pyx as modules
-from dag import DAG
-from isl_to_python import isl_map_to_dict_optimized2, dict_to_isl_map
+from .dag import DAG
+from .isl_to_python import isl_map_to_dict_optimized2, dict_to_isl_map
 
 def get_poly_initial_mapping(int num_qubit) -> tuple:
     """
