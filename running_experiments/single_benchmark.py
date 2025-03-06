@@ -73,6 +73,6 @@ def main(input_directory, output_directory):
 if __name__ == "__main__":
     benchmark = "queko-bss-16qbt"
     input_directory = "benchmarks/polyhedral/" + benchmark
-    output_directory = "experiment_results/" + benchmark
+    output_directory = "experiment_results/raw_data/" + benchmark
     
     main(input_directory, output_directory)

@@ -11,7 +11,6 @@ def paths_poly_heuristic(F, dag, mapping, distance_matrix, access, swaps):
 
     return H
 
-
 def decay_poly_heuristic(F,E, mapping, distance_matrix, access, decay_parameter, gate):
     W = 0.5
     new_access = access.apply_range(mapping)
@@ -40,11 +39,7 @@ def isl_calc_distance(set,access, distance_matrix):
     points = isl_set_to_list_points(set)
 
     return  sum(calculate_distance(point, access, distance_matrix) for point in points)
-
-    
-
-    
-    
+  
 def multi_layer_poly_heuristic(F, dag, initial_mapping, distance_matrix, access,
                                decay_parameter, gate,
                                lookahead_layers=5,
@@ -121,7 +116,6 @@ def multi_layer_poly_heuristic(F, dag, initial_mapping, distance_matrix, access,
 
     return heuristic_value
 
-
 def calculate_distance(gate_details, access, distance_matrix):
     qubits = gate_details.apply(access)
     if qubits.is_empty():
@@ -143,14 +137,11 @@ def get_subset_of_unionset(uset, limit):
 
     return subset_isl_set
 
-
 def isl_set_len(S):
     if not S.is_empty():
         return S.as_set().count_val().to_python()
     return 0
     
-
-
 def create_extended_successor_set(F, dag, extended_set_size=20):
     E = isl.UnionSet("{}")
     E_size = 0
@@ -175,3 +166,4 @@ def create_extended_successor_set(F, dag, extended_set_size=20):
 
         
     return E
+
