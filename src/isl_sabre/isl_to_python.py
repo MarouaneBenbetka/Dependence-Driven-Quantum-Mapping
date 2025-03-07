@@ -61,29 +61,16 @@ def isl_set_to_python_list(_set):
     return points
 
 
-if __name__ == "__main__":
-    # print("1>Test set to list")
-    # access = isl.Set("{ [1];[2];[3];[6];[5]}")
+def isl_set_to_list_points(_set):
+    points = []
 
-    # print(isl_set_to_python_list(access))
+    def point_to_int(point):
+        points.append(point.to_set())
 
-    print("2>Test map to list")
-    map = isl.Map(
-        "{[1] -> [2]; [1]->[69];[2] -> [3];[2]->[1]; [3] -> [4];[3]->[2]; [6] -> [7]; [5] -> [6]}")
-    isl_map_to_python_dict(map)
+    _set.foreach_point(point_to_int)
 
-    num_qubits = map.range().dim_max_val(0).to_python() + 1
+    return points
 
-    nodes_dict = isl_map_to_python_dict(map)
-
-    print(nodes_dict)
-
-    dag = DAG(num_qubits=num_qubits, nodes_dict=nodes_dict)
-
-    dag.print_dag()
-
-    print(dag.successors)
-    print(dict_to_isl_map(dag.successors))
 
 
 def collect_points_from_set(S: isl.Set):

@@ -15,72 +15,83 @@ import time
 import random
 
 class POLY_SABRE():
-    def __init__(self, edges, data,no_read_dep=False) -> None:
+    def __init__(self, edges, data,no_read_dep=False,poly_path=False) -> None:
 
         self.edges = edges
         self.data = data
         self.coupling_graph = nx.Graph()
-
         self.coupling_graph.add_edges_from(edges)
         self.distance_matrix = get_distance_matrix(self.coupling_graph)
-
-        self.num_qubit = len(self.distance_matrix[0])
-
+        self.num_qubit = len(self.distance_matrix) + 1
         self.disconnected_edges = extract_disconnected_edges_map(edges)
-
         self.neighbours = extract_neighbourss_map(edges)
+        self.physical_qubits_domain = isl.Set("{ [i]:  0 <= i <  %d }" % self.num_qubit)
+        if poly_path:
+            self.all_swap_mappings = generate_all_swaps_mapping(self.coupling_graph, self.physical_qubits_domain)
 
-        self.physical_qubits_domain = isl.Set(
-            "{ [i]:  0 <= i <  %d }" % self.num_qubit)
-
-        self.all_swap_mappings = generate_all_swaps_mapping(self.coupling_graph, self.physical_qubits_domain)
-
-        self.swap_mapping = generate_all_neighbours_mapping(
-            self.coupling_graph)
-
-        self.nb_gates, self.read_dep, self.access, self.reverse_access, self.schedule, self.reverse_schedule,self.write_dep = read_data(
-            self.data)
-        
-        self.decay_parameter = [0.001 for _ in range(self.num_qubit)]
-        self.distance_map = distance_map(self.distance_matrix)
+        self.swap_mapping = generate_all_neighbours_mapping(self.coupling_graph)
+        self.nb_gates, self.read_dep, self.access, self.reverse_access, self.schedule, self.reverse_schedule,self.write_dep = read_data(self.data)  
+        self.decay_parameter = [1 for _ in range(self.num_qubit)]
         self.dag = generate_dag(self.read_dep,self.write_dep,no_read_dep)
         map_str = f"{{ [i] -> [{self.nb_gates}-i - 1] : 0 <= i < {self.nb_gates} }}"
         self.reverse_dag = self.dag.apply_range(isl.Map(map_str)).apply_domain(isl.Map(map_str))
         self.reset = 5
-
+        self.instruction_times = {}
+        
     def execute_sabre_algorithm(self, front_layer_gates, access, mapping, dag, with_transitive, huristic_method, verbose):
         nb_swaps = 0
         total_executed_gates = 0
         total_gates = self.count_number_gates(dag,front_layer_gates)
         self.decay_parameter = [1 for _ in range(self.num_qubit)]
+        
+        
         with tqdm(total=total_gates, desc="Executing Gates", mininterval=0.1, disable = (verbose==0)) as pbar:
+          
             while not front_layer_gates.is_empty():
+                
+                
+                ready_to_execute_gates = self.track_time(
+                    "extract_gate_time",
+                    lambda: self.extract_ready_to_execute_gate_list(front_layer_gates, access, mapping)
+                )
 
-                ready_to_execute_gates = self.extract_ready_to_execute_gate_list(
-                    front_layer_gates, access, mapping)
                 if not ready_to_execute_gates.is_empty():
-                    front_layer_gates = front_layer_gates.subtract(
-                        ready_to_execute_gates)
-                    waiting_nodes = ready_to_execute_gates.apply(dag)
-                    dag = dag.subtract_domain(ready_to_execute_gates)
 
-                    waiting_nodes = waiting_nodes.subtract(dag.range())
-                    front_layer_gates = front_layer_gates.union(waiting_nodes)
+                    original_dag = dag
+                    dag = self.track_time(
+                        "remove_execute_gate_time",
+                        lambda: self.remove_excuted_gate(original_dag, ready_to_execute_gates)
+                    )
+                    waiting_nodes = self.track_time(
+                        "waiting_nodes_time",
+                        lambda: ready_to_execute_gates.apply(original_dag).subtract(dag.range())
+                    )
 
-                    self.decay_parameter = [
-                        1 for _ in range(self.num_qubit)]
+                    front_layer_gates = self.track_time(
+                        "front_layer_gates_time",
+                        lambda: front_layer_gates.subtract(ready_to_execute_gates).union(waiting_nodes)
+                    )
+
+                    self.decay_parameter = [1 for _ in range(self.num_qubit)]
                     executed_gates_count = ready_to_execute_gates.as_set().count_val().to_python()
                     total_executed_gates += executed_gates_count
-
                     pbar.update(executed_gates_count)
 
                 else:
-                    best_node = self.find_best_node(
-                        front_layer_gates, dag, with_transitive)
 
-                    local_swap, mapping = self.apply_heuristic(
-                        front_layer_gates, access, mapping, dag, best_node, huristic_method,verbose=verbose)
+                    best_node = self.track_time(
+                        "find_best_node_time",
+                        lambda: self.find_best_node(front_layer_gates, dag, with_transitive)
+                    )
+
+                    local_swap, mapping = self.track_time(
+                        "heuristic_time",
+                        lambda: self.apply_heuristic(front_layer_gates, access, mapping, dag, best_node, huristic_method, verbose=verbose)
+                    )
+                    
                     nb_swaps += local_swap
+                    
+                
         return nb_swaps, mapping
 
     def count_number_gates(self, dag, front_layer_gates):
@@ -89,6 +100,21 @@ class POLY_SABRE():
         except:
             return 0
 
+    def remove_excuted_gate(self,dag,ready_to_execute_gates):
+
+        complement_set = ready_to_execute_gates.as_set().complement()
+        return dag.intersect_domain(complement_set)
+    
+    def track_time(self,label, func):
+        start = time.time()
+        result = func()
+        elapsed = time.time() - start
+        if label in self.instruction_times:
+            self.instruction_times[label] += elapsed
+        else:
+            self.instruction_times[label] = elapsed
+        return result
+               
     def apply_heuristic(self, front_layer_gates, access, mapping, dag, best_node, huristic_method,verbose=0):
 
         if huristic_method not in ["decay", "multi-layer-decay","single-decay", "poly-paths"]:
@@ -96,25 +122,29 @@ class POLY_SABRE():
 
         
         if huristic_method == "decay":
-
             heuristic_score = dict()
             
-            logical_qubits = front_layer_gates.apply(access)
-            physical_qubits = logical_qubits.apply(mapping)
-            physical_qubits_int = isl_set_to_python_list(physical_qubits)
-            swap_candidate_list = self.candidate_swaps(physical_qubits_int,dag)
             
-            
+            Extended_layer = self.track_time("Extended_layer", lambda: create_extended_successor_set(front_layer_gates, dag))
+            combined_domain = self.track_time("combined_domain", lambda: front_layer_gates.union(Extended_layer).coalesce())
+            mapping = self.track_time("mapping", lambda: mapping.coalesce())
+            simplified_access = self.track_time("simplified_access", lambda: access.gist_domain(combined_domain))
+            new_access = self.track_time("new_access", lambda: simplified_access.intersect_domain(combined_domain))
+            logical_qubits = self.track_time("logical_qubits", lambda: front_layer_gates.apply(access))
+            physical_qubits = self.track_time("physical_qubits", lambda: logical_qubits.apply(mapping))
+            physical_qubits_int = self.track_time("physical_qubits_int", lambda: isl_set_to_python_list(physical_qubits))
+            swap_candidate_list = self.track_time("swap_candidate_list", lambda: self.candidate_swaps(physical_qubits_int))
+                
             for swap_gate in swap_candidate_list:
                 temp_mapping = self.update_mapping(
                     swap_gate[0], mapping)
+
                 swap_gate_score = decay_poly_heuristic(
-                    front_layer_gates, dag, temp_mapping, self.distance_matrix, access, self.decay_parameter, (swap_gate[1][0], swap_gate[1][1]))
-                
-                
+                    front_layer_gates, Extended_layer, temp_mapping, self.distance_matrix, new_access, self.decay_parameter, (swap_gate[1][0], swap_gate[1][1]))
+
+
                 heuristic_score.update(
                     {swap_gate[0]: (swap_gate_score, swap_gate[1])})
-            
             
             min_score_swap_gate, min_gate = self.find_min_score_swap_gate(
                 heuristic_score,verbose=verbose)
@@ -201,8 +231,7 @@ class POLY_SABRE():
 
             return number_swap, mapping
 
-
-    def candidate_swaps(self,active_qubits,dag):
+    def candidate_swaps(self,active_qubits):
 
         candidates = []
         active_set = set(active_qubits)
@@ -317,7 +346,7 @@ class POLY_SABRE():
 
             return ploy_initial_mapping(layout)
 
-    def run(self, num_iter=1, chunk_size=None, with_transitive=False, huristic_method="single-decay", verbose=0):
+    def run(self, num_iter=1, chunk_size=None, with_transitive=False, heuristic_method="single-decay", verbose=0):
         min_swap = float('inf')
         temp_mapping = self.get_initial_mapping()
 
@@ -337,17 +366,14 @@ class POLY_SABRE():
                 temp_access = self.reverse_access
                 dag = self.reverse_dag
 
-            while chunk < self.nb_gates:
-                filter_domain = isl.Set(
-                    f"{{ [i] : {chunk}<= i < {chunk + chunk_size} }}")
+            while chunk <= self.nb_gates:
+                filter_domain = isl.Set(f"{{ [i] : {chunk}<= i < {chunk + chunk_size} }}")
                 new_access = temp_access.intersect_domain(filter_domain)
                 new_schedule = temp_schedule.intersect_range(filter_domain)
-                new_dag = dag.intersect_domain(
-                    filter_domain).intersect_range(filter_domain)
+                new_dag = dag.intersect_domain(filter_domain).intersect_range(filter_domain)
                 
                 front_layer = get_front_layer(new_dag, new_schedule)
-                swap_count, temp_mapping = self.execute_sabre_algorithm(
-                    front_layer, new_access, temp_mapping, new_dag, with_transitive, huristic_method, verbose)
+                swap_count, temp_mapping = self.execute_sabre_algorithm(front_layer, new_access, temp_mapping, new_dag, with_transitive, heuristic_method, verbose)
 
                 total_swaps += swap_count
                 chunk += chunk_size

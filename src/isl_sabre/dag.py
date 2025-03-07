@@ -81,26 +81,3 @@ class DAG:
             print(f"Node {node}: successors {self.successors[node]}, predecessors {self.predecessors[node]}")
 
 
-
-if __name__ == "__main__":
-    # Create nodes dictionary for the DAG (3-qubit circuit)
-    nodes_dict = {
-        0: [0, 1],  # CX gate (qubits 0 and 1)
-        1: [0],      # RX gate (qubit 0)
-        2: [1],      # RZ gate (qubit 1)
-        3: [0, 2],   # H gate (qubit 2)
-    }
-
-    # Instantiate the DAG
-    dag = DAG(num_qubits=3, nodes_dict=nodes_dict)
-
-    # Inspect the structure
-    print("First layer nodes:", dag.first_layer)  # Should show [0]
-    print("Node 0", "successors",
-          dag.successors[0], "predecessors", dag.predecessors[0])
-    print("Node 1", "successors",
-          dag.successors[1], "predecessors", dag.predecessors[1])
-    print("Node 2", "successors",
-          dag.successors[2], "predecessors", dag.predecessors[2])
-    print("Node 3", "successors",
-          dag.successors[3], "predecessors", dag.predecessors[3])

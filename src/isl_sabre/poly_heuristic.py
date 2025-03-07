@@ -1,7 +1,7 @@
 import islpy as isl
-from src.isl_sabre.python_to_isl import list_to_isl_set
-from src.isl_sabre.isl_to_python import isl_set_to_python_list
-
+from src.isl_sabre.python_to_isl import list_to_isl_set,int_to_isl_set
+from src.isl_sabre.isl_to_python import isl_set_to_python_list,isl_set_to_list_points
+import time
 
 
 def paths_poly_heuristic(F, dag, mapping, distance_matrix, access, swaps):
@@ -11,45 +11,35 @@ def paths_poly_heuristic(F, dag, mapping, distance_matrix, access, swaps):
 
     return H
 
-
-def decay_poly_heuristic(F, dag, mapping, distance_matrix, access, decay_parameter, gate):
+def decay_poly_heuristic(F,E, mapping, distance_matrix, access, decay_parameter, gate):
     W = 0.5
+    new_access = access.apply_range(mapping)
 
     max_decay = max(decay_parameter[gate[0]] , decay_parameter[gate[1]])
-    lookahead_H = lookahead_heuristic(F,dag,W,access,distance_matrix,mapping)
+    lookahead_H = lookahead_heuristic(F,E,W,new_access,distance_matrix)
     H = max_decay * lookahead_H
 
     return H
 
-def lookahead_heuristic(F,dag,w,access,distance_matrix,mapping,verbose=False):
-    E = create_extended_successor_set(F, dag)
-    size_F, size_E = isl_size(F), isl_size(E)
+def lookahead_heuristic(F,E,w,access,distance_matrix):
+    
+    size_F, size_E = isl_set_len(F), isl_set_len(E)
 
-    f_distance = isl_calc_distance(F,access, distance_matrix, mapping,verbose)
-
-    e_distance = isl_calc_distance(E,access, distance_matrix, mapping,verbose)
+    f_distance = isl_calc_distance(F,access, distance_matrix)
+    e_distance = isl_calc_distance(E,access, distance_matrix)
+    
+    
     f_distance = f_distance / size_F
     if size_E:
         e_distance = w * (e_distance) / size_E
 
-    return f_distance + e_distance
+    return f_distance + e_distance 
 
-def isl_calc_distance(set,access, distance_matrix, initial_mapping,verbose=False):
-    distance = 0
-    def calc_f_distance(point):
-        nonlocal distance
-        distance += calculate_distance(point,access, distance_matrix, initial_mapping,verbose)
-        
-    set.foreach_point(lambda point: calc_f_distance(point))
-    
-    return distance
-    
-def isl_size(set):
-    if not set.is_empty():
-        return set.as_set().count_val().to_python()
-    return 0
-    
-    
+def isl_calc_distance(set,access, distance_matrix):
+    points = isl_set_to_list_points(set)
+
+    return  sum(calculate_distance(point, access, distance_matrix) for point in points)
+  
 def multi_layer_poly_heuristic(F, dag, initial_mapping, distance_matrix, access,
                                decay_parameter, gate,
                                lookahead_layers=5,
@@ -126,24 +116,15 @@ def multi_layer_poly_heuristic(F, dag, initial_mapping, distance_matrix, access,
 
     return heuristic_value
 
-
-def calculate_distance(gate_details, access, distance_matrix, initial_mapping,verbose=False):
-    qubits = gate_details.to_set().apply(access)
+def calculate_distance(gate_details, access, distance_matrix):
+    qubits = gate_details.apply(access)
     if qubits.is_empty():
         return 0
-    logical_q1, logical_q2 = qubits.lexmin(), qubits.lexmax()
-
-    physical_q1 = logical_q1.apply(initial_mapping)
-    physical_q2 = logical_q2.apply(initial_mapping)
-    distance = distance_matrix[
-        physical_q1.as_set().dim_max_val(0).to_python(),
-        physical_q2.as_set().dim_max_val(0).to_python()
-    ] 
     
-    #if verbose:
-        #print(f"Distance between {physical_q1} and {physical_q2} is {distance}")
+    physical_q1 = qubits.lexmin().as_set()
+    physical_q2 = qubits.lexmax().as_set()
     
-    return distance
+    return distance_matrix[physical_q1][physical_q2]  
 
 def get_subset_of_unionset(uset, limit):
     
@@ -156,41 +137,33 @@ def get_subset_of_unionset(uset, limit):
 
     return subset_isl_set
 
-
-
+def isl_set_len(S):
+    if not S.is_empty():
+        return S.as_set().count_val().to_python()
+    return 0
     
-
-
 def create_extended_successor_set(F, dag, extended_set_size=20):
     E = isl.UnionSet("{}")
     E_size = 0
 
     while E_size < extended_set_size and not F.is_empty():
-        # Compute next level of successors
-        next_E = F.apply(dag)
+        next_E = F.apply(dag).subtract(F)  
         if next_E.is_empty():
             break
         
-        # How many new gates/points are in next_E?
-        next_E_size = next_E.as_set().count_val().to_python()
-        
-        # If adding all of next_E fits, just add them
-        if E_size + next_E_size <= extended_set_size:
-            E = E.union(next_E)
-            F = next_E
-            E_size += next_E_size
-        else:
-            # We can only add enough points to hit extended_set_size
-            needed = extended_set_size - E_size
-            
-            # Extract up to 'needed' points from next_E
-            partial_next_E = get_subset_of_unionset(next_E, needed)
-            
-            E = E.union(partial_next_E)
-            # Update E_size by however many actually got added
-            E_size += partial_next_E.as_set().count_val().to_python()
-            
-            # We have now reached the extended_set_size limit, so stop.
-            break
+        next_E_size = isl_set_len(next_E)
+        remaining_size = extended_set_size - E_size
 
+        if next_E_size <= remaining_size:
+            E = E.union(next_E)
+            F = next_E  
+        else:
+            partial_next_E = get_subset_of_unionset(next_E, remaining_size)
+            E = E.union(partial_next_E)
+            F = next_E.subtract(partial_next_E) 
+        
+        E_size = isl_set_len(E)  
+
+        
     return E
+

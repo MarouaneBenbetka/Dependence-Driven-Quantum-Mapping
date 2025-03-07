@@ -1,3 +1,0 @@
-Loading module 'miniconda-nobashrc/3-4.11.0'
-Loading module 'gcc/9.2.0'
-slurmstepd: error: *** JOB 9366685 ON cn155 CANCELLED AT 2024-11-01T16:13:03 DUE TO TIME LIMIT ***
