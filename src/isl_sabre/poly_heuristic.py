@@ -1,45 +1,50 @@
 import islpy as isl
-from src.isl_sabre.python_to_isl import list_to_isl_set,int_to_isl_set
-from src.isl_sabre.isl_to_python import isl_set_to_python_list,isl_set_to_list_points
+from src.isl_sabre.python_to_isl import list_to_isl_set, int_to_isl_set
+from src.isl_sabre.isl_to_python import isl_set_to_python_list, isl_set_to_list_points
+from collections import deque
 import time
 
 
 def paths_poly_heuristic(F, dag, mapping, distance_matrix, access, swaps):
     W = 0.5
-    lookahead_H = lookahead_heuristic(F,dag,W,access,distance_matrix,mapping)
+    lookahead_H = lookahead_heuristic(
+        F, dag, W, access, distance_matrix, mapping)
     H = lookahead_H + swaps
 
     return H
 
-def decay_poly_heuristic(F,E, mapping, distance_matrix, access, decay_parameter, gate):
+
+def decay_poly_heuristic(F, E, mapping, distance_matrix, access, decay_parameter, gate):
     W = 0.5
     new_access = access.apply_range(mapping)
 
-    max_decay = max(decay_parameter[gate[0]] , decay_parameter[gate[1]])
-    lookahead_H = lookahead_heuristic(F,E,W,new_access,distance_matrix)
+    max_decay = max(decay_parameter[gate[0]], decay_parameter[gate[1]])
+    lookahead_H = lookahead_heuristic(F, E, W, new_access, distance_matrix)
     H = max_decay * lookahead_H
 
     return H
 
-def lookahead_heuristic(F,E,w,access,distance_matrix):
-    
+
+def lookahead_heuristic(F, E, w, access, distance_matrix):
+
     size_F, size_E = isl_set_len(F), isl_set_len(E)
 
-    f_distance = isl_calc_distance(F,access, distance_matrix)
-    e_distance = isl_calc_distance(E,access, distance_matrix)
-    
-    
+    f_distance = isl_calc_distance(F, access, distance_matrix)
+    e_distance = isl_calc_distance(E, access, distance_matrix)
+
     f_distance = f_distance / size_F
     if size_E:
         e_distance = w * (e_distance) / size_E
 
-    return f_distance + e_distance 
+    return f_distance + e_distance
 
-def isl_calc_distance(set,access, distance_matrix):
+
+def isl_calc_distance(set, access, distance_matrix):
     points = isl_set_to_list_points(set)
 
-    return  sum(calculate_distance(point, access, distance_matrix) for point in points)
-  
+    return sum(calculate_distance(point, access, distance_matrix) for point in points)
+
+
 def multi_layer_poly_heuristic(F, dag, initial_mapping, distance_matrix, access,
                                decay_parameter, gate,
                                lookahead_layers=5,
@@ -116,54 +121,79 @@ def multi_layer_poly_heuristic(F, dag, initial_mapping, distance_matrix, access,
 
     return heuristic_value
 
+
 def calculate_distance(gate_details, access, distance_matrix):
     qubits = gate_details.apply(access)
     if qubits.is_empty():
         return 0
-    
+
     physical_q1 = qubits.lexmin().as_set()
     physical_q2 = qubits.lexmax().as_set()
-    
-    return distance_matrix[physical_q1][physical_q2]  
+
+    return distance_matrix[physical_q1][physical_q2]
+
 
 def get_subset_of_unionset(uset, limit):
-    
+
     points_list = isl_set_to_python_list(uset)
     points_list.sort()
 
-    subset_points_list  = points_list[:limit]
+    subset_points_list = points_list[:limit]
 
     subset_isl_set = list_to_isl_set(subset_points_list)
 
     return subset_isl_set
 
+
 def isl_set_len(S):
     if not S.is_empty():
         return S.as_set().count_val().to_python()
     return 0
-    
+
+
 def create_extended_successor_set(F, dag, extended_set_size=20):
     E = isl.UnionSet("{}")
     E_size = 0
 
     while E_size < extended_set_size and not F.is_empty():
-        next_E = F.apply(dag).subtract(F)  
+        next_E = F.apply(dag).subtract(F)
         if next_E.is_empty():
             break
-        
+
         next_E_size = isl_set_len(next_E)
         remaining_size = extended_set_size - E_size
 
         if next_E_size <= remaining_size:
             E = E.union(next_E)
-            F = next_E  
+            F = next_E
         else:
             partial_next_E = get_subset_of_unionset(next_E, remaining_size)
             E = E.union(partial_next_E)
-            F = next_E.subtract(partial_next_E) 
-        
-        E_size = isl_set_len(E)  
+            F = next_E.subtract(partial_next_E)
 
-        
+        E_size = isl_set_len(E)
+
     return E
 
+
+def create_extended_successor_set2(F, dag, extended_set_size=20):
+
+    front_points = isl_set_to_python_list(F)
+    front_points.sort()
+
+    visited = []
+    queue = deque(front_points)
+
+    while queue and len(visited) < extended_set_size:
+        current = queue.popleft()
+
+        if current in dag:
+            for succ in dag[current]:
+                if succ not in visited:
+                    visited.append(succ)
+                    queue.append(succ)
+
+                    if len(visited) >= extended_set_size:
+                        break
+
+    return list_to_isl_set(visited)

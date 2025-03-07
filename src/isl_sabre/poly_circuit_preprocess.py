@@ -8,6 +8,7 @@ from .dag import DAG
 from .isl_to_python import isl_map_to_dict_optimized2, dict_to_isl_map
 import time
 
+
 def get_poly_initial_mapping(num_qubit: Graph) -> dict:
 
     physical_qubits = list(range(num_qubit+1))
@@ -108,7 +109,7 @@ def swaps_to_isl_map(path: list, connect, physical_qubits_domain):
 
 def generate_swap_mappings(graph, source, target, physical_qubits_domain):
     path_generator = nx.shortest_simple_paths(graph, source, target)
-    
+
     swap_mappings = []
     # Limit to only the first k shortest paths.
     k = 1
@@ -129,7 +130,8 @@ def get_distance_matrix(graph):
             point_j = isl.Set("{["+str(j)+"]}")
             if i != j:
                 try:
-                    distance = nx.shortest_path_length(graph, source=i, target=j)
+                    distance = nx.shortest_path_length(
+                        graph, source=i, target=j)
                 except nx.NetworkXNoPath:
                     distance = float('inf')  # No path between nodes
                 distance_dict[point_i][point_j] = distance
@@ -148,7 +150,7 @@ def get_front_layer(dependencies, schedule):
     domain = dependencies.domain()
     range = dependencies.range()
     front_layer = domain.subtract(range)
-   
+
     single_nodes = schedule.range().subtract(domain.union(range))
 
     return front_layer.union(single_nodes)
@@ -156,12 +158,15 @@ def get_front_layer(dependencies, schedule):
 
 def compute_circuit_depth(dependencies):
     current_depth = 1
-    remaining_dependencies = dependencies  
+    remaining_dependencies = dependencies
     while not remaining_dependencies.is_empty():
-        front_layer = remaining_dependencies.domain().subtract(remaining_dependencies.range())
-        remaining_dependencies = remaining_dependencies.subtract_domain(front_layer)
+        front_layer = remaining_dependencies.domain().subtract(
+            remaining_dependencies.range())
+        remaining_dependencies = remaining_dependencies.subtract_domain(
+            front_layer)
         current_depth += 1
     return current_depth
+
 
 def distance_map(distance_matrix):
     n = len(distance_matrix)
@@ -172,10 +177,11 @@ def distance_map(distance_matrix):
     return isl.Map("{"+map_str+"}")
 
 
-def generate_dag(read,write,no_read_dep):
+def generate_dag(read, write, no_read_dep):
     _map = isl_map_to_dict_optimized2(read)
     _write = isl_map_to_dict_optimized2(write)
 
-    dag = DAG(num_qubits=read.range().dim_max_val(0).to_python() + 1, nodes_dict=_map,write=_write,no_read_dep=no_read_dep)
+    dag = DAG(num_qubits=read.range().dim_max_val(0).to_python() + 1,
+              nodes_dict=_map, write=_write, no_read_dep=no_read_dep)
 
-    return dict_to_isl_map(dag.successors)
+    return dict_to_isl_map(dag.successors), dag.successors
