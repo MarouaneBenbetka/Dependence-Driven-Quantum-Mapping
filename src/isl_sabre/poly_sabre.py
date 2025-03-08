@@ -11,6 +11,7 @@ from qiskit import QuantumCircuit
 from qiskit.transpiler import CouplingMap
 from qiskit.transpiler.passes import SabreLayout
 from qiskit.converters import circuit_to_dag
+from collections import defaultdict
 import time
 import random
 
@@ -18,7 +19,7 @@ import random
 class POLY_SABRE():
     def __init__(self, edges, data, no_read_dep=False, poly_path=False) -> None:
 
-        self.edges = edges
+        self.backend_connections = set(tuple(edge) for edge in edges)
         self.data = data
         self.coupling_graph = nx.Graph()
         self.coupling_graph.add_edges_from(edges)
@@ -43,7 +44,7 @@ class POLY_SABRE():
         self.reverse_dag = self.dag.apply_range(
             isl.Map(map_str)).apply_domain(isl.Map(map_str))
         self.reset = 5
-        self.instruction_times = {}
+        self.instruction_times = defaultdict(float)
 
     def execute_sabre_algorithm(self, front_layer_gates, access, mapping, dag, with_transitive, huristic_method, verbose):
         nb_swaps = 0
@@ -152,16 +153,19 @@ class POLY_SABRE():
             swap_candidate_list = self.track_time(
                 "swap_candidate_list", lambda: self.candidate_swaps(physical_qubits_int))
 
+            total = 0
             for swap_gate in swap_candidate_list:
+                start = time.time()
                 temp_mapping = self.update_mapping(
                     swap_gate[0], mapping)
-
+                total += time.time() - start
                 swap_gate_score = decay_poly_heuristic(
                     front_layer_gates, Extended_layer, temp_mapping, self.distance_matrix, new_access, self.decay_parameter, (swap_gate[1][0], swap_gate[1][1]))
 
                 heuristic_score.update(
                     {swap_gate[0]: (swap_gate_score, swap_gate[1])})
 
+            self.instruction_times["for_inside_apply_heuristic"] += total
             min_score_swap_gate, min_gate = self.find_min_score_swap_gate(
                 heuristic_score, verbose=verbose)
 
@@ -345,8 +349,8 @@ class POLY_SABRE():
         logical_qubits = gate.apply(access)
         physical_qubits = logical_qubits.apply(mapping)
 
-        q1, q2 = physical_qubits.lexmin().as_set(), physical_qubits.lexmax().as_set()
-        return q1.flat_product(q2).intersect(self.disconnected_edges).is_empty()
+        q1, q2 = isl_set_to_python_list(physical_qubits)
+        return (q1, q2) in self.backend_connections or (q2, q1) in self.backend_connections
 
     def get_initial_mapping(self, method="sabre"):
         if method == "random":
@@ -354,7 +358,7 @@ class POLY_SABRE():
         elif method == "sabre":
             circuit = QuantumCircuit.from_qasm_str(self.data["qasm_code"])
             dag_circuit = circuit_to_dag(circuit)
-            coupling_map = CouplingMap(self.edges)
+            coupling_map = CouplingMap(self.backend_connections)
             sabre_layout = SabreLayout(coupling_map, seed=21)
             sabre_layout.run(dag_circuit)
 
