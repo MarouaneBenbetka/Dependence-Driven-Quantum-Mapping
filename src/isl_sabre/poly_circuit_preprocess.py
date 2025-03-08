@@ -10,25 +10,28 @@ import time
 
 
 def get_poly_initial_mapping(num_qubit: Graph) -> dict:
-
+    mapping_dict = {}
     physical_qubits = list(range(num_qubit+1))
     logical_qubits = list(range(num_qubit+1))
     random.shuffle(physical_qubits)
-    start_time = time.time()
     map_str = ""
     for logical_qubit, physical_qubit in zip(logical_qubits, physical_qubits):
         map_str += f"q[{logical_qubit}] -> [{physical_qubit}];"
+        mapping_dict[logical_qubit] = physical_qubit
     mapping = isl.Map("{"+map_str+"}")
-    return mapping, time.time() - start_time
+
+    return mapping, mapping_dict
 
 
-def ploy_initial_mapping(layout) -> dict:
+def ploy_initial_mapping(layout, num_qubits) -> dict:
+    mapping_dict = {}
     map_str = ""
     for v in layout._v2p:
         if v._register._name != "ancilla":
             map_str += f"q[{v._index}] -> [{layout._v2p[v]}];"
+            mapping_dict[v._index] = layout._v2p[v]
 
-    return isl.Map("{"+map_str+"}")
+    return isl.Map("{"+map_str+"}"), mapping_dict
 
 
 def extract_disconnected_edges_map(edges):
