@@ -62,11 +62,9 @@ class POLY_SABRE():
 
         with tqdm(total=total_gates, desc="Executing Gates", mininterval=0.1, disable=(verbose == 0)) as pbar:
             while not self.isl_front_layer.is_empty():
-
                 isl_ready_to_execute_gates, ready_to_execute_gates = self.track_time(
                     "extract_gate_time",
-                    lambda: self.extract_ready_to_execute_gate_list(
-                        access, mapping)
+                    lambda: self.extract_ready_to_execute_gate_list()
                 )
 
                 if len(ready_to_execute_gates) > 0:
@@ -143,9 +141,7 @@ class POLY_SABRE():
 
             self.isl_extended_layer, self.extended_layer = self.track_time(
                 "Extended_layer", lambda: create_extended_successor_set2(self.front_layer, self.dag_graph))
-
             mapping = self.track_time("mapping", lambda: mapping.coalesce())
-
             logical_qubits = self.track_time(
                 "logical_qubits", lambda: self.isl_front_layer.apply(access))
             physical_qubits = self.track_time(
@@ -157,21 +153,30 @@ class POLY_SABRE():
 
             total = 0
             for swap_gate in swap_candidate_list:
+
                 temp_mapping = self.update_mapping(
                     swap_gate[0], mapping)
                 temp_mapping_dict = {k: v for k,
                                      v in self.mapping_dict.items()}
+
                 Q1, Q2 = swap_gate[1]
+
                 q1 = self.reverse_mapping_dict.get(Q1, None)
                 q2 = self.reverse_mapping_dict.get(Q2, None)
-                if q1:
+                if q1 is not None and q2 is not None:
                     temp_mapping_dict[q1] = Q2
-                if q2:
                     temp_mapping_dict[q2] = Q1
+                elif q1 is not None:
+                    temp_mapping_dict[q1] = Q2
+                elif q2 is not None:
+                    temp_mapping_dict[q2] = Q1
+                else:
+                    print("no q1 or q2")
 
                 start = time.time()
                 swap_gate_score = decay_poly_heuristic2(
                     self.front_layer, self.extended_layer, temp_mapping_dict, self.distance_matrix, self.access_dict, self.decay_parameter, (swap_gate[1][0], swap_gate[1][1]))
+
                 total += time.time() - start
 
                 heuristic_score.update(
@@ -185,12 +190,15 @@ class POLY_SABRE():
                 min_score_swap_gate, mapping)
 
             Q1, Q2 = min_gate[0], min_gate[1]
+
             q1 = self.reverse_mapping_dict.get(Q1, None)
             q2 = self.reverse_mapping_dict.get(Q2, None)
-            if q1:
+
+            if q1 is not None:
                 self.mapping_dict[q1] = Q2
             self.reverse_mapping_dict[Q2] = q1
-            if q2:
+
+            if q2 is not None:
                 self.mapping_dict[q2] = Q1
             self.reverse_mapping_dict[Q1] = q2
 
@@ -291,14 +299,12 @@ class POLY_SABRE():
 
         return candidates
 
-    def extract_ready_to_execute_gate_list(self, access, mapping):
+    def extract_ready_to_execute_gate_list(self,):
         ready_to_execute_gates_list = []
 
-        front_layer_gates_list = self.front_layer
-        for gate in front_layer_gates_list:
+        for gate in self.front_layer:
             q1, q2 = self.access_dict[gate]
             Q1, Q2 = self.mapping_dict[q1], self.mapping_dict[q2]
-
             if (Q1, Q2) in self.backend_connections or (Q2, Q1) in self.backend_connections:
                 ready_to_execute_gates_list.append(gate)
 

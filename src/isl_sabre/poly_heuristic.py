@@ -46,7 +46,7 @@ def decay_poly_heuristic2(front_layer, extended_layer, mapping, distance_matrix,
         e_distance += distance_matrix[Q1][Q2]
 
     H = max_decay * (f_distance / front_layer_size + W *
-                     (e_distance / extended_layer_size) if extended_layer_size else 0)
+                     ((e_distance / extended_layer_size) if extended_layer_size else 0))
 
     return H
 
@@ -153,6 +153,7 @@ def calculate_distance(gate_details, access, distance_matrix):
 
     physical_q1 = qubits.lexmin().as_set().dim_min_val(0).to_python()
     physical_q2 = qubits.lexmax().as_set().dim_min_val(0).to_python()
+
     return distance_matrix[physical_q1][physical_q2]
 
 
