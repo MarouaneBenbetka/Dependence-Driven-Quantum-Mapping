@@ -17,10 +17,36 @@ def paths_poly_heuristic(F, dag, mapping, distance_matrix, access, swaps):
 def decay_poly_heuristic(F, E, mapping, distance_matrix, access, decay_parameter, gate):
     W = 0.5
     new_access = access.apply_range(mapping)
-
     max_decay = max(decay_parameter[gate[0]], decay_parameter[gate[1]])
+
     lookahead_H = lookahead_heuristic(F, E, W, new_access, distance_matrix)
     H = max_decay * lookahead_H
+
+    return H
+
+
+def decay_poly_heuristic2(front_layer, extended_layer, mapping, distance_matrix, access, decay_parameter, gate):
+    W = 0.5
+    front_layer_size = len(front_layer)
+    extended_layer_size = len(extended_layer)
+
+    max_decay = max(decay_parameter[gate[0]], decay_parameter[gate[1]])
+
+    f_distance = 0
+    for gate in front_layer:
+        q1, q2 = access[gate]
+        Q1, Q2 = mapping[q1], mapping[q2]
+
+        f_distance += distance_matrix[Q1][Q2]
+
+    e_distance = 0
+    for gate in extended_layer:
+        q1, q2 = access[gate]
+        Q1, Q2 = mapping[q1], mapping[q2]
+        e_distance += distance_matrix[Q1][Q2]
+
+    H = max_decay * (f_distance / front_layer_size + W *
+                     (e_distance / extended_layer_size) if extended_layer_size else 0)
 
     return H
 
@@ -28,10 +54,8 @@ def decay_poly_heuristic(F, E, mapping, distance_matrix, access, decay_parameter
 def lookahead_heuristic(F, E, w, access, distance_matrix):
 
     size_F, size_E = isl_set_len(F), isl_set_len(E)
-
     f_distance = isl_calc_distance(F, access, distance_matrix)
     e_distance = isl_calc_distance(E, access, distance_matrix)
-
     f_distance = f_distance / size_F
     if size_E:
         e_distance = w * (e_distance) / size_E
@@ -127,9 +151,8 @@ def calculate_distance(gate_details, access, distance_matrix):
     if qubits.is_empty():
         return 0
 
-    physical_q1 = qubits.lexmin().as_set()
-    physical_q2 = qubits.lexmax().as_set()
-
+    physical_q1 = qubits.lexmin().as_set().dim_min_val(0).to_python()
+    physical_q2 = qubits.lexmax().as_set().dim_min_val(0).to_python()
     return distance_matrix[physical_q1][physical_q2]
 
 
@@ -176,9 +199,8 @@ def create_extended_successor_set(F, dag, extended_set_size=20):
     return E
 
 
-def create_extended_successor_set2(F, dag, extended_set_size=20):
+def create_extended_successor_set2(front_points, dag, extended_set_size=20):
 
-    front_points = isl_set_to_python_list(F)
     front_points.sort()
 
     visited = []
@@ -196,4 +218,4 @@ def create_extended_successor_set2(F, dag, extended_set_size=20):
                     if len(visited) >= extended_set_size:
                         break
 
-    return list_to_isl_set(visited)
+    return list_to_isl_set(visited), visited

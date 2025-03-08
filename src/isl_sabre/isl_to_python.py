@@ -61,6 +61,16 @@ def isl_set_to_python_list(_set):
     return points
 
 
+def isl_set_to_python_set(_set):
+    points = set()
+
+    def point_to_int(point):
+        points.add(point.to_set().dim_min_val(0).to_python())
+
+    _set.foreach_point(point_to_int)
+    return points
+
+
 def isl_set_to_list_points(_set):
     points = []
 
@@ -70,7 +80,6 @@ def isl_set_to_list_points(_set):
     _set.foreach_point(point_to_int)
 
     return points
-
 
 
 def collect_points_from_set(S: isl.Set):

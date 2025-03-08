@@ -5,7 +5,7 @@ import networkx as nx
 import itertools
 import numpy as np
 from .dag import DAG
-from .isl_to_python import isl_map_to_dict_optimized2, dict_to_isl_map
+from .isl_to_python import isl_map_to_dict_optimized2, dict_to_isl_map, isl_set_to_python_list
 import time
 
 
@@ -125,19 +125,17 @@ def generate_swap_mappings(graph, source, target, physical_qubits_domain):
 
 def get_distance_matrix(graph):
 
-    distance_dict = {}
+    distance_dict = [[0] * len(graph.nodes())
+                     for _ in range(len(graph.nodes()))]
     for i in graph.nodes():
-        point_i = isl.Set("{["+str(i)+"]}")
-        distance_dict[point_i] = {}
         for j in graph.nodes():
-            point_j = isl.Set("{["+str(j)+"]}")
             if i != j:
                 try:
                     distance = nx.shortest_path_length(
                         graph, source=i, target=j)
                 except nx.NetworkXNoPath:
                     distance = float('inf')  # No path between nodes
-                distance_dict[point_i][point_j] = distance
+                distance_dict[i][j] = distance
     return distance_dict
 
 
@@ -156,7 +154,9 @@ def get_front_layer(dependencies, schedule):
 
     single_nodes = schedule.range().subtract(domain.union(range))
 
-    return front_layer.union(single_nodes)
+    isl_front_layer = front_layer.union(single_nodes)
+
+    return isl_front_layer, isl_set_to_python_list(isl_front_layer)
 
 
 def compute_circuit_depth(dependencies):
