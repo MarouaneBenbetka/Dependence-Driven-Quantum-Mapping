@@ -12,41 +12,72 @@ from qiskit.transpiler import CouplingMap
 from qiskit.transpiler.passes import SabreLayout
 from qiskit.converters import circuit_to_dag
 from collections import defaultdict
-import time
+from time import time
 import random
 
 
 class POLY_SABRE():
-    def __init__(self, edges, data, no_read_dep=False, poly_path=False) -> None:
+    def __init__(self, edges, data, no_read_dep=False, poly_path=False, transitive_reduction=False) -> None:
 
+        self.instruction_times = defaultdict(float)
         self.backend_connections = set(tuple(edge) for edge in edges)
+        self.backend = defaultdict(set)
+        for edge in edges:
+            self.backend[edge[0]].add(edge[1])
+            self.backend[edge[1]].add(edge[0])
+
         self.data = data
+        start = time()
         self.coupling_graph = nx.Graph()
         self.coupling_graph.add_edges_from(edges)
+        self.instruction_times["coupling_graph"] = time() - start
+        start = time()
         self.distance_matrix = get_distance_matrix(self.coupling_graph)
+        self.instruction_times["distance_matrix"] = time() - start
         self.num_qubit = len(self.distance_matrix) + 1
+        start = time()
         self.disconnected_edges = extract_disconnected_edges_map(edges)
+        self.instruction_times["disconnected_edges"] = time() - start
+
+        start = time()
         self.neighbours = extract_neighbourss_map(edges)
+        self.instruction_times["neighbours"] = time() - start
+
+        start = time()
         self.physical_qubits_domain = isl.Set(
             "{ [i]:  0 <= i <  %d }" % self.num_qubit)
+        self.instruction_times["physical_qubits_domain"] = time() - start
+
         if poly_path:
             self.all_swap_mappings = generate_all_swaps_mapping(
                 self.coupling_graph, self.physical_qubits_domain)
 
+        start = time()
         self.swap_mapping = generate_all_neighbours_mapping(
             self.coupling_graph)
+        self.instruction_times["swap_mapping"] = time() - start
+
+        start = time()
         self.nb_gates, self.read_dep, self.access, self.reverse_access, self.schedule, self.reverse_schedule, self.write_dep = read_data(
             self.data)
+        self.instruction_times["read_data"] = time() - start
 
-        self.access_dict = isl_map_to_dict_optimized2(self.access)
+        start = time()
+        self.access_dict = isl_map_to_dict_optimized(self.access)
+        self.instruction_times["access_dict"] = time() - start
+
         self.decay_parameter = [1 for _ in range(self.num_qubit)]
-        self.dag, self.dag_graph = generate_dag(
-            self.read_dep, self.write_dep, no_read_dep)
+        start = time()
+        self.dag, self.dag_graph, self.dag_predecessors = generate_dag(
+            self.read_dep, self.write_dep, no_read_dep, transitive_reduction)
+        self.instruction_times["generate_dag"] = time() - start
+
+        start = time()
         map_str = f"{{ [i] -> [{self.nb_gates}-i - 1] : 0 <= i < {self.nb_gates} }}"
         self.reverse_dag = self.dag.apply_range(
             isl.Map(map_str)).apply_domain(isl.Map(map_str))
+        self.instruction_times["reverse_dag"] = time() - start
         self.reset = 5
-        self.instruction_times = defaultdict(float)
         self.mapping_dict = None
         self.reverse_mapping_dict = None
         self.isl_front_layer = None
@@ -62,32 +93,12 @@ class POLY_SABRE():
 
         with tqdm(total=total_gates, desc="Executing Gates", mininterval=0.1, disable=(verbose == 0)) as pbar:
             while not self.isl_front_layer.is_empty():
-                isl_ready_to_execute_gates, ready_to_execute_gates = self.track_time(
-                    "extract_gate_time",
-                    lambda: self.extract_ready_to_execute_gate_list()
-                )
+                isl_ready_to_execute_gates, ready_to_execute_gates = self.extract_ready_to_execute_gate_list()
 
                 if len(ready_to_execute_gates) > 0:
 
-                    original_dag = dag
-                    dag = self.track_time(
-                        "remove_execute_gate_time",
-                        lambda: self.remove_excuted_gate(
-                            original_dag, isl_ready_to_execute_gates)
-                    )
-                    waiting_nodes = self.track_time(
-                        "waiting_nodes_time",
-                        lambda: isl_ready_to_execute_gates.apply(
-                            original_dag).subtract(dag.range())
-                    )
-
-                    self.isl_front_layer = self.track_time(
-                        "front_layer_gates_time",
-                        lambda: self.isl_front_layer.subtract(
-                            isl_ready_to_execute_gates).union(waiting_nodes)
-                    )
-                    self.front_layer = isl_set_to_python_list(
-                        self.isl_front_layer)
+                    self.update_front_layer(
+                        ready_to_execute_gates, isl_ready_to_execute_gates)
 
                     self.decay_parameter = [1 for _ in range(self.num_qubit)]
                     executed_gates_count = isl_ready_to_execute_gates.as_set().count_val().to_python()
@@ -96,16 +107,10 @@ class POLY_SABRE():
 
                 else:
 
-                    best_node = self.track_time(
-                        "find_best_node_time",
-                        lambda: self.find_best_node(dag, with_transitive)
-                    )
+                    best_node = self.find_best_node(dag, with_transitive)
 
-                    local_swap, mapping = self.track_time(
-                        "heuristic_time",
-                        lambda: self.apply_heuristic(
-                            access, mapping, dag, best_node, huristic_method, verbose=verbose)
-                    )
+                    local_swap, mapping = self.apply_heuristic(
+                        access, mapping, dag, best_node, huristic_method, verbose=verbose)
 
                     nb_swaps += local_swap
 
@@ -139,21 +144,17 @@ class POLY_SABRE():
         if huristic_method == "decay":
             heuristic_score = dict()
 
-            self.isl_extended_layer, self.extended_layer = self.track_time(
-                "Extended_layer", lambda: create_extended_successor_set2(self.front_layer, self.dag_graph))
-            mapping = self.track_time("mapping", lambda: mapping.coalesce())
-            logical_qubits = self.track_time(
-                "logical_qubits", lambda: self.isl_front_layer.apply(access))
-            physical_qubits = self.track_time(
-                "physical_qubits", lambda: logical_qubits.apply(mapping))
-            physical_qubits_int = self.track_time(
-                "physical_qubits_int", lambda: isl_set_to_python_list(physical_qubits))
-            swap_candidate_list = self.track_time(
-                "swap_candidate_list", lambda: self.candidate_swaps(physical_qubits_int))
+            self.isl_extended_layer, self.extended_layer = create_extended_successor_set2(
+                self.front_layer, self.dag_graph)
+            mapping = mapping.coalesce()
+            logical_qubits = [
+                q for gate in self.front_layer for q in self.access_dict[gate]]
+            physical_qubits = set(self.mapping_dict[q] for q in logical_qubits)
+
+            swap_candidate_list = self.candidate_swaps(physical_qubits)
 
             total = 0
             for swap_gate in swap_candidate_list:
-
                 temp_mapping = self.update_mapping(
                     swap_gate[0], mapping)
                 temp_mapping_dict = {k: v for k,
@@ -173,16 +174,12 @@ class POLY_SABRE():
                 else:
                     print("no q1 or q2")
 
-                start = time.time()
                 swap_gate_score = decay_poly_heuristic2(
                     self.front_layer, self.extended_layer, temp_mapping_dict, self.distance_matrix, self.access_dict, self.decay_parameter, (swap_gate[1][0], swap_gate[1][1]))
-
-                total += time.time() - start
 
                 heuristic_score.update(
                     {swap_gate[0]: (swap_gate_score, swap_gate[1])})
 
-            self.instruction_times["for_inside_apply_heuristic"] += total
             min_score_swap_gate, min_gate = self.find_min_score_swap_gate(
                 heuristic_score, verbose=verbose)
 
@@ -282,20 +279,13 @@ class POLY_SABRE():
             return number_swap, mapping
 
     def candidate_swaps(self, active_qubits):
-
         candidates = []
-        active_set = set(active_qubits)
 
-        for u, v in self.coupling_graph.edges():
-            if u in active_set or v in active_set:
-
-                candidate = None
-                if u in active_set:
-                    candidate = (u, v)
-                else:
-                    candidate = (v, u)
-                map_str = f"[{u}] -> [{v}];[{v}] -> [{u}]"
-                candidates.append((isl.Map("{"+map_str+"}"), candidate))
+        for qubit in active_qubits:
+            for neighbor in self.backend[qubit]:
+                map_str = f"[{qubit}] -> [{neighbor}];[{neighbor}] -> [{qubit}]"
+                candidates.append(
+                    (isl.Map("{"+map_str+"}"), (qubit, neighbor)))
 
         return candidates
 
@@ -375,6 +365,21 @@ class POLY_SABRE():
             return mapping
         other_mapping = mapping.subtract_range(swap_gate.domain())
         return mapping.apply_range(swap_gate).union(other_mapping)
+
+    def update_front_layer(self, executable_gates, isl_executable_gates):
+
+        for gate in executable_gates:
+            for successor_gate in self.dag_graph[gate]:
+                self.dag_predecessors[successor_gate].discard(gate)
+                if len(self.dag_predecessors[successor_gate]) == 0:
+                    self.front_layer.add(successor_gate)
+                    self.isl_front_layer = self.isl_front_layer.union(
+                        isl.Set(f"{{[{successor_gate}]}}"))
+
+            self.front_layer.discard(gate)
+
+        self.isl_front_layer = self.isl_front_layer.subtract(
+            isl_executable_gates)
 
     def is_gate_executable(self, gate, access, mapping) -> bool:
 

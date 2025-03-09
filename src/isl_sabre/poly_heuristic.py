@@ -202,7 +202,7 @@ def create_extended_successor_set(F, dag, extended_set_size=20):
 
 def create_extended_successor_set2(front_points, dag, extended_set_size=20):
 
-    front_points.sort()
+    # front_points.sort()
 
     visited = []
     queue = deque(front_points)

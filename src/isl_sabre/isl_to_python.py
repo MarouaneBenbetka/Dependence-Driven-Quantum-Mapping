@@ -2,6 +2,7 @@ from src.isl_sabre.python_to_isl import dict_to_isl_map
 from src.isl_sabre.dag import DAG
 import islpy as isl
 from collections import defaultdict
+import time
 
 
 def isl_map_to_python_dict(_map):
@@ -18,24 +19,22 @@ def isl_map_to_python_dict(_map):
     return map_dict
 
 
+# def isl_map_to_dict_optimized(m: isl.Map):
+#     wrapped = m.wrap()
+#     points = collect_points_from_set(wrapped)
+
+#     result = defaultdict(list)
+#     for p in points:
+#         domain_point = p.get_coordinate_val(isl.dim_type.set, 0).to_python()
+
+#         range_point = p.get_coordinate_val(isl.dim_type.set, 1).to_python()
+
+#         result[domain_point].append(range_point)
+
+#     return result
+
+
 def isl_map_to_dict_optimized(m: isl.Map):
-
-    wrapped = m.wrap()
-
-    points = collect_points_from_set(wrapped)
-
-    result = defaultdict(list)
-    for p in points:
-        domain_point = p.get_coordinate_val(isl.dim_type.set, 0).to_python()
-
-        range_point = p.get_coordinate_val(isl.dim_type.set, 1).to_python()
-
-        result[domain_point].append(range_point)
-
-    return result
-
-
-def isl_map_to_dict_optimized2(m: isl.Map):
     result = defaultdict(list)
     dim_set = isl.dim_type.set
     to_py = isl.Val.to_python  # Cache method lookup

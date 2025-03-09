@@ -5,6 +5,7 @@ from src.isl_sabre.poly_circuit_utils import *
 from src.isl_sabre.poly_circuit_preprocess import *
 import sys
 import os
+from time import time
 
 # backends
 
@@ -21,13 +22,20 @@ def run_single_file(file_path):
 
     # poly sabre
     data = json_file_to_isl(file_path)
-    poly_sabre = POLY_SABRE(edges, data)
-    poly_swap_count = poly_sabre.run(heuristic_method="decay", verbose=1)
+    start = time()
+    poly_sabre = POLY_SABRE(
+        edges, data, transitive_reduction=True)
+    print(f"Time to create poly_sabre object: {time()-start:.6f} seconds")
+    poly_swap_count = poly_sabre.run(
+        heuristic_method="decay", verbose=1)
+
+    # poly_sabre = POLY_SABRE(edges, data, )
+    # poly_swap_count = poly_sabre.run(heuristic_method="decay", verbose=0)
 
     # qiskit sabre
     single_trial_swap_count, multi_trial_swap_count = run_sabre(data, edges)
     print(
-        f"poly_swap_count={poly_swap_count}, single_trial_swap_count={single_trial_swap_count}, multi_trial_swap_count={multi_trial_swap_count}")
+        f" poly_swap_with_transitive={poly_swap_count} ,single_trial_swap_count={single_trial_swap_count}, multi_trial_swap_count={multi_trial_swap_count}")
 
     for name, elapsed in poly_sabre.instruction_times.items():
         print(f"{name}: {elapsed:.6f} seconds")
@@ -35,5 +43,6 @@ def run_single_file(file_path):
 
 
 if __name__ == "__main__":
-    run_single_file(
-        r"benchmarks/polyhedral/queko-bss-16qbt/16QBT_500CYC_QSE_1.json")
+    for i in range(1):
+        run_single_file(
+            fr"benchmarks/polyhedral/queko-bss-16qbt/16QBT_500CYC_QSE_{i}.json")

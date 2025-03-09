@@ -5,7 +5,7 @@ import networkx as nx
 import itertools
 import numpy as np
 from .dag import DAG
-from .isl_to_python import isl_map_to_dict_optimized2, dict_to_isl_map, isl_set_to_python_list
+from .isl_to_python import isl_map_to_dict_optimized, dict_to_isl_map, isl_set_to_python_list, isl_set_to_python_set
 import time
 
 
@@ -156,7 +156,7 @@ def get_front_layer(dependencies, schedule):
 
     isl_front_layer = front_layer.union(single_nodes)
 
-    return isl_front_layer, isl_set_to_python_list(isl_front_layer)
+    return isl_front_layer, isl_set_to_python_set(isl_front_layer)
 
 
 def compute_circuit_depth(dependencies):
@@ -180,11 +180,19 @@ def distance_map(distance_matrix):
     return isl.Map("{"+map_str+"}")
 
 
-def generate_dag(read, write, no_read_dep):
-    _map = isl_map_to_dict_optimized2(read)
-    _write = isl_map_to_dict_optimized2(write)
+def generate_dag(read, write, no_read_dep, transitive_reduction=False):
+    start = time.time()
+    _map = isl_map_to_dict_optimized(read)
+    # if no_read_dep:
+    #     print("here")
+    #     _write = isl_map_to_dict_optimized2(write)
+    # else:
+    _write = None
+    print("Time to convert to dict", time.time()-start)
 
     dag = DAG(num_qubits=read.range().dim_max_val(0).to_python() + 1,
-              nodes_dict=_map, write=_write, no_read_dep=no_read_dep)
-
-    return dict_to_isl_map(dag.successors), dag.successors
+              nodes_dict=_map, write=_write, no_read_dep=no_read_dep, transitive_reduction=transitive_reduction)
+    start = time.time()
+    isl_dag = dict_to_isl_map(dag.successors)
+    print("Time to convert to isl map",  time.time()-start)
+    return isl_dag, dag.successors, dag.predecessors
