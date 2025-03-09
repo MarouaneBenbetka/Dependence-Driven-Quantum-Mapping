@@ -72,8 +72,9 @@ def read_data(data):
 
     #qops = access.domain().count_val().to_python()
     qops =  access.domain().dim_max_val(0).to_python()
-    write_dep = data["write_dependencies"]
-    write_dep = schedule.reverse().apply_range(write_dep).as_map()
+    #write_dep = data["write_dependencies"]
+    #write_dep = schedule.reverse().apply_range(write_dep).as_map()
+    write_dep = isl.UnionMap("{}")
     
     read_dep = access_to_gates(data["read_dependencies"],data["schedule"])
 

@@ -29,9 +29,6 @@ def run_single_file(file_path):
     poly_swap_count = poly_sabre.run(
         heuristic_method="decay", verbose=1)
 
-    # poly_sabre = POLY_SABRE(edges, data, )
-    # poly_swap_count = poly_sabre.run(heuristic_method="decay", verbose=0)
-
     # qiskit sabre
     single_trial_swap_count, multi_trial_swap_count = run_sabre(data, edges)
     print(
@@ -43,6 +40,5 @@ def run_single_file(file_path):
 
 
 if __name__ == "__main__":
-    for i in range(1):
-        run_single_file(
-            fr"benchmarks/polyhedral/queko-bss-16qbt/16QBT_500CYC_QSE_{i}.json")
+    run_single_file(
+        fr"benchmarks/polyhedral/queko-bss-16qbt/16QBT_900CYC_QSE_0.json")
