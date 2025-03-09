@@ -5,9 +5,8 @@ import networkx as nx
 import itertools
 import numpy as np
 from .dag import DAG
-from .isl_to_python import isl_map_to_dict_optimized, dict_to_isl_map, isl_set_to_python_list, isl_set_to_python_set,parse_mapping
+from .isl_to_python import isl_map_to_dict_optimized, dict_to_isl_map, isl_set_to_python_list, isl_set_to_python_set, parse_mapping
 import time
-
 
 
 def get_poly_initial_mapping(num_qubit: Graph) -> dict:
@@ -182,7 +181,7 @@ def distance_map(distance_matrix):
 
 
 def generate_dag(read, write, no_read_dep, transitive_reduction=False):
-    _map = parse_mapping(read.as_map().to_str())
+    _map = isl_map_to_dict_optimized(read)
     if no_read_dep:
         _write = parse_mapping(write.as_map().to_str())
     else:

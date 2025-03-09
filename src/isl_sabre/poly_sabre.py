@@ -58,18 +58,18 @@ class POLY_SABRE():
         self.instruction_times["swap_mapping"] = time() - start
 
         start = time()
-        self.nb_gates, self.read_dep, self.access, self.reverse_access, self.schedule, self.reverse_schedule, self.write_dep = read_data(
+        self.nb_gates, self.access, self.reverse_access, self.schedule, self.reverse_schedule, self.write_dep = read_data(
             self.data)
         self.instruction_times["read_data"] = time() - start
 
         start = time()
-        self.access_dict = parse_mapping(self.access.as_map().to_str())
+        self.access_dict = isl_map_to_dict_optimized(self.access)
         self.instruction_times["access_dict"] = time() - start
 
         self.decay_parameter = [1 for _ in range(self.num_qubit)]
         start = time()
         self.dag, self.dag_graph, self.dag_predecessors = generate_dag(
-            self.read_dep, self.write_dep, no_read_dep, transitive_reduction)
+            self.access, self.write_dep, no_read_dep, transitive_reduction)
         self.instruction_times["generate_dag"] = time() - start
 
         start = time()

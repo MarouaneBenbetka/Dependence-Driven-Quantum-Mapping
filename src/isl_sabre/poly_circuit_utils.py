@@ -2,6 +2,7 @@
 import json
 import islpy as isl
 from src.isl_sabre.isl_to_python import isl_set_to_python_list
+import time
 
 
 def json_file_to_isl(path: str):
@@ -40,7 +41,7 @@ def filter_multi_qubit_gates(domain, read_dependencies, schedule):
     new_read_dependicies = read_dependencies.intersect_domain(
         new_domain).coalesce()
 
-    #new_schedule = rescheduling(filtered_schedule)
+    # new_schedule = rescheduling(filtered_schedule)
     new_schedule = filtered_schedule
 
     return new_domain, new_read_dependicies, new_schedule
@@ -64,23 +65,30 @@ def rescheduling(schedule):
 
 
 def read_data(data):
-
+    start = time.time()
     domain, read_dep, schedule = filter_multi_qubit_gates(
         data["domain"], data["read_dependencies"], data["schedule"])
+    print("filter_multi_qubit_gates", time.time()-start)
 
+    start = time.time()
     access = access_to_gates(read_dep, schedule)
+    print("access_to_gates", time.time()-start)
+    # qops = access.domain().count_val().to_python()
 
-    #qops = access.domain().count_val().to_python()
-    qops =  access.domain().dim_max_val(0).to_python()
-    #write_dep = data["write_dependencies"]
-    #write_dep = schedule.reverse().apply_range(write_dep).as_map()
-    write_dep = isl.UnionMap("{}")
-    
-    read_dep = access_to_gates(data["read_dependencies"],data["schedule"])
+    start = time.time()
+    qops = access.domain().dim_max_val(0).to_python()
+    print("qops", time.time()-start)
 
+    start = time.time()
+    write_dep = data["write_dependencies"]
+    write_dep = schedule.reverse().apply_range(write_dep).as_map()
+    print("write_dep", time.time()-start)
+
+    start = time.time()
     map_str = f"{{ [i] -> [{qops}-i - 1] : 0 <= i <= {qops} }}"
     reverse_map = isl.Map(map_str)
     reverse_access = access.apply_domain(reverse_map)
     reverse_schedule = schedule.apply_range(reverse_map)
+    print("reverse", time.time()-start)
 
-    return qops, read_dep,access, reverse_access, schedule, reverse_schedule,write_dep
+    return qops, access, reverse_access, schedule, reverse_schedule, write_dep

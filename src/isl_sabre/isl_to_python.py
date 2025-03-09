@@ -105,17 +105,20 @@ def parse_mapping(s):
         var_ranges = {}
         if condition_part:
             # Add explicit multiplication in conditions
-            condition_part = re.sub(r'(\d+)([a-zA-Z_]\w*)', r'\1*\2', condition_part)
+            condition_part = re.sub(
+                r'(\d+)([a-zA-Z_]\w*)', r'\1*\2', condition_part)
             # Split conditions by 'and' to find range constraints
             condition_parts = re.split(r'\s+and\s+', condition_part)
             for part in condition_parts:
                 part = part.strip()
-                match = re.match(r'^\s*(.*?)\s*<=\s*([a-zA-Z0-9_]+)\s*<=\s*(.*?)\s*$', part)
+                match = re.match(
+                    r'^\s*(.*?)\s*<=\s*([a-zA-Z0-9_]+)\s*<=\s*(.*?)\s*$', part)
                 if match:
                     lower_expr = match.group(1).strip()
                     var_name = match.group(2).strip()
                     upper_expr = match.group(3).strip()
-                    var_ranges[var_name] = {'lower': lower_expr, 'upper': upper_expr}
+                    var_ranges[var_name] = {
+                        'lower': lower_expr, 'upper': upper_expr}
 
         # Process based on key type
         if key is not None:  # Fixed integer key
@@ -162,7 +165,8 @@ def parse_mapping(s):
                 upper_key = eval(var_ranges[key_var]['upper'], {})
                 for key_value in range(int(lower_key), int(upper_key) + 1):
                     context = {key_var: key_value}
-                    other_vars = {v: var_ranges[v] for v in var_ranges if v != key_var}
+                    other_vars = {v: var_ranges[v]
+                                  for v in var_ranges if v != key_var}
                     if not other_vars:
                         # No other variables, check full condition
                         if eval(condition_part, {}, context):
@@ -178,7 +182,8 @@ def parse_mapping(s):
                             try:
                                 lower = eval(other_vars[var]['lower'], context)
                                 upper = eval(other_vars[var]['upper'], context)
-                                var_values[var] = range(int(lower), int(upper) + 1)
+                                var_values[var] = range(
+                                    int(lower), int(upper) + 1)
                             except:
                                 continue
                         if var_values:
