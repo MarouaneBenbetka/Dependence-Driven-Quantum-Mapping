@@ -18,16 +18,13 @@ from time import time
 
 def run_single_file(file_path):
     edges = Fake27QPulseV1().configuration().coupling_map
-    data = json_file_to_isl(file_path)
 
-    # poly sabre
     data = json_file_to_isl(file_path)
     start = time()
     poly_sabre = POLY_SABRE(
         edges, data, transitive_reduction=True)
     print(f"Time to create poly_sabre object: {time()-start:.6f} seconds")
-    poly_swap_count = poly_sabre.run(
-        heuristic_method="decay", verbose=1)
+    poly_swap_count = poly_sabre.run(heuristic_method="decay", verbose=1)
 
     # qiskit sabre
     single_trial_swap_count, multi_trial_swap_count = run_sabre(data, edges)
@@ -41,4 +38,4 @@ def run_single_file(file_path):
 
 if __name__ == "__main__":
     run_single_file(
-        fr"benchmarks/polyhedral/queko-bss-16qbt/16QBT_900CYC_QSE_0.json")
+        fr"benchmarks/polyhedral/queko-bss-16qbt/16QBT_500CYC_QSE_0.json")

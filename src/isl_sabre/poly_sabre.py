@@ -27,56 +27,43 @@ class POLY_SABRE():
             self.backend[edge[1]].add(edge[0])
 
         self.data = data
-        start = time()
+
         self.coupling_graph = nx.Graph()
         self.coupling_graph.add_edges_from(edges)
-        self.instruction_times["coupling_graph"] = time() - start
-        start = time()
+
         self.distance_matrix = get_distance_matrix(self.coupling_graph)
-        self.instruction_times["distance_matrix"] = time() - start
         self.num_qubit = len(self.distance_matrix) + 1
-        start = time()
+
         self.disconnected_edges = extract_disconnected_edges_map(edges)
-        self.instruction_times["disconnected_edges"] = time() - start
 
-        start = time()
         self.neighbours = extract_neighbourss_map(edges)
-        self.instruction_times["neighbours"] = time() - start
 
-        start = time()
         self.physical_qubits_domain = isl.Set(
             "{ [i]:  0 <= i <  %d }" % self.num_qubit)
-        self.instruction_times["physical_qubits_domain"] = time() - start
 
         if poly_path:
             self.all_swap_mappings = generate_all_swaps_mapping(
                 self.coupling_graph, self.physical_qubits_domain)
 
-        start = time()
         self.swap_mapping = generate_all_neighbours_mapping(
             self.coupling_graph)
-        self.instruction_times["swap_mapping"] = time() - start
 
-        start = time()
         self.nb_gates, self.access, self.reverse_access, self.schedule, self.reverse_schedule, self.write_dep = read_data(
             self.data)
-        self.instruction_times["read_data"] = time() - start
 
-        start = time()
-        self.access_dict = isl_map_to_dict_optimized(self.access)
-        self.instruction_times["access_dict"] = time() - start
+        if "access_dict" in data and data["access_dict"]:
+            self.access_dict = data["access_dict"]
+        else:
+            self.access_dict = isl_map_to_dict_optimized(self.access)
 
         self.decay_parameter = [1 for _ in range(self.num_qubit)]
-        start = time()
         self.dag, self.dag_graph, self.dag_predecessors = generate_dag(
-            self.access, self.write_dep, no_read_dep, transitive_reduction)
-        self.instruction_times["generate_dag"] = time() - start
+            self.access_dict, None, self.access.range().dim_max_val(0).to_python() + 1, no_read_dep, transitive_reduction)
 
-        start = time()
         map_str = f"{{ [i] -> [{self.nb_gates}-i - 1] : 0 <= i < {self.nb_gates} }}"
         self.reverse_dag = self.dag.apply_range(
             isl.Map(map_str)).apply_domain(isl.Map(map_str))
-        self.instruction_times["reverse_dag"] = time() - start
+
         self.reset = 5
         self.mapping_dict = None
         self.reverse_mapping_dict = None

@@ -180,13 +180,9 @@ def distance_map(distance_matrix):
     return isl.Map("{"+map_str+"}")
 
 
-def generate_dag(read, write, no_read_dep, transitive_reduction=False):
-    _map = isl_map_to_dict_optimized(read)
-    if no_read_dep:
-        _write = parse_mapping(write.as_map().to_str())
-    else:
-        _write = None
-    dag = DAG(num_qubits=read.range().dim_max_val(0).to_python() + 1,
-              nodes_dict=_map, write=_write, no_read_dep=no_read_dep, transitive_reduction=transitive_reduction)
+def generate_dag(read, write, num_qubits, no_read_dep, transitive_reduction=False):
+
+    dag = DAG(num_qubits=num_qubits,
+              nodes_dict=read, write=write, no_read_dep=no_read_dep, transitive_reduction=transitive_reduction)
     isl_dag = dict_to_isl_map(dag.successors)
     return isl_dag, dag.successors, dag.predecessors
