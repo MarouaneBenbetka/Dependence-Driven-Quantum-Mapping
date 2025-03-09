@@ -63,7 +63,7 @@ class POLY_SABRE():
         self.instruction_times["read_data"] = time() - start
 
         start = time()
-        self.access_dict = isl_map_to_dict_optimized(self.access)
+        self.access_dict = parse_mapping(self.access.as_map().to_str())
         self.instruction_times["access_dict"] = time() - start
 
         self.decay_parameter = [1 for _ in range(self.num_qubit)]

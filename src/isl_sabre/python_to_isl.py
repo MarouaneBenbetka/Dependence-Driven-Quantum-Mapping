@@ -2,20 +2,27 @@
 import islpy as isl
 
 
-def dict_to_isl_map(input_dict: dict) -> str:
+def dict_to_isl_map(input_dict: dict, chunk_size: int = 50) -> isl.UnionMap:
     """
-    Convert a dictionary of {key: [values]} to an ISL Map string format.
+    Convert a dictionary of {key: [values]} to an ISL UnionMap string format,
+    grouping the entries into chunks of `chunk_size`.
     """
-
     entries = []
     for key, values in input_dict.items():
         for val in values:
             entries.append(f"[{key}]->[{val}]")
+    
     if not entries:
         return isl.UnionMap("{}")
-
-    return isl.Map("{" + ";".join(entries) + "}").coalesce()
-
+    
+    chunks = [entries[i:i + chunk_size] for i in range(0, len(entries), chunk_size)]
+    
+    union_map = isl.UnionMap("{}")
+    for chunk in chunks:
+        isl_map = isl.Map("{" + ";".join(chunk) + "}")
+        union_map = union_map.union(isl_map)
+    
+    return union_map
 
 def list_to_isl_set(input_list):
     if not input_list:
