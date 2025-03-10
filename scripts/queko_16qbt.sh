@@ -8,10 +8,10 @@
 #SBATCH -c 64
 #SBATCH --mem=128G
 #SBATCH -t 5-0
-#SBATCH -o /scratch/mb10325/Poly-Swap/scripts/queko_16qbt.out
-#SBATCH -e /scratch/mb10325/Poly-Swap/scripts/queko_16qbt.err
+#SBATCH -o /scratch/mb10324/Poly-Swap/scripts/queko_16qbt.out
+#SBATCH -e /scratch/mb10324/Poly-Swap/scripts/queko_16qbt.err
 #SBATCH --mail-type=ALL
-#SBATCH --mail-user=mb10325@nyu.edu
+#SBATCH --mail-user=mb10324@nyu.edu
 
 #Resource requiremenmt commands end here
 
@@ -25,4 +25,4 @@ conda activate main
 
 #Execute the code
 
-python /scratch/mb10325/Poly-Swap/running_experiments/single_benchmark.py
+python /scratch/mb10324/Poly-Swap/running_experiments/single_benchmark.py
