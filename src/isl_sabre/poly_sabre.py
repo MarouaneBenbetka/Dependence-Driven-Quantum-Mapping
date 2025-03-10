@@ -1,7 +1,7 @@
 from src.isl_sabre.poly_circuit_preprocess import *
 from src.isl_sabre.poly_heuristic import *
 from src.isl_sabre.poly_circuit_utils import *
-
+from src.isl_sabre.isl_to_python import *
 
 import islpy as isl
 import networkx as nx
@@ -47,14 +47,16 @@ class POLY_SABRE():
 
         self.swap_mapping = generate_all_neighbours_mapping(
             self.coupling_graph)
-
+        start = time()
         self.nb_gates, self.access, self.reverse_access, self.schedule, self.reverse_schedule, self.write_dep = read_data(
             self.data)
-
+        print(f"Time to read data: {time()-start:.6f} seconds")
+        start = time()
         if "access_dict" in data and data["access_dict"]:
             self.access_dict = data["access_dict"]
         else:
-            self.access_dict = isl_map_to_dict_optimized(self.access)
+            self.access_dict = isl_map_to_dict_optimized2(self.access)
+        print(f"Time to convert access to dict: {time()-start:.6f} seconds")
 
         self.decay_parameter = [1 for _ in range(self.num_qubit)]
         self.dag, self.dag_graph, self.dag_predecessors = generate_dag(
