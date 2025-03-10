@@ -52,6 +52,26 @@ def isl_map_to_dict_optimized(m: isl.Map):
     return result
 
 
+def isl_map_to_dict_optimized2(_map):
+    result = defaultdict(list)
+
+    def map_to_dict(b):
+        dim_set = isl.dim_type.set
+        to_py = isl.Val.to_python
+
+        def callback(p) -> None:
+            domain = to_py(p.get_coordinate_val(dim_set, 0))
+            range_val = to_py(p.get_coordinate_val(dim_set, 1))
+            result[domain].append(range_val)
+
+        b.foreach_point(callback)
+
+    for b in _map.wrap().get_basic_sets():
+        map_to_dict(b)
+
+    return result
+
+
 def parse_mapping(s):
 
     # Remove curly braces and split into entries
