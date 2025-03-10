@@ -5,11 +5,38 @@ from collections import deque
 import time
 
 
-def paths_poly_heuristic(F, dag, mapping, distance_matrix, access, swaps):
+def paths_poly_heuristic(F, E, mapping, distance_matrix, access, swaps):
     W = 0.5
+    new_access = access.apply_range(mapping)
     lookahead_H = lookahead_heuristic(
-        F, dag, W, access, distance_matrix, mapping)
+        F, E, W, new_access, distance_matrix)
     H = lookahead_H + swaps
+
+    return H
+
+def paths_poly_heuristic2(front_layer, extended_layer, mapping, distance_matrix, access, swaps):
+
+
+    W = 0.5
+    front_layer_size = len(front_layer)
+    extended_layer_size = len(extended_layer)
+
+
+    f_distance = 0
+    for gate in front_layer:
+        q1, q2 = access[gate]
+        Q1, Q2 = mapping[q1], mapping[q2]
+
+        f_distance += distance_matrix[Q1][Q2]
+
+    e_distance = 0
+    for gate in extended_layer:
+        q1, q2 = access[gate]
+        Q1, Q2 = mapping[q1], mapping[q2]
+        e_distance += distance_matrix[Q1][Q2]
+
+    H =  (f_distance / front_layer_size + W *
+                     ((e_distance / extended_layer_size) if extended_layer_size else 0)) + swaps
 
     return H
 

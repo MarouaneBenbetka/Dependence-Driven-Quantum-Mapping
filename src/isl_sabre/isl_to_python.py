@@ -72,6 +72,66 @@ def isl_map_to_dict_optimized2(_map):
     return result
 
 
+def isl_map_to_dict_optimized3(_map):
+    result = defaultdict(int)
+
+    def map_to_dict(b):
+        dim_set = isl.dim_type.set
+        to_py = isl.Val.to_python
+
+        def callback(p) -> None:
+            domain = to_py(p.get_coordinate_val(dim_set, 0))
+            range_val = to_py(p.get_coordinate_val(dim_set, 1))
+            result[domain] = range_val
+
+        b.foreach_point(callback)
+
+    for b in _map.wrap().get_basic_sets():
+        map_to_dict(b)
+
+    return result
+
+def isl_count_dependencies(_map):
+    result = defaultdict(int)
+
+
+    def map_to_dict(b):
+        dim_set = isl.dim_type.set
+        to_py = isl.Val.to_python
+
+        def callback(p) -> None:
+            domain = to_py(p.get_coordinate_val(dim_set, 0))
+            result[domain] = result.get(domain,0) + 1
+
+        b.foreach_point(callback)
+
+    
+    _map = _map.transitive_closure()[0].wrap().as_set()
+    for b in _map.get_basic_sets():
+        map_to_dict(b)
+
+    return result
+
+def count_dependencies(dag):
+    memo = {}
+
+    def reachable(node):
+        if node in memo:
+            return memo[node]
+        # Set to hold nodes reachable from 'node'
+        reached = set()
+        for neighbor in dag.get(node, []):
+            reached.add(neighbor)
+            reached |= reachable(neighbor)
+        memo[node] = reached
+        return reached
+
+    # Compute the transitive closure for each node in the DAG
+    closure = {node: reachable(node) for node in dag}
+
+    return {node: len(reachable_nodes) for node, reachable_nodes in closure.items()}
+
+
 def parse_mapping(s):
 
     # Remove curly braces and split into entries
