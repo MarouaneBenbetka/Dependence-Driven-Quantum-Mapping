@@ -24,7 +24,7 @@ def generate_random_initial_mapping(num_qubits: int):
         reverse_mapping[physical_qubit] = logical_qubit
     isl_mapping = isl.Map("{"+isl_mapping_str+"}")
 
-    return isl_mapping, mapping
+    return isl_mapping, mapping, reverse_mapping
 
 
 def generate_sabre_initial_mapping(qasm_code, backned_edges):

@@ -1,11 +1,6 @@
-from src.isl_sabre.python_to_isl import dict_to_isl_map
-from src.isl_sabre.dag import DAG
 import islpy as isl
 from collections import defaultdict
-import time
-import re
 from collections import defaultdict
-from itertools import product
 
 
 def isl_map_to_python_dict(_map):

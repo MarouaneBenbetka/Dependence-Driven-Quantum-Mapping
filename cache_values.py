@@ -6,7 +6,7 @@ from tqdm import tqdm
 import islpy as isl
 
 from src.isl_sabre.isl_to_python import isl_map_to_dict_optimized
-from src.isl_sabre.poly_circuit_utils import json_file_to_isl, access_to_gates, filter_multi_qubit_gates
+from isl_sabre.isl_data_loader import json_file_to_isl, access_to_gates, filter_multi_qubit_gates
 
 
 def main():

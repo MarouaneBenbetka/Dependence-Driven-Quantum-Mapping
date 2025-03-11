@@ -1,19 +1,9 @@
 from qiskit.providers.fake_provider import Fake27QPulseV1, Fake5QV1, Fake20QV1
 from src.original_sabre.sabre import run_sabre
-from src.isl_sabre.poly_sabre import POLY_SABRE
-from src.isl_sabre.poly_circuit_utils import *
-from src.isl_sabre.poly_circuit_preprocess import *
-import sys
-import os
+from src.isl_routing.mapping.routing import POLY_QMAP
+from src.isl_routing.utils.isl_data_loader import *
+from src.isl_routing.utils.circuit_utils import *
 from time import time
-
-# backends
-
-
-# poly_sabre
-
-
-# original sabre
 
 
 def run_single_file(file_path):
@@ -23,11 +13,11 @@ def run_single_file(file_path):
     data = json_file_to_isl(file_path)
     print(f"Time to load data: {time()-start:.6f} seconds")
     start = time()
-    poly_sabre = POLY_SABRE(
+    poly_mapper = POLY_QMAP(
         edges, data)
     print(f"Time to create poly_sabre object: {time()-start:.6f} seconds")
-    poly_swap_count = poly_sabre.run(
-        heuristic_method="decay", verbose=1, with_transitive_closure=True)
+    poly_swap_count = poly_mapper.run(
+        heuristic_method="decay", verbose=1)
 
     single_trial_swap_count, multi_trial_swap_count = run_sabre(data, edges)
     print(
@@ -38,4 +28,4 @@ def run_single_file(file_path):
 
 if __name__ == "__main__":
     run_single_file(
-        fr"benchmarks/polyhedral/queko-bss-16qbt/16QBT_200CYC_QSE_4.json")
+        fr"benchmarks/polyhedral/queko-bss-20qbt/20QBT_900CYC_QSE_9.json")

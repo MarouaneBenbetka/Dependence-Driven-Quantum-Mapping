@@ -1,12 +1,9 @@
-from networkx import Graph
-import random
 import islpy as isl
 import networkx as nx
 import itertools
-import numpy as np
-from .dag import DAG
-from .isl_to_python import dict_to_isl_map,  isl_set_to_python_set
-import time
+from src.isl_routing.graph.dag import DAG
+from src.isl_routing.utils.isl_to_python import isl_set_to_python_set
+from src.isl_routing.utils.python_to_isl import dict_to_isl_map
 
 
 def extract_disconnected_edges_map(edges):

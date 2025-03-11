@@ -1,9 +1,7 @@
 
 import json
 import islpy as isl
-from src.isl_sabre.isl_to_python import isl_set_to_python_list, isl_map_to_dict_optimized2
-
-import time
+from src.isl_routing.utils.isl_to_python import isl_set_to_python_list, isl_map_to_dict_optimized2
 import os
 import ast
 

@@ -1,16 +1,16 @@
-from src.isl_sabre.poly_circuit_preprocess import *
-from src.isl_sabre.poly_heuristic import *
-from src.isl_sabre.poly_circuit_utils import *
-from src.isl_sabre.isl_to_python import *
-from src.isl_sabre.graph import *
-from src.isl_sabre.mapping import *
+from src.isl_routing.utils.circuit_utils import *
+from src.isl_routing.mapping.heuristic import *
+from src.isl_routing.utils.isl_data_loader import *
+from src.isl_routing.utils.isl_to_python import *
+from src.isl_routing.graph.graph import *
+from src.isl_routing.mapping.mapping import *
+
 import islpy as isl
+import random
 from tqdm import tqdm
 
-import random
 
-
-class POLY_SABRE():
+class POLY_QMAP():
     def __init__(self, edges, data) -> None:
 
         self.backend_connections = set(tuple(edge) for edge in edges)
@@ -41,7 +41,7 @@ class POLY_SABRE():
         self.isl_dag, self.dag, self.dag_predecessors = generate_dag(
             self.access, None, self.num_qubits, no_read_dep, transitive_reduction)
 
-        self.init_mapping()
+        self.init_mapping(method="sabre")
         self.init_front_layer()
 
         if with_transitive_closure:
