@@ -75,6 +75,178 @@ def create_extended_successor_set(front_points, dag, extended_set_size=20):
 
     return list_to_isl_set(visited), visited
 
+def get_all_predecessors(node, predecessors, visited=None):
+    if visited is None:
+        visited = set()
+    if node in visited:
+        return set()
+    visited.add(node)
+    preds = set(predecessors.get(node, []))
+    for p in predecessors.get(node, []):
+        preds |= get_all_predecessors(p, predecessors, visited)
+    return preds
+    
+    
+def create_lookahead_path_set(front_points, dag, predecessors, lookahead_path_size=20):
+
+
+    def dfs_paths(node, depth):
+
+        if depth >= lookahead_path_size:
+            return [[node]]
+        successors = list(dag[node])
+
+        valid_successors = [succ for succ in successors if len(predecessors.get(succ, [])) == 1]
+        if not valid_successors:
+            return [[node]]
+        paths = []
+        for succ in valid_successors:
+            for sub_path in dfs_paths(succ, depth + 1):
+                paths.append([node] + sub_path)
+        return paths
+
+    all_paths = []
+
+    for front in front_points:
+        paths_from_front = dfs_paths(front, 0)
+        for path in paths_from_front:
+
+            extended_nodes = set(path)
+
+            for node in path:
+                extended_nodes |= get_all_predecessors(node, predecessors)
+
+            extended_path = list(extended_nodes)
+            if front not in extended_path:
+                extended_path.insert(0, front)
+            all_paths.append(extended_path)
+    return all_paths
+
+
+def lookahead_poly_heuristic(best_node,front_layer,lookahead_path, mapping, distance_matrix, access,decay_parameter, gate):
+    W = 0.5
+    
+    max_decay = max(decay_parameter[gate[0]], decay_parameter[gate[1]])
+
+    front_layer_size = len(front_layer)
+    lookahead_layer_size = len(lookahead_path)
+    
+    
+    q1, q2 = access[best_node]
+    Q1, Q2 = mapping[q1], mapping[q2]
+
+    node_distance = distance_matrix[Q1][Q2]
+
+    f_distance = 0
+    for gate in front_layer:
+        q1, q2 = access[gate]
+        Q1, Q2 = mapping[q1], mapping[q2]
+
+        f_distance += distance_matrix[Q1][Q2]
+
+        
+    p_distance = 0
+    for gate in lookahead_path:
+        q1, q2 = access[gate]
+        Q1, Q2 = mapping[q1], mapping[q2]
+        p_distance += distance_matrix[Q1][Q2]
+
+    H =  (node_distance + W * (f_distance / front_layer_size) + 0.25 *
+                     ((p_distance / lookahead_layer_size) if lookahead_layer_size else 0))
+
+    return max_decay * H
+
+
+def max_focus_poly_heuristic(front_layer, extended_layer, mapping, distance_matrix, access, decay_parameter, gate):
+    W = 0.5
+    front_layer_distance = len(front_layer)
+    extended_layer_size = len(extended_layer)
+
+    max_decay = max(decay_parameter[gate[0]], decay_parameter[gate[1]])
+
+    max_f_distance = 0
+    f_distance = 0
+    for gate in front_layer:
+        q1, q2 = access[gate]
+        Q1, Q2 = mapping[q1], mapping[q2]
+        f_distance += distance_matrix[Q1][Q2]
+        max_f_distance = max(max_f_distance,distance_matrix[Q1][Q2])
+
+    e_distance = 0
+    for gate in extended_layer:
+        q1, q2 = access[gate]
+        Q1, Q2 = mapping[q1], mapping[q2]
+        e_distance += distance_matrix[Q1][Q2]
+
+    H = max_decay * (max_f_distance + f_distance/front_layer_distance + W *
+                     ((e_distance / extended_layer_size) if extended_layer_size else 0))
+
+    return H
+
+
+
+
+def more_excuted_heuristic(front_layer, extended_layer, mapping, distance_matrix, access, decay_parameter, gate):
+    W1 = 1
+    W2 = 0.5
+    front_layer_size = len(front_layer)
+    extended_layer_size = len(extended_layer)
+
+    max_decay = max(decay_parameter[gate[0]], decay_parameter[gate[1]])
+
+    excuted_gates = 0
+    f_distance = 0
+    for gate in front_layer:
+        q1, q2 = access[gate]
+        Q1, Q2 = mapping[q1], mapping[q2]
+
+        f_distance += distance_matrix[Q1][Q2]
+        if distance_matrix[Q1][Q2] == 1:
+            excuted_gates -= 1
+
+    e_distance = 0
+    for gate in extended_layer:
+        q1, q2 = access[gate]
+        Q1, Q2 = mapping[q1], mapping[q2]
+        e_distance += distance_matrix[Q1][Q2]
+    H = max_decay * (excuted_gates / front_layer_size + W1 *(f_distance / front_layer_size) + W2 *
+                     ((e_distance / extended_layer_size) if extended_layer_size else 0))
+
+    return H
+
+
+
+
+def dynamic_weighte_heuristic(front_layer, extended_layer, mapping, distance_matrix, access,dag, decay_parameter, gate):
+    front_layer_size = len(front_layer)
+
+    W = 0.5
+    max_decay = max(decay_parameter[gate[0]], decay_parameter[gate[1]])
+
+    f_distance = 0
+    for gate in front_layer:
+        q1, q2 = access[gate]
+        Q1, Q2 = mapping[q1], mapping[q2]
+
+        f_distance += distance_matrix[Q1][Q2]
+
+    e_distance = 0
+    layers = order_extended_layer_from_successors(extended_layer,dag)
+    for layer in layers:
+        e_layer_distance = 0
+        for gate in layer:
+            q1, q2 = access[gate]
+            Q1, Q2 = mapping[q1], mapping[q2]
+            e_layer_distance += distance_matrix[Q1][Q2]
+        e_distance =  W * (e_layer_distance / len(layers))
+        W = 0.5 * W
+
+    H = max_decay * (f_distance / front_layer_size + e_distance)
+
+
+    return H
+
+
 
 def find_min_score_swap_gate(heuristic_score, epsilon=1e-10):
     random.seed(21)
@@ -92,3 +264,32 @@ def find_min_score_swap_gate(heuristic_score, epsilon=1e-10):
     best_swaps.sort()
 
     return random.choice(best_swaps)
+
+
+
+def order_extended_layer_from_successors(extended_layer, successors):
+
+    extended_set = set(extended_layer)
+    
+    in_degree = {node: 0 for node in extended_layer}
+    for node in extended_layer:
+        for succ in successors.get(node, []):
+            if succ in extended_set:
+                in_degree[succ] += 1
+
+    layers = []
+    current_layer = [node for node in extended_layer if in_degree[node] == 0]
+    
+    while current_layer:
+        layers.append(current_layer)
+        next_layer = []
+
+        for node in current_layer:
+            for succ in successors.get(node, []):
+                if succ in extended_set:
+                    in_degree[succ] -= 1
+                    if in_degree[succ] == 0:
+                        next_layer.append(succ)
+        current_layer = next_layer
+
+    return layers

@@ -94,7 +94,7 @@ def rescheduling(schedule):
     return schedule.apply_range(dispersed_to_compact_schedule_map)
 
 
-def read_data(data, with_write_dep=False, with_reverse=False):
+def read_data(data, with_write_dep=True, with_reverse=False):
     access = None
     schedule = None
 
@@ -113,6 +113,7 @@ def read_data(data, with_write_dep=False, with_reverse=False):
     if with_write_dep:
         write_dep = data["write_dependencies"]
         write_dep = schedule.reverse().apply_range(write_dep).as_map()
+        write_dict = isl_map_to_dict_optimized2(write_dep)
     else:
         write_dep = None
 
@@ -121,4 +122,4 @@ def read_data(data, with_write_dep=False, with_reverse=False):
     else:
         access_dict = isl_map_to_dict_optimized2(access)
 
-    return qops, access, access_dict, schedule, write_dep
+    return qops, access, access_dict, schedule, write_dep,write_dict

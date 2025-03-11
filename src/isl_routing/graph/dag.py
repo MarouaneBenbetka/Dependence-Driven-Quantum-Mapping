@@ -7,7 +7,6 @@ class DAG:
 
         self.num_qubits = num_qubits
         self.nodes_dict = nodes_dict
-        self.write = write
         self.nodes_order = sorted(list(nodes_dict.keys()))
 
         self.predecessors: DefaultDict[int, Set[int]] = defaultdict(set)
@@ -15,21 +14,20 @@ class DAG:
         self.first_layer: List[int] = []
 
         if no_read_dep:
-            qubit_history: List[List[int]] = [[] for _ in range(num_qubits)]
-            for node in self.nodes_order:
-                for q in self.nodes_dict[node]:
-                    if q in self.write[node]:
-                        for prev_node in qubit_history[q]:
-                            if q not in self.write[prev_node]:
-                                self._add_edge(prev_node, node)
-                        qubit_history[q] = [node]
-                    else:
-                        for prev_node in qubit_history[q]:
-                            if q in self.write[prev_node]:
-                                self._add_edge(prev_node, node)
-                        qubit_history[q].append(node)
-                if not self.predecessors[node]:
-                    self.first_layer.append(node)
+            self.write_order = sorted(list(write.keys()))
+
+            write_order = sorted(list(write.keys()))
+            last_op = [None] * num_qubits     
+            last_write = [None] * num_qubits 
+            for node_key in write_order:
+                write_qubit = write[node_key][0]
+                last_write[write_qubit] = node_key
+                
+                if node_key in nodes_dict:
+                    for qubit in nodes_dict[node_key]:
+                        if last_op[qubit] is not None and last_write[qubit] is not None and (qubit in write[node_key] or last_op[qubit] in write[node_key] or last_write[qubit] > last_op[qubit]):
+                            self._add_edge(last_op[qubit], node_key)
+                        last_op[qubit] = node_key
 
         else:
             qubit_pos: List[Optional[int]] = [None] * num_qubits

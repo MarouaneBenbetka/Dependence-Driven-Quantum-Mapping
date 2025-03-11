@@ -27,6 +27,23 @@ def generate_random_initial_mapping(num_qubits: int):
     return isl_mapping, mapping, reverse_mapping
 
 
+def generate_trivial_initial_mapping(num_qubits: int):
+    """
+    Generate a trivial mapping from logical qubits to physical qubits.
+    """
+    logical_qubits = list(range(num_qubits))
+    physical_qubits = list(range(num_qubits))
+    isl_mapping_str = ""
+    mapping = {}
+    reverse_mapping = {}
+    for logical_qubit, physical_qubit in zip(logical_qubits, physical_qubits):
+        isl_mapping_str += f"q[{logical_qubit}] -> [{physical_qubit}];"
+        mapping[logical_qubit] = physical_qubit
+        reverse_mapping[physical_qubit] = logical_qubit
+    isl_mapping = isl.Map("{"+isl_mapping_str+"}")
+
+    return isl_mapping, mapping, reverse_mapping
+
 def generate_sabre_initial_mapping(qasm_code, backned_edges):
     circuit = QuantumCircuit.from_qasm_str(qasm_code)
     dag_circuit = circuit_to_dag(circuit)

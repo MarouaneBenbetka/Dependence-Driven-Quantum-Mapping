@@ -2,6 +2,7 @@ from src.isl_routing.utils.circuit_utils import *
 from src.isl_routing.mapping.heuristic import *
 from src.isl_routing.utils.isl_data_loader import *
 from src.isl_routing.utils.isl_to_python import *
+from src.isl_routing.utils.python_to_isl import *
 from src.isl_routing.graph.graph import *
 from src.isl_routing.mapping.mapping import *
 
@@ -23,7 +24,7 @@ class POLY_QMAP():
 
         self.disconnected_edges = extract_disconnected_edges_map(edges)
 
-        self.nb_gates, self.isl_access, self.access, self.schedule, self.write_dep = read_data(
+        self.nb_gates, self.isl_access, self.access, self.schedule, self.write_dep,self.write_dict = read_data(
             self.data)
 
         self.decay_parameter = [1 for _ in range(self.num_qubits)]
@@ -37,24 +38,41 @@ class POLY_QMAP():
         self.isl_extended_layer = None
         self.extended_layer = None
 
-    def run(self, with_transitive_closure=False, heuristic_method="decay", no_read_dep=False, transitive_reduction=True, verbose=0):
-        self.isl_dag, self.dag, self.dag_predecessors = generate_dag(
-            self.access, None, self.num_qubits, no_read_dep, transitive_reduction)
+    def run(self, with_transitive_closure=False, heuristic_method=None, no_read_dep=False, transitive_reduction=True,initial_mapping_method="trivial", verbose=0):
+        if heuristic_method is None:
 
-        self.init_mapping(method="sabre")
-        self.init_front_layer()
+            swap_count = float("inf")
+            for heuristic in ["decay", "single-decay","max_focus","more_excuted"]:
+                self.isl_dag, self.dag, self.dag_predecessors = generate_dag(
+                    self.access, self.write_dict, self.num_qubits, no_read_dep, transitive_reduction)
+                            
+                if with_transitive_closure:
+                    self.dag_dependencies = count_dependencies(self.dag)
+                self.init_mapping(method=initial_mapping_method)
+                self.init_front_layer()
+                swaps = self.execute_sabre_algorithm(
+                    with_transitive_closure, heuristic, verbose)
+                swap_count = min(swap_count,swaps)
+        else:
+            self.isl_dag, self.dag, self.dag_predecessors = generate_dag(
+                self.access, self.write_dict, self.num_qubits, no_read_dep, transitive_reduction)
 
-        if with_transitive_closure:
-            self.dag_dependencies = count_dependencies(self.dag)
+            self.init_mapping(method=initial_mapping_method)
+            self.init_front_layer()
 
-        swap_count = self.execute_sabre_algorithm(
-            with_transitive_closure, heuristic_method, verbose)
+            if with_transitive_closure:
+                self.dag_dependencies = count_dependencies(self.dag)
+            swap_count = self.execute_sabre_algorithm(
+                    with_transitive_closure, heuristic_method, verbose)
 
         return swap_count
 
     def init_mapping(self, method="sabre"):
         if method == "random":
             self.isl_mapping, self.mapping_dict, self.reverse_mapping_dict = generate_random_initial_mapping(
+                self.num_qubits)
+        elif method == "trivial":
+            self.isl_mapping, self.mapping_dict, self.reverse_mapping_dict = generate_trivial_initial_mapping(
                 self.num_qubits)
         elif method == "sabre":
             self.isl_mapping, self.mapping_dict, self.reverse_mapping_dict = generate_sabre_initial_mapping(
@@ -78,6 +96,7 @@ class POLY_QMAP():
 
         with tqdm(total=total_gates, desc="Executing Gates", mininterval=0.1, disable=(verbose == 0)) as pbar:
             while not self.isl_front_layer.is_empty():
+                
                 isl_ready_to_execute_gates, ready_to_execute_gates = self.extract_ready_to_execute_gate_list()
 
                 if len(ready_to_execute_gates) > 0:
@@ -130,7 +149,7 @@ class POLY_QMAP():
             isl_executable_gates)
 
     def apply_heuristic(self, huristic_method, with_transitive=False, verbose=0):
-        if huristic_method not in ["decay", "single-decay"]:
+        if huristic_method not in ["decay", "single-decay","lookahead","max_focus","more_excuted"]:
             raise ValueError("Invalid heuristic method provided")
 
         if huristic_method == "decay":
@@ -138,6 +157,15 @@ class POLY_QMAP():
 
         if huristic_method == "single-decay":
             return self._apply_single_decay_heuristic(with_transitive)
+        
+        if huristic_method == "lookahead":
+            return self._apply_lookahead_heuristic()
+        
+        if huristic_method == "max_focus":
+            return self._apply_max_focus_heuristic()
+        
+        if huristic_method == "more_excuted":
+            return self._apply_more_excuted_heuristic()
 
     def _apply_decay_heuristic(self):
         self.isl_extended_layer, self.extended_layer = create_extended_successor_set(
@@ -221,6 +249,132 @@ class POLY_QMAP():
         self.decay_parameter[best_swap_gate[1]] += 0.001
 
         return 1
+
+    def _apply_lookahead_heuristic(self):
+
+        lookahead_paths = create_lookahead_path_set(
+            self.front_layer, self.dag,self.dag_predecessors
+        )
+        logical_qubits = [
+            q for gate in self.front_layer for q in self.access[gate]]
+        physical_qubits = set(self.mapping_dict[q] for q in logical_qubits)
+
+        candidate_swaps = generate_swap_candidates(
+            physical_qubits, self.backend)
+
+        heuristic_score = {}
+        for swap_gate in candidate_swaps:
+            temp_mapping_dict = swap_logical_physical_mappings(
+                self.mapping_dict, self.reverse_mapping_dict, swap_gate
+            )
+            for path in lookahead_paths:
+                for node in self.front_layer:
+                    score = lookahead_poly_heuristic(
+                        node,
+                        self.front_layer,
+                        path,
+                        temp_mapping_dict,
+                        self.distance_matrix,
+                        self.access,
+                        self.decay_parameter,
+                        swap_gate
+                    )
+                    heuristic_score[swap_gate] = score
+
+        best_swap_gate = find_min_score_swap_gate(heuristic_score)
+
+        swap_logical_physical_mappings(
+            self.mapping_dict, self.reverse_mapping_dict, best_swap_gate, inplace=True
+        )
+        
+        self.decay_parameter[best_swap_gate[0]] += 0.001
+        self.decay_parameter[best_swap_gate[1]] += 0.001
+
+        return 1
+     
+    def _apply_max_focus_heuristic(self):
+        self.isl_extended_layer, self.extended_layer = create_extended_successor_set(
+            self.front_layer, self.dag
+        )
+
+        logical_qubits = [
+            q for gate in self.front_layer for q in self.access[gate]]
+        physical_qubits = set(self.mapping_dict[q] for q in logical_qubits)
+
+        candidate_swaps = generate_swap_candidates(
+            physical_qubits, self.backend)
+
+        heuristic_score = {}
+        for swap_gate in candidate_swaps:
+            temp_mapping_dict = swap_logical_physical_mappings(
+                self.mapping_dict, self.reverse_mapping_dict, swap_gate
+            )
+            score = max_focus_poly_heuristic(
+                self.front_layer,
+                self.extended_layer,
+                temp_mapping_dict,
+                self.distance_matrix,
+                self.access,
+                self.decay_parameter,
+                swap_gate
+            )
+            heuristic_score[swap_gate] = score
+
+        best_swap_gate = find_min_score_swap_gate(heuristic_score)
+
+        self.isl_mapping = swap_logical_physical_isl_mapping(
+            self.isl_mapping, best_swap_gate)
+        swap_logical_physical_mappings(
+            self.mapping_dict, self.reverse_mapping_dict, best_swap_gate, inplace=True
+        )
+
+        self.decay_parameter[best_swap_gate[0]] += 0.001
+        self.decay_parameter[best_swap_gate[1]] += 0.001
+
+        return 1
+   
+    
+    def _apply_more_excuted_heuristic(self):
+        self.isl_extended_layer, self.extended_layer = create_extended_successor_set(
+            self.front_layer, self.dag
+        )
+
+        logical_qubits = [
+            q for gate in self.front_layer for q in self.access[gate]]
+        physical_qubits = set(self.mapping_dict[q] for q in logical_qubits)
+
+        candidate_swaps = generate_swap_candidates(
+            physical_qubits, self.backend)
+
+        heuristic_score = {}
+        for swap_gate in candidate_swaps:
+            temp_mapping_dict = swap_logical_physical_mappings(
+                self.mapping_dict, self.reverse_mapping_dict, swap_gate
+            )
+            score = more_excuted_heuristic(
+                self.front_layer,
+                self.extended_layer,
+                temp_mapping_dict,
+                self.distance_matrix,
+                self.access,
+                self.decay_parameter,
+                swap_gate
+            )
+            heuristic_score[swap_gate] = score
+
+        best_swap_gate = find_min_score_swap_gate(heuristic_score)
+
+        self.isl_mapping = swap_logical_physical_isl_mapping(
+            self.isl_mapping, best_swap_gate)
+        swap_logical_physical_mappings(
+            self.mapping_dict, self.reverse_mapping_dict, best_swap_gate, inplace=True
+        )
+
+        self.decay_parameter[best_swap_gate[0]] += 0.001
+        self.decay_parameter[best_swap_gate[1]] += 0.001
+
+        return 1
+
 
     def find_best_node(self, with_transitive):
 
