@@ -1,7 +1,8 @@
 
 import json
 import islpy as isl
-from src.isl_sabre.isl_to_python import isl_set_to_python_list
+from src.isl_sabre.isl_to_python import isl_set_to_python_list, isl_map_to_dict_optimized2
+
 import time
 import os
 import ast
@@ -12,16 +13,31 @@ def json_file_to_isl(file_path: str):
     with open(file_path) as f:
         data = json.load(f)
 
+    domain = isl.UnionSet(data["Domain"])
+
+    read_dependencies = isl.UnionMap(data["Read"])
+
+    write_dependencies = isl.UnionMap(data["Write"])
+
+    call = isl.UnionMap(data["Call"])
+
+    schedule = isl.UnionMap(data["RecoveredSchedule"])
+    qops = data["Stats"]["Qops"]
+    qasm_code = data["qasm_code"]
+
+    access = None
+    filtered_schedule = None
+
     result = {
-        "domain": isl.UnionSet(data["Domain"]),
-        "read_dependencies": isl.UnionMap(data["Read"]),
-        "write_dependencies": isl.UnionMap(data["Write"]),
-        "call": isl.UnionMap(data["Call"]),
-        "schedule": isl.UnionMap(data["RecoveredSchedule"]),
-        "Qops": data["Stats"]["Qops"],
-        "qasm_code": data["qasm_code"],
-        "access":   isl.Map(data["access"]) if "access" in data else None,
-        "filtered_schedule": isl.UnionMap(data["filtered_schedule"]) if "filtered_schedule" in data else None
+        "domain": domain,
+        "read_dependencies": read_dependencies,
+        "write_dependencies": write_dependencies,
+        "call": call,
+        "schedule": schedule,
+        "Qops": qops,
+        "qasm_code": qasm_code,
+        "access":   access,
+        "filtered_schedule": filtered_schedule
     }
 
     access_dict_path = file_path.replace(".json", "_access_dict.txt")
@@ -34,7 +50,6 @@ def json_file_to_isl(file_path: str):
                 result["access_dict"] = data_dict
             except Exception as e:
                 result["access_dict"] = None
-
     return result
 
 
@@ -103,13 +118,9 @@ def read_data(data, with_write_dep=False, with_reverse=False):
     else:
         write_dep = None
 
-    if with_reverse:
-        map_str = f"{{ [i] -> [{qops}-i - 1] : 0 <= i <= {qops} }}"
-        reverse_map = isl.Map(map_str)
-        reverse_access = access.apply_domain(reverse_map)
-        reverse_schedule = schedule.apply_range(reverse_map)
+    if "access" in data and data["access"]:
+        access_dict = data["access"]
     else:
-        reverse_access = None
-        reverse_schedule = None
+        access_dict = isl_map_to_dict_optimized2(access)
 
-    return qops, access, reverse_access, schedule, reverse_schedule, write_dep
+    return qops, access, access_dict, schedule, write_dep

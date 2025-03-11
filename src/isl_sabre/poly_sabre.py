@@ -2,64 +2,34 @@ from src.isl_sabre.poly_circuit_preprocess import *
 from src.isl_sabre.poly_heuristic import *
 from src.isl_sabre.poly_circuit_utils import *
 from src.isl_sabre.isl_to_python import *
-
+from src.isl_sabre.graph import *
+from src.isl_sabre.mapping import *
 import islpy as isl
-import networkx as nx
 from tqdm import tqdm
 
-from qiskit import QuantumCircuit
-from qiskit.transpiler import CouplingMap
-from qiskit.transpiler.passes import SabreLayout
-from qiskit.converters import circuit_to_dag
-from collections import defaultdict
-from time import time
 import random
 
 
 class POLY_SABRE():
     def __init__(self, edges, data) -> None:
 
-        self.instruction_times = defaultdict(float)
         self.backend_connections = set(tuple(edge) for edge in edges)
-        self.backend = defaultdict(set)
-        for edge in edges:
-            self.backend[edge[0]].add(edge[1])
-            self.backend[edge[1]].add(edge[0])
+        self.backend = build_backend_graph(edges)
 
         self.data = data
 
-        self.coupling_graph = nx.Graph()
-        self.coupling_graph.add_edges_from(edges)
-
-        self.distance_matrix = get_distance_matrix(self.coupling_graph)
-        self.num_qubit = len(self.distance_matrix) + 1
+        self.distance_matrix = compute_distance_matrix(self.backend)
+        self.num_qubits = len(self.distance_matrix) + 1
 
         self.disconnected_edges = extract_disconnected_edges_map(edges)
 
-        self.neighbours = extract_neighbourss_map(edges)
-
-        self.physical_qubits_domain = isl.Set(
-            "{ [i]:  0 <= i <  %d }" % self.num_qubit)
-   
-
-        self.swap_mapping = generate_all_neighbours_mapping(
-            self.coupling_graph)
-        start = time()
-        self.nb_gates, self.access, self.reverse_access, self.schedule, self.reverse_schedule, self.write_dep = read_data(
+        self.nb_gates, self.isl_access, self.access, self.schedule, self.write_dep = read_data(
             self.data)
-        #print(f"Time to read data: {time()-start:.6f} seconds")
-        start = time()
-        if "access_dict" in data and data["access_dict"]:
-            self.access_dict = data["access_dict"]
-        else:
-            self.access_dict = isl_map_to_dict_optimized2(self.access)
-        #print(f"Time to convert access to dict: {time()-start:.6f} seconds")
 
-        self.decay_parameter = [1 for _ in range(self.num_qubit)]
-        
-
+        self.decay_parameter = [1 for _ in range(self.num_qubits)]
 
         self.reset = 5
+        self.isl_mapping = None
         self.mapping_dict = None
         self.reverse_mapping_dict = None
         self.isl_front_layer = None
@@ -67,11 +37,44 @@ class POLY_SABRE():
         self.isl_extended_layer = None
         self.extended_layer = None
 
-    def execute_sabre_algorithm(self, access, mapping, dag, with_transitive, huristic_method, verbose):
-        nb_swaps = 0
-        total_executed_gates = 0
-        total_gates = self.count_number_gates(dag, self.isl_front_layer)
-        self.decay_parameter = [1 for _ in range(self.num_qubit)]
+    def run(self, with_transitive_closure=False, heuristic_method="decay", no_read_dep=False, transitive_reduction=True, verbose=0):
+        self.isl_dag, self.dag, self.dag_predecessors = generate_dag(
+            self.access, None, self.num_qubits, no_read_dep, transitive_reduction)
+
+        self.init_mapping()
+        self.init_front_layer()
+
+        if with_transitive_closure:
+            self.dag_dependencies = count_dependencies(self.dag)
+
+        swap_count = self.execute_sabre_algorithm(
+            with_transitive_closure, heuristic_method, verbose)
+
+        return swap_count
+
+    def init_mapping(self, method="sabre"):
+        if method == "random":
+            self.isl_mapping, self.mapping_dict, self.reverse_mapping_dict = generate_random_initial_mapping(
+                self.num_qubits)
+        elif method == "sabre":
+            self.isl_mapping, self.mapping_dict, self.reverse_mapping_dict = generate_sabre_initial_mapping(
+                self.data["qasm_code"], self.backend_connections)
+        else:
+            raise ValueError(
+                f"Unknown mapping initialization method: {method}")
+
+    def init_front_layer(self):
+        self.front_layer = set()
+        for gate in self.dag:
+            if len(self.dag_predecessors[gate]) == 0:
+                self.front_layer.add(gate)
+
+        self.isl_front_layer = list_to_isl_set(self.front_layer)
+
+    def execute_sabre_algorithm(self, with_transitive, huristic_method, verbose):
+        swap_count = 0
+        total_gates = len(self.access)
+        self.decay_parameter = [1 for _ in range(self.num_qubits)]
 
         with tqdm(total=total_gates, desc="Executing Gates", mininterval=0.1, disable=(verbose == 0)) as pbar:
             while not self.isl_front_layer.is_empty():
@@ -82,317 +85,39 @@ class POLY_SABRE():
                     self.update_front_layer(
                         ready_to_execute_gates, isl_ready_to_execute_gates)
 
-                    self.decay_parameter = [1 for _ in range(self.num_qubit)]
-                    executed_gates_count = isl_ready_to_execute_gates.as_set().count_val().to_python()
-                    total_executed_gates += executed_gates_count
-                    pbar.update(executed_gates_count)
+                    self.decay_parameter = [1 for _ in range(self.num_qubits)]
+                    pbar.update(len(ready_to_execute_gates))
 
                 else:
 
-                    best_node = self.find_best_node(with_transitive)
-                    local_swap, mapping = self.apply_heuristic(
-                        access, mapping, dag, best_node, huristic_method, verbose=verbose)
+                    local_swap_count = self.apply_heuristic(
+                        huristic_method, with_transitive=with_transitive, verbose=verbose)
 
-                    nb_swaps += local_swap
+                    swap_count += local_swap_count
 
-        return nb_swaps, mapping
-
-    def count_number_gates(self, dag, front_layer_gates):
-        try:
-            return dag.domain().union(dag.range()).union(front_layer_gates).as_set().count_val().to_python()
-        except:
-            return 0
-
-    def remove_excuted_gate(self, dag, ready_to_execute_gates):
-        complement_set = ready_to_execute_gates.as_set().complement()
-        return dag.intersect_domain(complement_set)
-
-    def track_time(self, label, func):
-        start = time.time()
-        result = func()
-        elapsed = time.time() - start
-        if label in self.instruction_times:
-            self.instruction_times[label] += elapsed
-        else:
-            self.instruction_times[label] = elapsed
-        return result
-
-    def apply_heuristic(self, access, mapping, dag, isl_best_node, huristic_method, verbose=0):
-
-        if huristic_method not in ["decay", "single-decay", "poly-paths"]:
-            raise ValueError("Invalid heuristic method provided")
-
-        if huristic_method == "decay":
-            heuristic_score = dict()
-
-            self.isl_extended_layer, self.extended_layer = create_extended_successor_set2(
-                self.front_layer, self.dag_graph)
-            mapping = mapping.coalesce()
-            logical_qubits = [
-                q for gate in self.front_layer for q in self.access_dict[gate]]
-            physical_qubits = set(self.mapping_dict[q] for q in logical_qubits)
-
-            swap_candidate_list = self.candidate_swaps(physical_qubits)
-
-            total = 0
-            for swap_gate in swap_candidate_list:
-                temp_mapping = self.update_mapping(
-                    swap_gate[0], mapping)
-                temp_mapping_dict = {k: v for k,
-                                     v in self.mapping_dict.items()}
-
-                Q1, Q2 = swap_gate[1]
-
-                q1 = self.reverse_mapping_dict.get(Q1, None)
-                q2 = self.reverse_mapping_dict.get(Q2, None)
-                if q1 is not None and q2 is not None:
-                    temp_mapping_dict[q1] = Q2
-                    temp_mapping_dict[q2] = Q1
-                elif q1 is not None:
-                    temp_mapping_dict[q1] = Q2
-                elif q2 is not None:
-                    temp_mapping_dict[q2] = Q1
-                else:
-                    print("no q1 or q2")
-
-                swap_gate_score = decay_poly_heuristic2(
-                    self.front_layer, self.extended_layer, temp_mapping_dict, self.distance_matrix, self.access_dict, self.decay_parameter, (swap_gate[1][0], swap_gate[1][1]))
-
-                heuristic_score.update(
-                    {swap_gate[0]: (swap_gate_score, swap_gate[1])})
-
-            min_score_swap_gate, min_gate = self.find_min_score_swap_gate(
-                heuristic_score, verbose=verbose)
-
-            mapping = self.update_mapping(
-                min_score_swap_gate, mapping)
-
-            Q1, Q2 = min_gate[0], min_gate[1]
-
-            q1 = self.reverse_mapping_dict.get(Q1, None)
-            q2 = self.reverse_mapping_dict.get(Q2, None)
-
-            if q1 is not None:
-                self.mapping_dict[q1] = Q2
-            self.reverse_mapping_dict[Q2] = q1
-
-            if q2 is not None:
-                self.mapping_dict[q2] = Q1
-            self.reverse_mapping_dict[Q1] = q2
-
-            if verbose > 2:
-                print("     chosen swap gate :", min_score_swap_gate)
-                print("*"*50)
-
-            # newH = lookahead_heuristic(front_layer_gates,dag,0.5,access,self.distance_matrix,mapping)
-            # print("the improvment : ",H0 -newH)
-            self.decay_parameter[min_gate[0]] += 0.001
-            self.decay_parameter[min_gate[1]] += 0.001
-
-            number_swap = 1
-            return number_swap, mapping
-
-
-        if huristic_method == "single-decay":
-            heuristic_score = dict()
-            
-            best_node = isl_set_to_python_list(isl_best_node)
-            self.isl_extended_layer, self.extended_layer = create_extended_successor_set2(
-                best_node, self.dag_graph)
-            mapping = mapping.coalesce()
-            logical_qubits = [
-                q for gate in best_node for q in self.access_dict[gate]]
-            physical_qubits = set(self.mapping_dict[q] for q in logical_qubits)
-
-            swap_candidate_list = self.candidate_swaps(physical_qubits)
-
-            total = 0
-            for swap_gate in swap_candidate_list:
-                temp_mapping = self.update_mapping(
-                    swap_gate[0], mapping)
-                temp_mapping_dict = {k: v for k,
-                                     v in self.mapping_dict.items()}
-
-                Q1, Q2 = swap_gate[1]
-
-                q1 = self.reverse_mapping_dict.get(Q1, None)
-                q2 = self.reverse_mapping_dict.get(Q2, None)
-                if q1 is not None and q2 is not None:
-                    temp_mapping_dict[q1] = Q2
-                    temp_mapping_dict[q2] = Q1
-                elif q1 is not None:
-                    temp_mapping_dict[q1] = Q2
-                elif q2 is not None:
-                    temp_mapping_dict[q2] = Q1
-                else:
-                    print("no q1 or q2")
-
-                swap_gate_score = decay_poly_heuristic2(
-                    self.front_layer, self.extended_layer, temp_mapping_dict, self.distance_matrix, self.access_dict, self.decay_parameter, (swap_gate[1][0], swap_gate[1][1]))
-
-                heuristic_score.update(
-                    {swap_gate[0]: (swap_gate_score, swap_gate[1])})
-
-            min_score_swap_gate, min_gate = self.find_min_score_swap_gate(
-                heuristic_score, verbose=verbose)
-
-
-            Q1, Q2 = min_gate[0], min_gate[1]
-
-            q1 = self.reverse_mapping_dict.get(Q1, None)
-            q2 = self.reverse_mapping_dict.get(Q2, None)
-
-            if q1 is not None:
-                self.mapping_dict[q1] = Q2
-            self.reverse_mapping_dict[Q2] = q1
-
-            if q2 is not None:
-                self.mapping_dict[q2] = Q1
-            self.reverse_mapping_dict[Q1] = q2
-
-            if verbose > 2:
-                print("     chosen swap gate :", min_score_swap_gate)
-                print("*"*50)
-
-
-            self.decay_parameter[min_gate[0]] += 0.001
-            self.decay_parameter[min_gate[1]] += 0.001
-
-            number_swap = 1
-            return number_swap, mapping
-
-
-        if huristic_method == "poly-paths":
-            heuristic_score = dict()
-            
-            best_node = isl_set_to_python_list(isl_best_node)
-            self.isl_extended_layer, self.extended_layer = create_extended_successor_set2(
-                best_node, self.dag_graph)
-            mapping = mapping.coalesce()
-            logical_qubits = [
-                q for gate in best_node for q in self.access_dict[gate]]
-            physical_qubits = list(self.mapping_dict[q] for q in logical_qubits)
-            swap_candidate_list = self.all_swap_mappings[(
-                physical_qubits[0], physical_qubits[1])]
-            
-            
-            for swap_gate in swap_candidate_list:
-                temp_mapping = self.update_mapping(
-                    swap_gate[0], mapping)
-                
-                temp_mapping_dict = {k: v for k,
-                                     v in self.mapping_dict.items()}
-
-                Q1, Q2 = physical_qubits[0], physical_qubits[1]
-
-                q1 = self.reverse_mapping_dict.get(Q1, None)
-                q2 = self.reverse_mapping_dict.get(Q2, None)
-                if q1 is not None and q2 is not None:
-                    temp_mapping_dict[q1] = Q2
-                    temp_mapping_dict[q2] = Q1
-                elif q1 is not None:
-                    temp_mapping_dict[q1] = Q2
-                elif q2 is not None:
-                    temp_mapping_dict[q2] = Q1
-                else:
-                    print("no q1 or q2")
-                    
-                    
-                swap_gate_score = paths_poly_heuristic2(
-                    self.front_layer, self.extended_layer, temp_mapping_dict, self.distance_matrix, self.access_dict, swap_gate[1])
-                heuristic_score.update({swap_gate[0]: swap_gate_score})
-
-            min_score_swap_gate, _ = self.find_min_score_swap_gate(
-                heuristic_score, swap_candidate_list)
-
-            mapping = self.update_mapping(
-                min_score_swap_gate[0], mapping)
-            self.mapping_dict = isl_map_to_dict_optimized3(mapping)
-            self.reverse_mapping_dict = isl_map_to_dict_optimized3(mapping.reverse())
-            number_swap = swap_gate[1]
-            
-            #print(Q1,Q2,"-->",q1,q2, "number of swaps",number_swap)
-
-            return number_swap, mapping
-
-    def candidate_swaps(self, active_qubits):
-        candidates = []
-
-        for qubit in active_qubits:
-            for neighbor in self.backend[qubit]:
-                map_str = f"[{qubit}] -> [{neighbor}];[{neighbor}] -> [{qubit}]"
-                candidates.append(
-                    (isl.Map("{"+map_str+"}"), (qubit, neighbor)))
-
-        return candidates
+        return swap_count
 
     def extract_ready_to_execute_gate_list(self,):
         ready_to_execute_gates_list = []
 
         for gate in self.front_layer:
-            q1, q2 = self.access_dict[gate]
-            Q1, Q2 = self.mapping_dict[q1], self.mapping_dict[q2]
-            if (Q1, Q2) in self.backend_connections or (Q2, Q1) in self.backend_connections:
+            if self.is_gate_executable(gate):
                 ready_to_execute_gates_list.append(gate)
 
         isl_ready_to_execute_gates = list_to_isl_set(
             ready_to_execute_gates_list)
         return isl_ready_to_execute_gates, ready_to_execute_gates_list
 
-    def find_best_node(self, with_transitive):
+    def is_gate_executable(self, gate) -> bool:
 
-        if with_transitive and self.isl_front_layer.as_set().count_val().to_python() != 1 and self.dag_dependencies:
-            min_key = min(self.dag_dependencies, key=self.dag_dependencies.get)
-            best_node = int_to_isl_set(min_key)
-            del self.dag_dependencies[min_key]        
-        else:
-            
-            best_node = random.choice(list(self.front_layer))
-            best_node = int_to_isl_set(best_node)
-            
-        return best_node
+        q1, q2 = self.access[gate]
+        phys_q1, phys_q2 = self.mapping_dict[q1], self.mapping_dict[q2]
 
-    def find_min_score_swap_gate(self, heuristic_score, swap_candidate_list=None, verbose=0, epsilon=1e-10):
-        if swap_candidate_list:
-            all_scores = list(heuristic_score.values())
-
-            min_score = min(all_scores)
-            min_score_swap_gate = swap_candidate_list[all_scores.index(
-                min_score)]
-            return min_score_swap_gate, None
-        else:
-            random.seed(21)
-            min_score = float('inf')
-            best_swaps = []
-
-            for swap, (score, gate) in heuristic_score.items():
-                if verbose > 2:
-                    print("     swap gate :", swap)
-                    print("     score :", score)
-                    print("-"*50)
-                if score - min_score < -epsilon:
-                    # Found a significantly lower score: update min_score and reset best_swaps
-                    min_score = score
-                    best_swaps = [(swap, (score, gate))]
-                elif abs(score - min_score) <= epsilon:
-                    # Score is within epsilon of the min_score: add it to the list
-                    best_swaps.append((swap, (score, gate)))
-
-            best_swaps.sort()
-            selected_swap, (_, selected_gate) = random.choice(best_swaps)
-            # print([(bs[1], bs[0]) for _, bs in heuristic_score.items()], '--> ', selected_gate)
-            return selected_swap, selected_gate
-
-    def update_mapping(self, swap_gate, mapping):
-        if swap_gate.is_empty():
-            return mapping
-        other_mapping = mapping.subtract_range(swap_gate.domain())
-        return mapping.apply_range(swap_gate).union(other_mapping)
+        return (phys_q1, phys_q2) in self.backend_connections or (phys_q2, phys_q1) in self.backend_connections
 
     def update_front_layer(self, executable_gates, isl_executable_gates):
-
         for gate in executable_gates:
-            for successor_gate in self.dag_graph[gate]:
+            for successor_gate in self.dag[gate]:
                 self.dag_predecessors[successor_gate].discard(gate)
                 if len(self.dag_predecessors[successor_gate]) == 0:
                     self.front_layer.add(successor_gate)
@@ -404,85 +129,108 @@ class POLY_SABRE():
         self.isl_front_layer = self.isl_front_layer.subtract(
             isl_executable_gates)
 
-    def is_gate_executable(self, gate, access, mapping) -> bool:
+    def apply_heuristic(self, huristic_method, with_transitive=False, verbose=0):
+        if huristic_method not in ["decay", "single-decay"]:
+            raise ValueError("Invalid heuristic method provided")
 
-        logical_qubits = gate.apply(access)
-        physical_qubits = logical_qubits.apply(mapping)
+        if huristic_method == "decay":
+            return self._apply_decay_heuristic()
 
-        q1, q2 = isl_set_to_python_list(physical_qubits)
-        return (q1, q2) in self.backend_connections or (q2, q1) in self.backend_connections
+        if huristic_method == "single-decay":
+            return self._apply_single_decay_heuristic(with_transitive)
 
-    def get_initial_mapping(self, method="sabre"):
-        if method == "random":
-            return get_poly_initial_mapping(self.coupling_graph)
-        elif method == "sabre":
-            circuit = QuantumCircuit.from_qasm_str(self.data["qasm_code"])
-            dag_circuit = circuit_to_dag(circuit)
-            coupling_map = CouplingMap(self.backend_connections)
-            sabre_layout = SabreLayout(coupling_map, seed=21)
-            sabre_layout.run(dag_circuit)
+    def _apply_decay_heuristic(self):
+        self.isl_extended_layer, self.extended_layer = create_extended_successor_set(
+            self.front_layer, self.dag
+        )
 
-            layout = sabre_layout.property_set["layout"]
+        logical_qubits = [
+            q for gate in self.front_layer for q in self.access[gate]]
+        physical_qubits = set(self.mapping_dict[q] for q in logical_qubits)
 
-            return ploy_initial_mapping(layout, self.num_qubit)
+        candidate_swaps = generate_swap_candidates(
+            physical_qubits, self.backend)
 
-    def run(self, num_iter=1, chunk_size=None, with_transitive_closure=False, heuristic_method="single-decay",poly_path=False, no_read_dep=False, transitive_reduction=False, verbose=0):
-        min_swap = float('inf')
-        self.dag, self.dag_graph, self.dag_predecessors = generate_dag(
-            self.access_dict, None, self.access.range().dim_max_val(0).to_python() + 1, no_read_dep, transitive_reduction)
+        heuristic_score = {}
+        for swap_gate in candidate_swaps:
+            temp_mapping_dict = swap_logical_physical_mappings(
+                self.mapping_dict, self.reverse_mapping_dict, swap_gate
+            )
+            score = decay_poly_heuristic(
+                self.front_layer,
+                self.extended_layer,
+                temp_mapping_dict,
+                self.distance_matrix,
+                self.access,
+                self.decay_parameter,
+                swap_gate
+            )
+            heuristic_score[swap_gate] = score
 
-        map_str = f"{{ [i] -> [{self.nb_gates}-i - 1] : 0 <= i < {self.nb_gates} }}"
-        self.reverse_dag = self.dag.apply_range(
-            isl.Map(map_str)).apply_domain(isl.Map(map_str))
-        mapping, self.mapping_dict = self.get_initial_mapping()
-        if with_transitive_closure:
-            self.dag_dependencies = count_dependencies(self.dag_graph)
-        if poly_path:
-            self.all_swap_mappings = generate_all_swaps_mapping(
-                self.coupling_graph, self.physical_qubits_domain)
-        self.reverse_mapping_dict = {
-            v: k for k, v in self.mapping_dict.items()}
+        best_swap_gate = find_min_score_swap_gate(heuristic_score)
 
-        if chunk_size is None:
-            chunk_size = self.nb_gates + 1
+        self.isl_mapping = swap_logical_physical_isl_mapping(
+            self.isl_mapping, best_swap_gate)
+        swap_logical_physical_mappings(
+            self.mapping_dict, self.reverse_mapping_dict, best_swap_gate, inplace=True
+        )
 
-        for i in range(num_iter):
-            total_swaps = 0
-            chunk = 0
+        self.decay_parameter[best_swap_gate[0]] += 0.001
+        self.decay_parameter[best_swap_gate[1]] += 0.001
 
-            if i % 2 == 0:
-                temp_schedule = self.schedule
-                temp_access = self.access
-                dag = self.dag
-            else:
-                temp_schedule = self.reverse_schedule
-                temp_access = self.reverse_access
-                dag = self.reverse_dag
+        return 1
 
-            while chunk <= self.nb_gates:
-                filter_domain = isl.Set(
-                    f"{{ [i] : {chunk}<= i < {chunk + chunk_size} }}")
-                new_access = temp_access.intersect_domain(filter_domain)
-                new_schedule = temp_schedule.intersect_range(filter_domain)
-                new_dag = dag.intersect_domain(
-                    filter_domain).intersect_range(filter_domain)
+    def _apply_single_decay_heuristic(self, with_transitive):
+        isl_best_node = self.find_best_node(with_transitive)
+        best_node_list = isl_set_to_python_list(isl_best_node)
 
-                self.isl_front_layer, self.front_layer = get_front_layer(
-                    new_dag, new_schedule)
+        self.isl_extended_layer, self.extended_layer = create_extended_successor_set(
+            best_node_list, self.dag
+        )
 
-                swap_count, mapping = self.execute_sabre_algorithm(
-                    new_access, mapping, new_dag, with_transitive_closure, heuristic_method, verbose)
+        logical_qubits = [
+            q for gate in best_node_list for q in self.access[gate]]
+        physical_qubits = set(self.mapping_dict[q] for q in logical_qubits)
 
-                total_swaps += swap_count
-                chunk += chunk_size
+        candidate_swaps = generate_swap_candidates(
+            physical_qubits, self.backend)
 
-                if verbose == 2:
-                    print(f"total swaps in chunk {chunk} is ", total_swaps)
+        heuristic_score = {}
+        for swap_gate in candidate_swaps:
+            temp_mapping_dict = swap_logical_physical_mappings(
+                self.mapping_dict, self.reverse_mapping_dict, swap_gate
+            )
+            score = decay_poly_heuristic(
+                self.front_layer,
+                self.extended_layer,
+                temp_mapping_dict,
+                self.distance_matrix,
+                self.access,
+                self.decay_parameter,
+                swap_gate
+            )
+            heuristic_score[swap_gate] = score
 
-            if verbose == 2:
-                print("*"*50)
-                print(f"total swaps in iteration {i} is ", total_swaps)
-                print("*"*50)
+        best_swap_gate = find_min_score_swap_gate(heuristic_score)
 
-            min_swap = min(min_swap, total_swaps)
-        return min_swap
+        swap_logical_physical_mappings(
+            self.mapping_dict, self.reverse_mapping_dict, best_swap_gate, inplace=True
+        )
+
+        self.decay_parameter[best_swap_gate[0]] += 0.001
+        self.decay_parameter[best_swap_gate[1]] += 0.001
+
+        return 1
+
+    def find_best_node(self, with_transitive):
+
+        if with_transitive and self.isl_front_layer.as_set().count_val().to_python() != 1 and self.dag_dependencies:
+            min_key = min(self.dag_dependencies, key=self.dag_dependencies.get)
+            best_node = int_to_isl_set(min_key)
+            del self.dag_dependencies[min_key]
+        else:
+
+            best_node = random.choice(list(self.front_layer))
+            best_node = int_to_isl_set(best_node)
+
+        return best_node

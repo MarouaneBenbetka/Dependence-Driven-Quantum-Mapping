@@ -5,33 +5,8 @@ import networkx as nx
 import itertools
 import numpy as np
 from .dag import DAG
-from .isl_to_python import isl_map_to_dict_optimized, dict_to_isl_map, isl_set_to_python_list, isl_set_to_python_set, parse_mapping
+from .isl_to_python import dict_to_isl_map,  isl_set_to_python_set
 import time
-
-
-def get_poly_initial_mapping(num_qubit: Graph) -> dict:
-    mapping_dict = {}
-    physical_qubits = list(range(num_qubit+1))
-    logical_qubits = list(range(num_qubit+1))
-    random.shuffle(physical_qubits)
-    map_str = ""
-    for logical_qubit, physical_qubit in zip(logical_qubits, physical_qubits):
-        map_str += f"q[{logical_qubit}] -> [{physical_qubit}];"
-        mapping_dict[logical_qubit] = physical_qubit
-    mapping = isl.Map("{"+map_str+"}")
-
-    return mapping, mapping_dict
-
-
-def ploy_initial_mapping(layout, num_qubits) -> dict:
-    mapping_dict = {}
-    map_str = ""
-    for v in layout._v2p:
-        if v._register._name != "ancilla":
-            map_str += f"q[{v._index}] -> [{layout._v2p[v]}];"
-            mapping_dict[v._index] = layout._v2p[v]
-
-    return isl.Map("{"+map_str+"}"), mapping_dict
 
 
 def extract_disconnected_edges_map(edges):
@@ -56,8 +31,10 @@ def extract_neighbourss_map(edges):
     return isl.Map(edges_str)
 
 
-def generate_all_swaps_mapping(graph, physical_qubits_domain):
+def generate_all_swaps_mapping(edges, physical_qubits_domain):
     pathes = {}
+    graph = nx.Graph()
+    graph.add_edges_from(edges)
     node_pairs = list(itertools.combinations(graph.nodes, 2))
     for node1, node2 in node_pairs:
         pathes[(node1, node2)] = generate_swap_mappings(
