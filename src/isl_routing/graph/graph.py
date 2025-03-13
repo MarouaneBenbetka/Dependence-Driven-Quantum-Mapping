@@ -48,3 +48,22 @@ def generate_swap_candidates(active_qubits, backend):
             candidates.append((qubit, neighbor))
 
     return candidates
+
+
+def compute_dependencies_length(graph):
+    memo = {}
+
+    def dfs(node):
+        if node in memo:
+            return memo[node]
+        closure = set()
+        for neighbor in graph.get(node, []):
+            closure.add(neighbor)
+            closure |= dfs(neighbor)
+        memo[node] = closure
+        return closure
+
+    dependencies_length = {}
+    for node in graph:
+        dependencies_length[node] = len(dfs(node))
+    return dependencies_length

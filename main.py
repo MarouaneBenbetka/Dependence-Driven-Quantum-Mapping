@@ -8,25 +8,33 @@ from src.isl_routing.utils.circuit_utils import *
 
 from src.isl_routing.backend.load_backend import load_backend_edges
 from time import time
+better_sabre = 0
+better_decay = 0
+tries = 0
 
 
 def run_single_file(file_path):
     edges = load_backend_edges("ibm_sherbrooke")
 
-    start = time()
     data = json_file_to_isl(file_path)
-    print(f"Time to load data: {time()-start:.6f} seconds")
-    start = time()
     poly_mapper = POLY_QMAP(
         edges, data)
-    print(f"Time to create poly_sabre object: {time()-start:.6f} seconds")
     poly_swap_count = poly_mapper.run(
-        heuristic_method="decay", verbose=1)
+        heuristic_method="decay", verbose=0, initial_mapping_method="sabre")
 
+    closure_swap_count = poly_mapper.run(
+        heuristic_method="closure", verbose=0, initial_mapping_method="sabre")
+    sabre_swap_count = run_sabre(data, edges)['SabreLayout + SingleTrialSWAP']
+    print(f"File: {file_path}")
     print(f"Poly Swap Count: {poly_swap_count}")
-    print(run_sabre(data, edges))
+    print(f"Closure Swap Count: {closure_swap_count}")
+    print(
+        f"Saber Swap Count {sabre_swap_count}")
+    print("-"*20)
 
 
 if __name__ == "__main__":
-    run_single_file(
-        fr"benchmarks/polyhedral/queko-bss-16qbt/16QBT_700CYC_QSE_9.json")
+    for cycle in range(1, 5):
+        for i in range(10):
+            run_single_file(
+                fr"benchmarks/polyhedral/queko-bss-20qbt/20QBT_{cycle}00CYC_QSE_{i}.json")
