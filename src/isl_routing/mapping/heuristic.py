@@ -82,29 +82,31 @@ def closure_poly_heuristic(front_layer, extended_layer, mapping, distance_matrix
     return H
 
 
-def create_extended_successor_set(front_points, dag, extended_set_size=20):
+def create_extended_successor_set(front_points, dag, access, extended_set_size=40):
+    extended_set_size = extended_set_size * 5
 
-    # front_points.sort()
-
-    visited = []
+    visited = set()
     queue = deque(front_points)
 
     while queue and len(visited) < extended_set_size:
         current = queue.popleft()
 
         if current in dag:
+            if len(access.get(current, [])) > 1:  
+                visited.add(current)
+
             for succ in dag[current]:
                 if succ not in visited:
-                    visited.append(succ)
                     queue.append(succ)
 
                     if len(visited) >= extended_set_size:
                         break
 
-    return list_to_isl_set(visited), visited
+    return list_to_isl_set(list(visited)), list(visited)
 
 
-def create_leveled_extended_successor_set(front_points, dag, extended_set_size=20):
+def create_leveled_extended_successor_set(front_points, dag, access, extended_set_size=40):
+    extended_set_size = extended_set_size * 5
     visited = []
     layer_index = {}
     queue = deque()
@@ -117,10 +119,12 @@ def create_leveled_extended_successor_set(front_points, dag, extended_set_size=2
 
         if current in dag:
             for succ in dag[current]:
-
                 if succ not in layer_index:
-                    layer_index[succ] = current_layer + 1
-                    visited.append(succ)
+
+                    if len(access.get(succ, [])) > 1:
+                        visited.append(succ)
+                        layer_index[succ] = current_layer + 1
+                        
                     queue.append((succ, current_layer + 1))
 
                     if len(visited) >= extended_set_size:

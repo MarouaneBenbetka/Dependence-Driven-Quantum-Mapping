@@ -102,9 +102,8 @@ def read_data(data, with_write_dep=True, with_reverse=False):
         schedule = data["filtered_schedule"]
         access = data["access"]
     else:
-        domain, read_dep, schedule = filter_multi_qubit_gates(
-            data["domain"], data["read_dependencies"], data["schedule"])
-
+        #domain, read_dep, schedule = filter_multi_qubit_gates(data["domain"], data["read_dependencies"], data["schedule"])
+        domain, read_dep, schedule = data['domain'], data['read_dependencies'], data['schedule']
         access = access_to_gates(read_dep, schedule)
     # qops = access.domain().count_val().to_python()
 
