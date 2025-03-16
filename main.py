@@ -1,7 +1,7 @@
 from qiskit.providers.fake_provider import Fake27QPulseV1, Fake5QV1, Fake20QV1
 from qiskit_ibm_runtime import QiskitRuntimeService
 
-from src.original_sabre.sabre import run_sabre
+from state_of_the_art.sabre import run_sabre
 from src.isl_routing.mapping.routing import POLY_QMAP
 from src.isl_routing.utils.isl_data_loader import *
 from src.isl_routing.utils.circuit_utils import *
