@@ -22,13 +22,22 @@ def from_backend_to_edges():
 
 def run_cirq(qasm_str,edges=None,initial_mapping="abstract"):
     
-    circuit = circuit_from_qasm(qasm_str)
 
     if edges:
-        device_graph = edges_to_device(edges)
+        swap_count,depth = run_on_ibm(qasm_str,edges,initial_mapping=initial_mapping)
     else:
-        sycamore_device = cg.Sycamore
-        device_graph = sycamore_device.metadata.nx_graph
+        swap_count,depth = run_on_google(qasm_str,initial_mapping=initial_mapping)
+        
+
+    return {
+        "swaps": swap_count,
+        "depth": depth,
+    }
+    
+def run_on_google(qasm_str,initial_mapping="abstract"):
+    circuit = circuit_from_qasm(qasm_str)
+    sycamore_device = cg.Sycamore
+    device_graph = sycamore_device.metadata.nx_graph
 
     router = cirq.RouteCQC(device_graph)
 
@@ -48,11 +57,8 @@ def run_cirq(qasm_str,edges=None,initial_mapping="abstract"):
     )
 
     depth = len(routed_circuit)
-
-    return {
-        "swaps": swap_count,
-        "depth": depth,
-    }
+    
+    return swap_count,depth
     
     
 def get_trivial_mapping(circuit,device_graph):
@@ -93,3 +99,55 @@ def edges_to_device(edge_list):
         g.add_edge(q1, q2)
     
     return g
+
+def run_on_ibm(qasm_str,edges=None,initial_mapping="abstract"):
+    cirq_circuit = circuit_from_qasm(qasm_str)
+    device_graph = nx.Graph()
+    for edge in edges:
+        device_graph.add_edge(edge[0], edge[1])
+
+    # Convert the NetworkX graph to a Cirq device graph
+    cirq_device_graph = nx.Graph()
+    for node in device_graph.nodes():
+        cirq_device_graph.add_node(cirq.LineQubit(node))
+    for edge in device_graph.edges():
+        cirq_device_graph.add_edge(cirq.LineQubit(edge[0]), cirq.LineQubit(edge[1]))
+
+    if initial_mapping == "abstract":
+        router = cirq.RouteCQC(cirq_device_graph)
+
+        routed_circuit, _, _ = router.route_circuit(
+            cirq_circuit,
+            tag_inserted_swaps=True
+        )
+    else:
+        # Create trivial initial layout
+        sorted_qubits = sorted(cirq_circuit.all_qubits())
+        initial_mapping = {q: cirq.LineQubit(i) for i, q in enumerate(sorted_qubits)}
+        
+        class CustomInitialMapper:
+            def __init__(self, mapping):
+                self.mapping = mapping
+            
+            def initial_mapping(self, circuit):
+                return self.mapping
+
+        # Create the router
+        router = cirq.RouteCQC(cirq_device_graph)
+        
+        initial_mapper = CustomInitialMapper(initial_mapping)
+
+        # Route the circuit
+        routed_circuit, _, _ = router.route_circuit(
+            cirq_circuit,
+            initial_mapper=initial_mapper,
+            tag_inserted_swaps=True
+        )
+    
+    swap_count = sum(
+        1 for op in routed_circuit.all_operations()
+            if isinstance(op, cirq.TaggedOperation) and cirq.RoutingSwapTag() in op.tags
+        )
+    depth = len(routed_circuit)
+    
+    return swap_count,depth

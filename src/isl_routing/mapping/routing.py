@@ -39,7 +39,7 @@ class POLY_QMAP():
         self.isl_extended_layer = None
         self.extended_layer = None
         
-        self.circuit = QuantumCircuit(self.num_qubits)
+        self.circuit = QuantumCircuit(self.num_qubits - 1)
         self.results = {}
 
     def run(self, with_transitive_closure=False, heuristic_method=None, no_read_dep=False, transitive_reduction=True, initial_mapping_method="sabre",num_iter = 1, verbose=0):
