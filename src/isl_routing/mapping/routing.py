@@ -39,20 +39,19 @@ class POLY_QMAP():
         self.isl_extended_layer = None
         self.extended_layer = None
         
+        self.circuit = QuantumCircuit(self.num_qubits)
         self.results = {}
 
-    def run(self, with_transitive_closure=False, heuristic_method=None, no_read_dep=False, transitive_reduction=True, initial_mapping_method="trivial",num_iter = 1, verbose=0):
+    def run(self, with_transitive_closure=False, heuristic_method=None, no_read_dep=False, transitive_reduction=True, initial_mapping_method="sabre",num_iter = 1, verbose=0):
         self.init_mapping(method=initial_mapping_method)
         self.results = {}
         min_swaps = float('inf')
         for i in range(num_iter):
-            start = time()
             self.isl_dag, self.dag, self.dag_predecessors = generate_dag(
                 self.access, self.write_dict, self.num_qubits, no_read_dep, transitive_reduction,i%2)
 
             self.dag_dependencies_count = compute_dependencies_length(self.dag)
             self.init_front_layer()
-            print(time()-start)
 
             
             self.qubit_depth = {q: 0 for q in range(self.num_qubits)}
@@ -131,7 +130,7 @@ class POLY_QMAP():
             phys_q = self.mapping_dict[q]
             new_depth = self.qubit_depth.get(phys_q, 0) + 1
             self.qubit_depth[phys_q] = new_depth
-            
+            self.circuit.h(phys_q)
             return True
         
         
@@ -145,6 +144,8 @@ class POLY_QMAP():
 
             self.qubit_depth[phys_q1] = new_depth
             self.qubit_depth[phys_q2] = new_depth
+            
+            self.circuit.cx(phys_q1, phys_q2)
 
             return True
         return False
@@ -226,7 +227,9 @@ class POLY_QMAP():
         self.decay_parameter[best_swap_gate[0]] += 0.001
         self.decay_parameter[best_swap_gate[1]] += 0.001
         
-        self.update_depth( best_swap_gate[0], best_swap_gate[1])
+        phys_q1 , phys_q2 = self.mapping_dict[best_swap_gate[0]], self.mapping_dict[best_swap_gate[1]]
+        
+        self.update_depth(phys_q1, phys_q2)
 
         return 1
 
@@ -460,6 +463,8 @@ class POLY_QMAP():
 
         self.qubit_depth[q1] = new_depth
         self.qubit_depth[q2] = new_depth
+        
+        self.circuit.swap(q1, q2)
         
     def get_circuit_depth(self):
         return max(self.qubit_depth.values())

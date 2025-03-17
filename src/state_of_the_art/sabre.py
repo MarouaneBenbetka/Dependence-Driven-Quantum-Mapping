@@ -22,7 +22,7 @@ def get_layout(coupling_map, circuit):
     layout_applied_circuit = layout_pass_manager.run(circuit)
     return sabre_layout.property_set["layout"]
 
-def run_sabre(data, edges, layout="trivial", trial="single"):
+def run_sabre(data, edges, layout="sabre", trial="single"):
     """
     Run SabreSwap mapping with the specified layout and trial options,
     and return the SWAP count and circuit depth.
