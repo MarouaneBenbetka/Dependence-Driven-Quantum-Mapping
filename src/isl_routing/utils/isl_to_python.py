@@ -142,3 +142,87 @@ def isl_set_to_list_points(_set):
     _set.foreach_point(point_to_int)
 
     return points
+
+
+def shedule_to_qubits(_schedule):
+
+    result = defaultdict(list)
+
+    dim_set = isl.dim_type.set
+    to_str = isl.Val.to_str
+    to_py =  isl.Val.to_python
+
+    def bs_to_key(bs):
+        name = bs.get_tuple_name().lower()
+        n_dims = bs.dim(dim_set)
+        coords = [to_str(bs.sample_point().get_coordinate_val(dim_set, i)) for i in range(n_dims)]
+        return name + "_" + "_".join(coords)
+
+    def map_callback(_map):
+        def map_to_dict(b):
+
+            def callback(_point) -> None:
+                _m = _point.to_set().unwrap()
+                domain = bs_to_key(_m.domain())
+                range_val = to_py(_m.range().sample_point().get_coordinate_val(dim_set, 0))
+                result[domain].append(range_val)
+
+            b.foreach_point(callback)
+
+        for b in _map.get_basic_sets():
+            map_to_dict(b)
+
+
+    _schedule.wrap().foreach_set(map_callback)
+    
+    return result
+
+
+def time_to_schedule(_schedule):
+
+    result = defaultdict(list)
+
+    dim_set = isl.dim_type.set
+    to_str = isl.Val.to_str
+    to_py =  isl.Val.to_python
+
+    def bs_to_key(bs):
+        name = bs.get_tuple_name().lower()
+        n_dims = bs.dim(dim_set)
+        coords = [to_str(bs.sample_point().get_coordinate_val(dim_set, i)) for i in range(n_dims)]
+        return name + "_" + "_".join(coords)
+
+            
+    def map_callback(_map):
+        def map_to_dict(b):
+
+            def callback(_point) -> None:
+                _m = _point.to_set().unwrap()
+                domain = to_py(_m.domain().sample_point().get_coordinate_val(dim_set, 0))
+                range = bs_to_key(_m.range())
+                result[domain].append(range)
+
+            b.foreach_point(callback)
+
+        for b in _map.get_basic_sets():
+            map_to_dict(b)
+
+
+    _schedule.wrap().foreach_set(map_callback)
+    
+    return result
+
+
+
+def read2access(read,schedule):
+    t2s = time_to_schedule(schedule.reverse())
+    s2q= shedule_to_qubits(read)
+    time_to_qubits = defaultdict(list)
+    for time, schedules in t2s.items():
+        for schedule in schedules:
+            qubits = s2q.get(schedule, [])
+            time_to_qubits[time].extend(qubits)
+            
+    return time_to_qubits
+
+    

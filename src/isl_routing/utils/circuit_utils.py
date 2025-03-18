@@ -162,14 +162,3 @@ def generate_dag(read, write, num_qubits, no_read_dep, transitive_reduction=Fals
     isl_dag = dict_to_isl_map(dag.successors)
     return isl_dag, dag.successors, dag.predecessors
 
-
-def generate_reverse_dag(successors):
-    reverse_dict = defaultdict(set)
-    for key, value_set in successors.items():
-        for element in value_set:
-            reverse_dict[element].add(key)
-
-    # Convert to regular dict if needed (optional)
-    reverse_dict = dict(reverse_dict)
-    
-    return reverse_dict,successors

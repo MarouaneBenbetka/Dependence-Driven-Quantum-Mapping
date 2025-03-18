@@ -87,4 +87,4 @@ def run_sabre(data, edges, layout="sabre", trial="single"):
     swap_count = swapped_circuit.count_ops().get("swap", 0)
     circuit_depth = swapped_circuit.depth()
     
-    return {"circuit":swapped_circuit,"swap_count": swap_count, "circuit_depth": circuit_depth}
+    return {"swap_count": swap_count, "circuit_depth": circuit_depth}

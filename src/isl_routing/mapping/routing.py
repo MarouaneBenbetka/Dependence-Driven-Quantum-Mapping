@@ -23,8 +23,8 @@ class POLY_QMAP():
         self.num_qubits = len(self.distance_matrix) + 1
 
         self.disconnected_edges = extract_disconnected_edges_map(edges)
-
-        self.nb_gates, self.isl_access, self.access, self.schedule, self.write_dep, self.write_dict = read_data(
+        
+        self.access,self.write_dict = read_data(
             self.data)
 
         self.decay_parameter = [1 for _ in range(self.num_qubits)]
@@ -47,16 +47,21 @@ class POLY_QMAP():
         self.results = {}
         min_swaps = float('inf')
         for i in range(num_iter):
+            start = time()
             self.isl_dag, self.dag, self.dag_predecessors = generate_dag(
                 self.access, self.write_dict, self.num_qubits, no_read_dep, transitive_reduction,i%2)
 
             self.dag_dependencies_count = compute_dependencies_length(self.dag)
             self.init_front_layer()
-
+            
+            print(f"dag generation time: {time()-start}")
+            start = time()
             
             self.qubit_depth = {q: 0 for q in range(self.num_qubits)}
             swap_count = self.execute_sabre_algorithm(
                 with_transitive_closure, heuristic_method, verbose)
+            
+            print(f"excution time: {time()-start}")
             min_swaps = min(min_swaps, swap_count)
             self.results[i] = {"swap_count": swap_count, "circuit_depth": self.get_circuit_depth()}
         return min_swaps
