@@ -24,7 +24,7 @@ def run_single_file(file_path):
 
     start = time()
     closure_swap_count = poly_mapper.run(
-        heuristic_method="closure", verbose=1, initial_mapping_method="sabre")
+        heuristic_method="closure", verbose=1, initial_mapping_method="sabre", num_iter=1)
     print(f"Time to run: {time()-start}")
     sabre_swap_count = run_sabre(data, edges)["swap_count"]
 
@@ -37,4 +37,4 @@ def run_single_file(file_path):
 
 if __name__ == "__main__":
     run_single_file(
-        fr"benchmarks/polyhedral/queko-bss-54qbt/54QBT_900CYC_QSE_9.json")
+        fr"benchmarks/polyhedral/queko-bss-16qbt/16QBT_600CYC_QSE_9.json")

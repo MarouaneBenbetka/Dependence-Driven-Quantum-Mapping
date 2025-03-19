@@ -11,6 +11,8 @@ import random
 from tqdm import tqdm
 from time import time
 
+import copy
+
 
 class POLY_QMAP():
     def __init__(self, edges, data) -> None:
@@ -22,8 +24,6 @@ class POLY_QMAP():
 
         self.distance_matrix = compute_distance_matrix(self.backend)
         self.num_qubits = len(self.distance_matrix) + 1
-
-        self.disconnected_edges = extract_disconnected_edges_map(edges)
 
         self.access, self.write_dict = read_data(
             self.data)
@@ -45,19 +45,32 @@ class POLY_QMAP():
         self.init_mapping(method=initial_mapping_method)
         self.results = {}
         min_swaps = float('inf')
-        for i in range(num_iter):
-            self.isl_dag, self.dag2q, self.dag_predecessors2q, self.dag_full, self.dag_predecessors_full = generate_dag(
-                self.access, self.write_dict, self.num_qubits, no_read_dep, transitive_reduction, i % 2)
 
-            self.dag_dependencies_count = compute_dependencies_length(
-                self.dag2q)
+        successors2q, dag_predecessors2q, successors_full, dag_predecessors_full = generate_dag(
+            self.access, self.write_dict, self.num_qubits, no_read_dep, transitive_reduction)
+        self.dag_dependencies_count = compute_dependencies_length(successors2q)
+
+        for i in range(2*(num_iter-1)+1):
+            if i % 2 == 0:
+                self.dag2q = successors2q
+                self.dag_predecessors2q = dag_predecessors2q
+                self.dag_full = successors_full
+                self.dag_predecessors_full = copy.deepcopy(
+                    dag_predecessors_full)
+            else:
+                self.dag2q = dag_predecessors2q
+                self.dag_predecessors2q = successors2q
+                self.dag_full = dag_predecessors_full
+                self.dag_predecessors_full = copy.deepcopy(successors_full)
+
             self.init_front_layer()
 
             self.qubit_depth = {q: 0 for q in range(self.num_qubits)}
             swap_count = self.execute_sabre_algorithm(
                 heuristic_method, verbose)
-
-            min_swaps = min(min_swaps, swap_count)
+            if i % 2 == 0:
+                print(f"Iteration {i//2 + 1 }: Swap Count: {swap_count}")
+                min_swaps = min(min_swaps, swap_count)
             self.results[i] = {"swap_count": swap_count,
                                "circuit_depth": self.get_circuit_depth()}
         return min_swaps
@@ -94,7 +107,6 @@ class POLY_QMAP():
             while len(self.front_layer) > 0:
 
                 ready_to_execute_gates = self.extract_ready_to_execute_gate_list()
-
                 if len(ready_to_execute_gates) > 0:
 
                     self.update_front_layer(
