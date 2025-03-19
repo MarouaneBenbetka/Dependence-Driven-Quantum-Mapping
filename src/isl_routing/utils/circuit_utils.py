@@ -1,6 +1,7 @@
 import islpy as isl
 import networkx as nx
 import itertools
+from collections import defaultdict
 from src.isl_routing.graph.dag import DAG
 from src.isl_routing.utils.isl_to_python import isl_set_to_python_set
 from src.isl_routing.utils.python_to_isl import dict_to_isl_map
@@ -154,9 +155,10 @@ def distance_map(distance_matrix):
     return isl.Map("{"+map_str+"}")
 
 
-def generate_dag(read, write, num_qubits, no_read_dep, transitive_reduction=False):
+def generate_dag(read, write, num_qubits, no_read_dep, transitive_reduction=False,backward= False):
 
     dag = DAG(num_qubits=num_qubits,
-              nodes_dict=read, write=write, no_read_dep=no_read_dep, transitive_reduction=transitive_reduction)
+              nodes_dict=read, write=write, no_read_dep=no_read_dep, transitive_reduction=transitive_reduction,backward=backward)
     isl_dag = dict_to_isl_map(dag.successors)
     return isl_dag, dag.successors, dag.predecessors
+

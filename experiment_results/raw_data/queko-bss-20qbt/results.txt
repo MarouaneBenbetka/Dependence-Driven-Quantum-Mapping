@@ -1,2 +1,0 @@
-benchmarks/polyhedral/queko-bss-20qbt/20QBT_600CYC_QSE_2.json: poly_swap_count=2657, single_trial_swap_count=2470, multi_trial_swap_count=2359
-benchmarks/polyhedral/queko-bss-20qbt/20QBT_500CYC_QSE_5.json: poly_swap_count=2033, single_trial_swap_count=2059, multi_trial_swap_count=1806

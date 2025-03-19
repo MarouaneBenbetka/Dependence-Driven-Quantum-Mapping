@@ -3,48 +3,77 @@ from typing import Dict, List, Set, DefaultDict, Optional
 
 
 class DAG:
-    def __init__(self, num_qubits: int, nodes_dict: Dict[int, List[int]], write: Dict[int, List[int]], no_read_dep: Optional[bool] = False, transitive_reduction: Optional[bool] = False) -> None:
+    def __init__(self, num_qubits: int, nodes_dict: Dict[int, List[int]], write: Dict[int, List[int]], no_read_dep: Optional[bool] = False, transitive_reduction: Optional[bool] = False, backward: Optional[bool] = False) -> None:
 
         self.num_qubits = num_qubits
         self.nodes_dict = nodes_dict
-        self.nodes_order = sorted(list(nodes_dict.keys()))
+        self.nodes_order = sorted(list(nodes_dict.keys()), reverse=backward)
 
         self.predecessors: DefaultDict[int, Set[int]] = defaultdict(set)
         self.successors: DefaultDict[int, Set[int]] = defaultdict(set)
         self.first_layer: List[int] = []
 
         if no_read_dep:
-            self.write_order = sorted(list(write.keys()))
+            self.write_order = sorted(write.keys(), reverse=backward)
+            read_lists = {qubit: [] for qubit in range(num_qubits)}
+            last_write = {}
 
-            write_order = sorted(list(write.keys()))
-            last_op = [None] * num_qubits     
-            last_write = [None] * num_qubits 
-            for node_key in write_order:
-                write_qubit = write[node_key][0]
-                last_write[write_qubit] = node_key
-                
-                if node_key in nodes_dict:
-                    for qubit in nodes_dict[node_key]:
-                        if last_op[qubit] is not None and last_write[qubit] is not None and (qubit in write[node_key] or last_op[qubit] in write[node_key] or last_write[qubit] > last_op[qubit]):
-                            self._add_edge(last_op[qubit], node_key)
-                        last_op[qubit] = node_key
+            for gate in self.write_order:
+                read_to_write = not backward
+                current_writes = write.get(gate, [])
+                writes_set = set(current_writes)
+
+                # Process RAW dependencies for qubits not written by this gate
+                for qubit in self.nodes_dict.get(gate, []):
+                    if qubit in last_write and qubit not in writes_set:
+                        if read_to_write:
+                            self._add_edge(last_write[qubit], gate)
+                        else:
+                            self._add_edge(gate, last_write[qubit])
+
+                # Process WAR and WAW for qubits written by this gate
+                for qubit in current_writes:
+                    # WAR: Add edges from previous reads to this write
+                    for read_gate in read_lists[qubit]:
+                        if read_to_write:
+                            self._add_edge(read_gate, gate)
+                        else:
+                            self._add_edge(gate, read_gate)
+                    read_lists[qubit].clear()
+
+                    # WAW: Add edge from last write to this write
+                    if qubit in last_write:
+                        prev_write = last_write[qubit]
+                        if read_to_write:
+                            self._add_edge(prev_write, gate)
+                        else:
+                            self._add_edge(gate, prev_write)
+                    last_write[qubit] = gate
+
+                # Add this gate to read lists for qubits it reads but doesn't write
+                read_qubits = [q for q in self.nodes_dict.get(gate, []) if q not in writes_set]
+                for qubit in read_qubits:
+                    read_lists[qubit].append(gate)
+
+            # Determine first layer (gates with no predecessors)
+            self.first_layer = [gate for gate in self.write_order if not self.predecessors[gate]]
+
 
         else:
             qubit_pos: List[Optional[int]] = [None] * num_qubits
             for node_key in self.nodes_order:
                 qubits = self.nodes_dict[node_key]
-                if len(qubits) == 2:
-                    for q_idx in qubits:
-                        if q_idx >= num_qubits:
-                            raise IndexError(
-                                f"Qubit index {q_idx} is out of range for {num_qubits} qubits.")
-                        prev_node = qubit_pos[q_idx]
-                        if prev_node is not None:
-                            self._add_edge(prev_node, node_key)
-                        qubit_pos[q_idx] = node_key
+                for q_idx in qubits:
+                    if q_idx >= num_qubits:
+                        raise IndexError(
+                            f"Qubit index {q_idx} is out of range for {num_qubits} qubits.")
+                    prev_node = qubit_pos[q_idx]
+                    if prev_node is not None:
+                        self._add_edge(prev_node, node_key)
+                    qubit_pos[q_idx] = node_key
 
-                    if not self.predecessors[node_key]:
-                        self.first_layer.append(node_key)
+                if not self.predecessors[node_key]:
+                    self.first_layer.append(node_key)
 
         if transitive_reduction:
             self._transitive_reduction()

@@ -1,5 +1,5 @@
 from qiskit.providers.fake_provider import Fake27QPulseV1, Fake5QV1, Fake20QV1
-from src.original_sabre.sabre import run_sabre
+from state_of_the_art.sabre import run_sabre
 from src.isl_sabre.poly_sabre import POLY_SABRE
 from isl_sabre.isl_data_loader import *
 from isl_sabre.circuit_utils import *

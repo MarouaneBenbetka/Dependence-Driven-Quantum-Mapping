@@ -1,53 +1,45 @@
 
 import json
 import islpy as isl
-from src.isl_routing.utils.isl_to_python import isl_set_to_python_list, isl_map_to_dict_optimized2
+from isl_routing.utils.isl_to_python import *
 import os
 import ast
-
+from time import time
 
 def json_file_to_isl(file_path: str):
-
     with open(file_path) as f:
         data = json.load(f)
 
-    domain = isl.UnionSet(data["Domain"])
-
-    read_dependencies = isl.UnionMap(data["Read"])
-
-    write_dependencies = isl.UnionMap(data["Write"])
-
-    call = isl.UnionMap(data["Call"])
-
+    read = isl.UnionMap(data["Read"])
+    write = isl.UnionMap(data["Write"])
     schedule = isl.UnionMap(data["RecoveredSchedule"])
-    qops = data["Stats"]["Qops"]
+
+    access_read = read2access(read,schedule)
+    access_write = read2access(write,schedule)
     qasm_code = data["qasm_code"]
 
-    access = None
-    filtered_schedule = None
+
 
     result = {
-        "domain": domain,
-        "read_dependencies": read_dependencies,
-        "write_dependencies": write_dependencies,
-        "call": call,
-        "schedule": schedule,
-        "Qops": qops,
         "qasm_code": qasm_code,
-        "access":   access,
-        "filtered_schedule": filtered_schedule
+        "read": access_read,
+        "write": access_write,
     }
 
-    access_dict_path = file_path.replace(".json", "_access_dict.txt")
-    if os.path.exists(access_dict_path):
-        with open(access_dict_path, "r") as f:
-            content = f.read()
-            # Convert the string content into a Python dictionary
-            try:
-                data_dict = ast.literal_eval(content)
-                result["access_dict"] = data_dict
-            except Exception as e:
-                result["access_dict"] = None
+    return result
+
+def load_qasm(file_path: str):
+    with open(file_path) as f:
+        data = json.load(f)
+
+    qasm_code = data["qasm_code"]
+
+
+
+    result = {
+        "qasm_code": qasm_code,
+    }
+
     return result
 
 
@@ -94,32 +86,14 @@ def rescheduling(schedule):
     return schedule.apply_range(dispersed_to_compact_schedule_map)
 
 
-def read_data(data, with_write_dep=True, with_reverse=False):
-    access = None
-    schedule = None
+def read_data(data):
+    read = data['read']
+    write = data["write"]
 
-    if "filtered_schedule" in data and data["filtered_schedule"] is not None and "access" in data and data["access"] is not None:
-        schedule = data["filtered_schedule"]
-        access = data["access"]
-    else:
-        domain, read_dep, schedule = filter_multi_qubit_gates(
-            data["domain"], data["read_dependencies"], data["schedule"])
 
-        access = access_to_gates(read_dep, schedule)
-    # qops = access.domain().count_val().to_python()
+    #qops = read.as_map().domain().dim_max_val(0).to_python()
 
-    qops = access.domain().dim_max_val(0).to_python()
+    #write_dict = isl_map_to_dict_optimized2(write_dep.as_map())
+    #access_dict = isl_map_to_dict_optimized2(access.as_map())
 
-    if with_write_dep:
-        write_dep = data["write_dependencies"]
-        write_dep = schedule.reverse().apply_range(write_dep).as_map()
-        write_dict = isl_map_to_dict_optimized2(write_dep)
-    else:
-        write_dep = None
-
-    if "access" in data and data["access"]:
-        access_dict = data["access"]
-    else:
-        access_dict = isl_map_to_dict_optimized2(access)
-
-    return qops, access, access_dict, schedule, write_dep,write_dict
+    return  read, write
