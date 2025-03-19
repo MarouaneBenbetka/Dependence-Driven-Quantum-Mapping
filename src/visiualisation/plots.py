@@ -2,15 +2,16 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+import csv
 
-def plot_performance(results_swaps, results_depth, colors=None):
+def plot_performance(results_swaps, results_depth):
     """
     Plot the performance of heuristic methods using Plotly.
 
     Parameters:
         results_swaps (dict): Dictionary where keys are method names and values are lists of swap counts.
         results_depth (dict): Dictionary where keys are method names and values are lists of circuit depths.
-        methods (list): List of method names to plot.
         colors (dict, optional): Dictionary mapping method names to color hex codes. 
             Defaults to preset colors if not provided.
             
@@ -18,14 +19,13 @@ def plot_performance(results_swaps, results_depth, colors=None):
         fig (plotly.graph_objects.Figure): Plotly figure with subplots and interactive buttons.
     """
     # Use default colors if not provided
-    if colors is None:
-        colors = {
-            "qmap": "#1f77b4",     # blue
-            "sabre": "#ff7f0e",    # orange
-            "pytket": "#2ca02c",     # green 
-            "cirq" : "#9467bd",     #purple
-            "closure": "#d62728",  # red
-        }
+    colors = {
+        "qmap": "#1f77b4",     # blue
+        "sabre": "#ff7f0e",    # orange
+        "pytket": "#2ca02c",   # green 
+        "cirq": "#9467bd",     # purple
+        "closure": "#d62728",  # red
+    }
 
     # Create a subplot figure with 2 rows: swaps (row 1) and depths (row 2)
     fig = make_subplots(
@@ -33,7 +33,6 @@ def plot_performance(results_swaps, results_depth, colors=None):
         subplot_titles=("Swap Counts", "Circuit Depth")
     )
     methods = list(results_swaps.keys())
-
     total_methods = len(methods)
 
     # Add traces for swap counts in the first row
@@ -114,8 +113,6 @@ def plot_performance(results_swaps, results_depth, colors=None):
     
     return fig
 
-
-
 def compute_confusion_matrix(results):
     """
     Compute pairwise comparisons for a given metric (swap count or depth).
@@ -147,6 +144,9 @@ def plot_confusion_matrices(results_swaps, results_depth):
     Parameters:
         results_swaps (dict): Dictionary with swap count results for each method.
         results_depth (dict): Dictionary with circuit depth results for each method.
+        
+    Returns:
+        fig (matplotlib.figure.Figure): Matplotlib figure containing the two confusion matrices.
     """
     # Compute confusion matrices and get the method order.
     conf_matrix_swaps, methods = compute_confusion_matrix(results_swaps)
@@ -196,4 +196,126 @@ def plot_confusion_matrices(results_swaps, results_depth):
     
     fig.suptitle("Confusion Matrices: Method Performance Comparison", fontsize=16)
     plt.tight_layout(rect=[0, 0, 1, 0.95])
+    return fig
+
+def plots(benchmark, methods,layout):
+
+    
+    results_swaps, results_depth = get_data(benchmark,methods,layout)
+    # Generate and display the Plotly performance plot
+    performance_fig = plot_performance(results_swaps, results_depth)
+    performance_fig.show()
+    
+    # Generate and display the Matplotlib confusion matrices
+    confusion_fig = plot_confusion_matrices(results_swaps, results_depth)
+    
+    bars = plot_depth_ratios(benchmark, methods, layout)
     plt.show()
+    
+  
+def compute_average_depth_ratio(benchmark, methods, layout="trivial"):
+    """
+    For each method, compute the average ratio of depth_{layout} to baseline depth.
+    
+    The CSV file is expected to have a 'depth' column (baseline) and a
+    'depth_<layout>' column (e.g. depth_trivial or depth_default).
+    
+    Parameters:
+        benchmark (str): The benchmark folder (relative path segment).
+        methods (list): List of method names.
+        layout (str): The layout type to use (e.g., "trivial" or "default").
+        
+    Returns:
+        avg_ratios (dict): Dictionary mapping each method to its average ratio.
+    """
+    folder_path = "../experiment_results/" + benchmark 
+    avg_ratios = {}
+    
+    for method in methods:
+        file_path = os.path.join(folder_path, f"{method}.csv")
+        ratios = []
+        try:
+            with open(file_path, newline='') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    try:
+                        baseline = float(row["depth"])
+                        if baseline == 0:
+                            continue  # Avoid division by zero
+                        depth_val = float(row[f"depth_{layout}"])
+                        ratios.append(depth_val / baseline)
+                    except Exception as row_err:
+                        print(f"Error processing row in {file_path}: {row_err}")
+            if ratios:
+                avg_ratios[method] = sum(ratios) / len(ratios)
+            else:
+                avg_ratios[method] = None  # or 0 if you prefer
+        except FileNotFoundError:
+            print(f"File {file_path} not found.")
+            avg_ratios[method] = None
+        except Exception as e:
+            print(f"An error occurred processing {file_path}: {e}")
+            avg_ratios[method] = None
+    return avg_ratios
+
+def plot_depth_ratios(benchmark, methods, layout="trivial"):
+    colors = {
+        "qmap": "#1f77b4",     # blue
+        "sabre": "#ff7f0e",    # orange
+        "pytket": "#2ca02c",   # green 
+        "cirq": "#9467bd",     # purple
+        "closure": "#d62728",  # red
+    }
+    
+    
+    avg_ratios = compute_average_depth_ratio(benchmark, methods, layout)
+    methods = list(avg_ratios.keys())
+    values = list(avg_ratios.values())
+    bar_colors = [colors.get(method, "#000000") for method in methods]
+    
+    # Create a bar chart
+    plt.figure(figsize=(10, 6))
+    bars = plt.bar(methods, values, color=bar_colors)
+
+    # Set labels and title
+    plt.xlabel('Method')
+    plt.ylabel('Average Depth Ratio')
+    plt.title('Average Depth Ratio (depth_trivial/depth) for Each Method')
+    plt.ylim(0, max(values) + 1)
+
+    # Annotate each bar with its value
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width() / 2, height + 0.05, f'{height:.2f}', 
+                ha='center', va='bottom')
+        
+    return bars
+    
+
+  
+def get_data(benchmark,methods,layout):
+    
+    folder_path = "../experiment_results/"+benchmark 
+
+    # Initialize result dictionaries for trivial swaps and depth
+    results_swaps = {method: [] for method in methods}
+    results_depth = {method: [] for method in methods}
+
+    # Process each method's CSV file in the specified folder
+    for method in methods:
+        file_path = os.path.join(folder_path, f"{method}.csv")
+        try:
+            with open(file_path, newline='') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    results_swaps[method].append(int(row["swaps_"+layout]))
+                    results_depth[method].append(int(row["depth_"+layout]))
+                    
+            
+        except FileNotFoundError:
+            print(f"File {file_path} not found.")
+        except Exception as e:
+            print(f"An error occurred processing {file_path}: {e}")
+    return results_swaps, results_depth
+
+
