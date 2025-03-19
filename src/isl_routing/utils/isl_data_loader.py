@@ -1,10 +1,11 @@
 
 import json
 import islpy as isl
-from isl_routing.utils.isl_to_python import *
+from src.isl_routing.utils.isl_to_python import *
 import os
 import ast
 from time import time
+
 
 def json_file_to_isl(file_path: str):
     with open(file_path) as f:
@@ -14,11 +15,9 @@ def json_file_to_isl(file_path: str):
     write = isl.UnionMap(data["Write"])
     schedule = isl.UnionMap(data["RecoveredSchedule"])
 
-    access_read = read2access(read,schedule)
-    access_write = read2access(write,schedule)
+    access_read = read2access(read, schedule)
+    access_write = read2access(write, schedule)
     qasm_code = data["qasm_code"]
-
-
 
     result = {
         "qasm_code": qasm_code,
@@ -28,13 +27,12 @@ def json_file_to_isl(file_path: str):
 
     return result
 
+
 def load_qasm(file_path: str):
     with open(file_path) as f:
         data = json.load(f)
 
     qasm_code = data["qasm_code"]
-
-
 
     result = {
         "qasm_code": qasm_code,
@@ -90,10 +88,9 @@ def read_data(data):
     read = data['read']
     write = data["write"]
 
+    # qops = read.as_map().domain().dim_max_val(0).to_python()
 
-    #qops = read.as_map().domain().dim_max_val(0).to_python()
+    # write_dict = isl_map_to_dict_optimized2(write_dep.as_map())
+    # access_dict = isl_map_to_dict_optimized2(access.as_map())
 
-    #write_dict = isl_map_to_dict_optimized2(write_dep.as_map())
-    #access_dict = isl_map_to_dict_optimized2(access.as_map())
-
-    return  read, write
+    return read, write

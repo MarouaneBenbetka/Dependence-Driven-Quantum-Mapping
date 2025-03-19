@@ -92,7 +92,7 @@ def create_extended_successor_set(front_points, dag, access, extended_set_size=4
         current = queue.popleft()
 
         if current in dag:
-            if len(access.get(current, [])) > 1:  
+            if len(access.get(current, [])) > 1:
                 visited.add(current)
 
             for succ in dag[current]:
@@ -102,7 +102,7 @@ def create_extended_successor_set(front_points, dag, access, extended_set_size=4
                     if len(visited) >= extended_set_size:
                         break
 
-    return list_to_isl_set(list(visited)), list(visited)
+    return list(visited)
 
 
 def create_leveled_extended_successor_set(front_points, dag, access, extended_set_size=40):
@@ -120,17 +120,15 @@ def create_leveled_extended_successor_set(front_points, dag, access, extended_se
         if current in dag:
             for succ in dag[current]:
                 if succ not in layer_index:
+                    visited.append(succ)
+                    layer_index[succ] = current_layer + 1
 
-                    if len(access.get(succ, [])) > 1:
-                        visited.append(succ)
-                        layer_index[succ] = current_layer + 1
-                        
                     queue.append((succ, current_layer + 1))
 
                     if len(visited) >= extended_set_size:
                         break
 
-    return list_to_isl_set(visited), visited, layer_index
+    return visited, layer_index
 
 
 def get_all_predecessors(node, predecessors, visited=None):

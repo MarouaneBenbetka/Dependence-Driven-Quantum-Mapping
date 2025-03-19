@@ -5,6 +5,7 @@ from collections import defaultdict
 from src.isl_routing.graph.dag import DAG
 from src.isl_routing.utils.isl_to_python import isl_set_to_python_set
 from src.isl_routing.utils.python_to_isl import dict_to_isl_map
+import time
 
 
 def extract_disconnected_edges_map(edges):
@@ -155,10 +156,12 @@ def distance_map(distance_matrix):
     return isl.Map("{"+map_str+"}")
 
 
-def generate_dag(read, write, num_qubits, no_read_dep, transitive_reduction=False,backward= False):
+def generate_dag(read, write, num_qubits, no_read_dep, transitive_reduction=False, backward=False):
 
+    print("Generating DAG")
+    start = time.time()
     dag = DAG(num_qubits=num_qubits,
-              nodes_dict=read, write=write, no_read_dep=no_read_dep, transitive_reduction=transitive_reduction,backward=backward)
-    isl_dag = dict_to_isl_map(dag.successors)
-    return isl_dag, dag.successors, dag.predecessors
-
+              nodes_dict=read, write=write, no_read_dep=no_read_dep, transitive_reduction=transitive_reduction, backward=backward)
+    print(f"Time to generate DAG: {time.time()-start}")
+    isl_dag = dict_to_isl_map(dag.successors_2q)
+    return isl_dag, dag.successors_2q, dag.predecessors_2q, dag.successors_full, dag.predecessors_full
