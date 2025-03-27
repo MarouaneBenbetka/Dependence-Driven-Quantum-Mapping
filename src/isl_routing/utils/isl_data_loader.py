@@ -40,6 +40,7 @@ def load_qasm(file_path: str):
 
     return result
 
+
 def load_backend(file_path: str):
     with open(file_path) as f:
         data = json.load(f)
@@ -47,8 +48,9 @@ def load_backend(file_path: str):
     return {
         "backend_name": data["backend_name"],
         "coupling_map": data["coupling_map"]
-        
+
     }
+
 
 def extract_multi_qubit_gates(access_map):
     return access_map.subtract(access_map.lexmin().intersect(access_map.lexmax())).domain()
@@ -91,15 +93,3 @@ def rescheduling(schedule):
         "{" + ";".join(f"[{x}]->[{y}]" for x, y in zip(schedule_points_list, compact_schedule_points_list)) + "}")
 
     return schedule.apply_range(dispersed_to_compact_schedule_map)
-
-
-def read_data(data):
-    read = data['read']
-    write = data["write"]
-
-    # qops = read.as_map().domain().dim_max_val(0).to_python()
-
-    # write_dict = isl_map_to_dict_optimized2(write_dep.as_map())
-    # access_dict = isl_map_to_dict_optimized2(access.as_map())
-
-    return read, write
