@@ -1,0 +1,17 @@
+file_path,depth,sherbrooke_swaps_trivial,sherbrooke_depth_trivial,sherbrooke_swaps_default,sherbrooke_depth_default,ankaa_3_swaps_trivial,ankaa_3_depth_trivial,ankaa_3_swaps_default,ankaa_3_depth_default
+benchmarks/polyhedral/medium/bv_n14__depth17.json,17,43,70,12,53,23,52,7,31
+benchmarks/polyhedral/medium/multiplier_n15__depth49.json,49,144,357,116,350,113,335,92,319
+benchmarks/polyhedral/medium/ghz_state_n23__depth24.json,24,36,54,13,36,18,42,11,33
+benchmarks/polyhedral/medium/bv_n19__depth22.json,22,35,83,18,71,29,70,13,47
+benchmarks/polyhedral/medium/ising_n26__depth16.json,16,35,29,18,18,26,22,16,20
+benchmarks/polyhedral/medium/multiply_n13__depth7.json,7,51,93,16,64,30,80,16,55
+benchmarks/polyhedral/medium/cat_state_n22__depth23.json,23,36,53,15,37,18,39,13,37
+benchmarks/polyhedral/medium/qft_n18__depth134.json,134,194,333,146,246,162,352,126,308
+benchmarks/polyhedral/medium/wstate_n27__depth55.json,55,78,163,25,119,33,126,7,112
+benchmarks/polyhedral/medium/swap_test_n25__depth15.json,15,118,208,42,183,64,167,32,163
+benchmarks/polyhedral/medium/qf21_n15__depth52.json,52,107,308,67,288,79,294,47,278
+benchmarks/polyhedral/medium/dnn_n16__depth173.json,173,56,697,35,255,36,534,9,369
+benchmarks/polyhedral/medium/square_root_n18__depth203.json,203,857,2309,555,2201,498,2085,458,1891
+benchmarks/polyhedral/medium/knn_n25__depth15.json,15,118,207,42,182,64,166,32,162
+benchmarks/polyhedral/medium/sat_n11__depth51.json,51,178,573,150,574,126,542,105,532
+benchmarks/polyhedral/medium/seca_n11__depth37.json,37,44,174,31,104,31,122,25,106

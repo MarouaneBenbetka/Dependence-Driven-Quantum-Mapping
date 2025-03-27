@@ -2,9 +2,9 @@ import cirq
 import cirq_google as cg
 from cirq.contrib.qasm_import import circuit_from_qasm
 import networkx as nx
+import re
 
-
-def from_backend_to_edges():
+def Sycamore():
     sycamore_device = cg.Sycamore
     device_graph = sycamore_device.metadata.nx_graph
 
@@ -20,18 +20,22 @@ def from_backend_to_edges():
 
 
 
-def run_cirq(qasm_str,edges=None,initial_mapping="abstract"):
+def run_cirq(data,edges=None,initial_mapping="abstract"):
     
-
+    qasm_str = data["qasm_code"].replace("u(", "u3(")
+    qasm_str = re.sub(r'cp\(pi/[0-9.]+\)', 'cx', qasm_str)
+    qasm_str = qasm_str.replace("cp(0)", "cx")
+    cleaned_qasm = "\n".join(line for line in qasm_str.splitlines() if "reset" not in line)
     if edges:
-        swap_count,depth = run_on_ibm(qasm_str,edges,initial_mapping=initial_mapping)
+        swap_count,depth,cx_count = run_on_ibm(cleaned_qasm,edges,initial_mapping=initial_mapping)
     else:
-        swap_count,depth = run_on_google(qasm_str,initial_mapping=initial_mapping)
+        swap_count,depth,cx_count = run_on_google(cleaned_qasm,initial_mapping=initial_mapping)
         
 
     return {
         "swaps": swap_count,
         "depth": depth,
+        "cx_count": cx_count
     }
     
 def run_on_google(qasm_str,initial_mapping="abstract"):
@@ -55,10 +59,16 @@ def run_on_google(qasm_str,initial_mapping="abstract"):
     1 for op in routed_circuit.all_operations()
         if isinstance(op, cirq.TaggedOperation) and cirq.RoutingSwapTag() in op.tags
     )
+    cx_count = sum(
+        1 for op in routed_circuit.all_operations()
+        if isinstance(op, cirq.GateOperation)
+            and isinstance(op.gate, cirq.CNotPowGate)
+            and op.gate.exponent == 1
+    )
 
     depth = len(routed_circuit)
     
-    return swap_count,depth
+    return swap_count,depth,cx_count
     
     
 def get_trivial_mapping(circuit,device_graph):
@@ -148,6 +158,13 @@ def run_on_ibm(qasm_str,edges=None,initial_mapping="abstract"):
         1 for op in routed_circuit.all_operations()
             if isinstance(op, cirq.TaggedOperation) and cirq.RoutingSwapTag() in op.tags
         )
+    cx_count = sum(
+        1 for op in routed_circuit.all_operations()
+        if isinstance(op, cirq.GateOperation)
+            and isinstance(op.gate, cirq.CNotPowGate)
+            and op.gate.exponent == 1
+    )
+
     depth = len(routed_circuit)
     
-    return swap_count,depth
+    return swap_count,depth,cx_count
