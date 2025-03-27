@@ -15,6 +15,18 @@ from qiskit.transpiler.passes import (
     TrivialLayout
 )
 
+def remove_classical_registers(qasm_str):
+    lines = qasm_str.splitlines()
+    cleaned_lines = []
+    for line in lines:
+        stripped = line.strip()
+        # Remove classical register definitions and measurement instructions.
+        if stripped.startswith("creg") or stripped.startswith("measure"):
+            continue
+        cleaned_lines.append(line)
+    return "\n".join(cleaned_lines)
+
+# Assume data["qasm_code"] contains your QASM code.
 
 def get_layout(coupling_map, circuit):
     sabre_layout = SabreLayout(coupling_map, seed=21)
@@ -39,7 +51,9 @@ def run_sabre(data, edges, layout="sabre", trial="single"):
     """
 
     # Build circuit from QASM code
-    circuit = QuantumCircuit.from_qasm_str(data["qasm_code"])
+    clean_qasm = remove_classical_registers(data["qasm_code"])
+
+    circuit = QuantumCircuit.from_qasm_str(clean_qasm)
 
     # Get the coupling map and number of physical qubits
     coupling_map = CouplingMap(edges)

@@ -40,6 +40,15 @@ def load_qasm(file_path: str):
 
     return result
 
+def load_backend(file_path: str):
+    with open(file_path) as f:
+        data = json.load(f)
+
+    return {
+        "backend_name": data["backend_name"],
+        "coupling_map": data["coupling_map"]
+        
+    }
 
 def extract_multi_qubit_gates(access_map):
     return access_map.subtract(access_map.lexmin().intersect(access_map.lexmax())).domain()
