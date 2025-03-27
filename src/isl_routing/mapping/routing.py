@@ -25,8 +25,7 @@ class POLY_QMAP():
         self.distance_matrix = compute_distance_matrix(self.backend)
         self.num_qubits = len(self.distance_matrix) + 1
 
-        self.access, self.write_dict = read_data(
-            self.data)
+        self.access, self.write_dict = self.data["read"], self.data["write"]
 
         self.decay_parameter = [1 for _ in range(self.num_qubits)]
         self.qubit_depth = {q: 0 for q in range(self.num_qubits)}
@@ -69,7 +68,6 @@ class POLY_QMAP():
             swap_count = self.execute_sabre_algorithm(
                 heuristic_method, verbose)
             if i % 2 == 0:
-                print(f"Iteration {i//2 + 1 }: Swap Count: {swap_count}")
                 min_swaps = min(min_swaps, swap_count)
             self.results[i] = {"swap_count": swap_count,
                                "circuit_depth": self.get_circuit_depth()}

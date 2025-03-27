@@ -1,6 +1,7 @@
 from collections import defaultdict
 from typing import Dict, List, Set, DefaultDict, Optional
 from tqdm import tqdm
+import copy
 
 
 class DAG:
@@ -22,11 +23,14 @@ class DAG:
         self.successors_full: DefaultDict[int, Set[int]] = defaultdict(set)
         self.first_layer_full: List[int] = []
 
+        self.no_read_dep = no_read_dep
+        self.write = write
+
+        self._build_edges_full()
+
         self.predecessors_2q: DefaultDict[int, Set[int]] = defaultdict(set)
         self.successors_2q: DefaultDict[int, Set[int]] = defaultdict(set)
         self.first_layer_2q: List[int] = []
-
-        self._build_edges_full()
 
         self._build_edges_2q()
 
@@ -34,22 +38,40 @@ class DAG:
             self._transitive_reduction_2q()
 
     def _build_edges_full(self) -> None:
-
-        qubit_pos = [None] * \
-            self.num_qubits
+        # Tracks the most recent node to use each qubit
+        qubit_pos = [None] * self.num_qubits
 
         for node_key in self.nodes_order:
-            qubits = self.nodes_dict[node_key]
-            for q_idx in qubits:
+            qubits_used = self.nodes_dict[node_key]
+
+            for q_idx in qubits_used:
                 if q_idx >= self.num_qubits:
                     raise IndexError(f"Qubit index {q_idx} out of range.")
+
                 prev_node = qubit_pos[q_idx]
+
+                # Only add dependency if it’s not a “read–read” edge when no_read_dep = True
                 if prev_node is not None:
-                    self.successors_full[prev_node].add(node_key)
-                    self.predecessors_full[node_key].add(prev_node)
+                    if self.no_read_dep:
+                        # Determine if previous node or this node writes q_idx
+                        prev_writes = q_idx in self.write.get(prev_node, [])
+                        curr_writes = q_idx in self.write.get(node_key, [])
+
+                        # If both are only reading (i.e., read–read), skip
+                        if not prev_writes and not curr_writes:
+                            pass  # Skip adding an edge
+                        else:
+                            self.successors_full[prev_node].add(node_key)
+                            self.predecessors_full[node_key].add(prev_node)
+
+                    else:
+                        # Standard behavior: always add the edge
+                        self.successors_full[prev_node].add(node_key)
+                        self.predecessors_full[node_key].add(prev_node)
 
                 qubit_pos[q_idx] = node_key
 
+            # If this node has no predecessors, it belongs to the first layer
             if not self.predecessors_full[node_key]:
                 self.first_layer_full.append(node_key)
 
