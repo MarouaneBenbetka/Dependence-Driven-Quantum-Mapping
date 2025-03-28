@@ -312,6 +312,7 @@ def find_min_score_swap_gate(heuristic_score, epsilon=1e-10):
     best_swaps.sort()
 
     return random.choice(best_swaps)
+    # return best_swaps[0] if best_swaps else None
 
 
 def order_extended_layer_from_successors(extended_layer, successors):

@@ -40,14 +40,17 @@ class POLY_QMAP():
         self.circuit = QuantumCircuit(self.num_qubits - 1)
         self.results = {}
 
-    def run(self, heuristic_method=None, no_read_dep=False, transitive_reduction=True, initial_mapping_method="sabre", num_iter=1, verbose=0):
+    def run(self, heuristic_method=None, enforce_read_after_read=True, transitive_reduction=True, initial_mapping_method="sabre", num_iter=1, verbose=0):
         self.init_mapping(method=initial_mapping_method)
         self.results = {}
         min_swaps = float('inf')
 
+        start = time()
         successors2q, dag_predecessors2q, successors_full, dag_predecessors_full = generate_dag(
-            self.access, self.write_dict, self.num_qubits, no_read_dep, transitive_reduction)
+            self.access, self.write_dict, self.num_qubits, enforce_read_after_read, transitive_reduction)
         self.dag_dependencies_count = compute_dependencies_length(successors2q)
+
+        print(f"Time to generate DAG: {time()-start} seconds")
 
         for i in range(2*(num_iter-1)+1):
             if i % 2 == 0:

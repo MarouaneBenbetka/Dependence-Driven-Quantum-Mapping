@@ -8,23 +8,22 @@ class DAG:
     def __init__(
         self,
         num_qubits: int,
-        nodes_dict: Dict[int, List[int]],
-        write: Dict[int, List[int]],
-        no_read_dep: Optional[bool] = False,
+        read_dependencies: Dict[int, List[int]],
+        write_dependencies: Dict[int, List[int]],
+        enforce_read_after_read: Optional[bool] = True,
         transitive_reduction: bool = False,
-        backward: bool = False
     ) -> None:
 
         self.num_qubits = num_qubits
-        self.nodes_dict = nodes_dict
-        self.nodes_order = sorted(nodes_dict.keys(), reverse=backward)
+        self.read_dependencies = read_dependencies
+        self.schedule = sorted(read_dependencies.keys())
 
         self.predecessors_full: DefaultDict[int, Set[int]] = defaultdict(set)
         self.successors_full: DefaultDict[int, Set[int]] = defaultdict(set)
         self.first_layer_full: List[int] = []
 
-        self.no_read_dep = no_read_dep
-        self.write = write
+        self.enforce_read_after_read = enforce_read_after_read
+        self.write_dependencies = write_dependencies
 
         self._build_edges_full()
 
@@ -38,67 +37,106 @@ class DAG:
             self._transitive_reduction_2q()
 
     def _build_edges_full(self) -> None:
-        # Tracks the most recent node to use each qubit
-        qubit_pos = [None] * self.num_qubits
 
-        for node_key in self.nodes_order:
-            qubits_used = self.nodes_dict[node_key]
+        latest_writer_for_qubit = {}
+        active_readers_for_qubit = {}
+        read_since_writer_for_qubit = {}
 
-            for q_idx in qubits_used:
-                if q_idx >= self.num_qubits:
-                    raise IndexError(f"Qubit index {q_idx} out of range.")
+        for node in self.schedule:
+            write_qubits = self.write_dependencies[node]
+            read_qubits = [
+                qubit for qubit in self.read_dependencies[node] if qubit not in write_qubits]
 
-                prev_node = qubit_pos[q_idx]
+            for q in read_qubits:
+                if q in latest_writer_for_qubit:
+                    writer_node = latest_writer_for_qubit[q]
+                    if writer_node is not None and writer_node != node:
+                        self.successors_full[writer_node].add(node)
+                        self.predecessors_full[node].add(writer_node)
 
-                # Only add dependency if it’s not a “read–read” edge when no_read_dep = True
-                if prev_node is not None:
-                    if self.no_read_dep:
-                        # Determine if previous node or this node writes q_idx
-                        prev_writes = q_idx in self.write.get(prev_node, [])
-                        curr_writes = q_idx in self.write.get(node_key, [])
+                # Also handle READ-AFTER-READ (RAR) if enforce_read_after_read=True
+                if self.enforce_read_after_read and q in active_readers_for_qubit:
+                    # All existing readers of q must precede this new read
+                    for old_reader_node in active_readers_for_qubit[q]:
+                        if old_reader_node != node:
+                            self.successors_full[old_reader_node].add(node)
+                            self.predecessors_full[node].add(old_reader_node)
 
-                        # If both are only reading (i.e., read–read), skip
-                        if not prev_writes and not curr_writes:
-                            pass  # Skip adding an edge
-                        else:
-                            self.successors_full[prev_node].add(node_key)
-                            self.predecessors_full[node_key].add(prev_node)
+                    # If we do NOT allow parallel reads, then once we add edges
+                    # from old readers, we can clear them because the new read
+                    # becomes the "latest" read. This ensures sequential reading:
+                    active_readers_for_qubit[q].clear()
 
-                    else:
-                        # Standard behavior: always add the edge
-                        self.successors_full[prev_node].add(node_key)
-                        self.predecessors_full[node_key].add(prev_node)
+                # Now record that this node is actively reading q
+                if q not in active_readers_for_qubit:
+                    active_readers_for_qubit[q] = set()
+                active_readers_for_qubit[q].add(node)
+                read_since_writer_for_qubit[q] = True
 
-                qubit_pos[q_idx] = node_key
+            #
+            # 2) WRITE-AFTER-WRITE (WAW): If node writes qubit q, it depends on the latest writer of q.
+            #
+            # 3) WRITE-AFTER-READ (WAR): If node writes qubit q, it depends on all *active readers* of q.
+            #
+            for q in write_qubits:
+                # (a) WAW
+                if q in latest_writer_for_qubit:
+                    old_writer = latest_writer_for_qubit[q]
+                    if old_writer is not None and old_writer != node:
+                        if not read_since_writer_for_qubit.get(q, False):
+                            self.successors_full[old_writer].add(node)
+                            self.predecessors_full[node].add(old_writer)
 
-            # If this node has no predecessors, it belongs to the first layer
-            if not self.predecessors_full[node_key]:
-                self.first_layer_full.append(node_key)
+                # (b) WAR
+                if q in active_readers_for_qubit:
+                    for old_reader_node in active_readers_for_qubit[q]:
+                        if old_reader_node != node:
+                            self.successors_full[old_reader_node].add(node)
+                            self.predecessors_full[node].add(old_reader_node)
+
+                    # Once we write, we effectively overwrite the old data,
+                    # so any active readers of q are now outdated:
+                    active_readers_for_qubit[q].clear()
+
+                # (c) This node becomes the latest writer of q
+                latest_writer_for_qubit[q] = node
+                read_since_writer_for_qubit[q] = False
 
     def _build_edges_2q(self) -> None:
-        qubit_pos_2q = [None] * self.num_qubits
+        """Build the 2-qubit DAG by collapsing out single-qubit nodes 
+        from the full DAG structure."""
 
-        for node_key in self.nodes_order:
-            qubits = self.nodes_dict[node_key]
+        two_qubit_nodes = [
+            n for n in self.schedule if len(self.read_dependencies[n]) == 2]
+        two_qubit_set = set(two_qubit_nodes)
 
-            if len(qubits) != 2:
-                continue
+        self.successors_2q = defaultdict(set)
+        self.predecessors_2q = defaultdict(set)
 
-            for q_idx in qubits:
-                if q_idx >= self.num_qubits:
-                    raise IndexError(f"Qubit index {q_idx} out of range.")
-                prev_2q_node = qubit_pos_2q[q_idx]
-                if prev_2q_node is not None:
-                    self.successors_2q[prev_2q_node].add(node_key)
-                    self.predecessors_2q[node_key].add(prev_2q_node)
+        for n in two_qubit_nodes:
 
-                qubit_pos_2q[q_idx] = node_key
+            queue = list(self.successors_full[n])
+            visited = set()
 
-            if not self.predecessors_2q[node_key]:
-                self.first_layer_2q.append(node_key)
+            while queue:
+                x = queue.pop(0)
+                if x in visited:
+                    continue
+                visited.add(x)
+
+                if x in two_qubit_set:
+                    self.successors_2q[n].add(x)
+                    self.predecessors_2q[x].add(n)
+                else:
+                    queue.extend(self.successors_full[x])
+
+        self.first_layer_2q = []
+        for n in two_qubit_nodes:
+            if not self.predecessors_2q[n]:
+                self.first_layer_2q.append(n)
 
     def _transitive_reduction_2q(self) -> None:
-        order = self.nodes_order  # topological order
+        order = self.schedule  # topological order
         reachable = {node: set() for node in order}
 
         for u in reversed(order):
@@ -123,7 +161,7 @@ class DAG:
 
     def print_dag_full(self) -> None:
         print("=== FULL DAG ===")
-        for node in self.nodes_order:
+        for node in self.schedule:
             succ = self.successors_full[node]
             pred = self.predecessors_full[node]
             print(f"Node {node}: successors={succ}, predecessors={pred}")
@@ -132,7 +170,7 @@ class DAG:
         print("=== 2Q DAG ===")
         all_2q_nodes = set(self.predecessors_2q.keys()) | set(
             self.successors_2q.keys())
-        for node in self.nodes_order:
+        for node in self.schedule:
             if node not in all_2q_nodes:
                 continue
             succ = self.successors_2q[node]

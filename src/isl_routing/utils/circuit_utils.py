@@ -156,8 +156,8 @@ def distance_map(distance_matrix):
     return isl.Map("{"+map_str+"}")
 
 
-def generate_dag(read, write, num_qubits, no_read_dep, transitive_reduction=False, backward=False):
+def generate_dag(read, write, num_qubits, enforce_read_after_read=True, transitive_reduction=False):
 
-    dag = DAG(nodes_dict=read, write=write, no_read_dep=no_read_dep,
-              transitive_reduction=transitive_reduction, backward=backward, num_qubits=num_qubits)
+    dag = DAG(read_dependencies=read, write_dependencies=write, enforce_read_after_read=enforce_read_after_read,
+              transitive_reduction=transitive_reduction, num_qubits=num_qubits)
     return dag.successors_2q, dag.predecessors_2q, dag.successors_full, dag.predecessors_full
