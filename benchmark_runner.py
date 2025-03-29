@@ -8,10 +8,10 @@ from qiskit.providers.fake_provider import Fake27QPulseV1, Fake5QV1, Fake20QV1
 from qiskit_ibm_runtime import QiskitRuntimeService
 
 from state_of_the_art.sabre import run_sabre
-from src.isl_routing.mapping.routing import POLY_QMAP
-from src.isl_routing.utils.isl_data_loader import json_file_to_isl
-from src.isl_routing.utils.circuit_utils import *
-from src.isl_routing.backend.load_backend import load_backend_edges
+from src.qlosure.mapping.routing import POLY_QMAP
+from src.qlosure.utils.isl_data_loader import json_file_to_isl
+from src.qlosure.utils.circuit_utils import *
+from src.qlosure.backend.load_backend import load_backend_edges
 
 
 def run_single_file(file_path, initial_mapping_method="sabre"):

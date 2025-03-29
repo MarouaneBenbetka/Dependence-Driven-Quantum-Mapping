@@ -2,11 +2,11 @@ from qiskit.providers.fake_provider import Fake27QPulseV1, Fake5QV1, Fake20QV1
 from qiskit_ibm_runtime import QiskitRuntimeService
 
 from src.state_of_the_art.sabre import run_sabre, run_sabre2
-from src.isl_routing.mapping.routing import POLY_QMAP
-from src.isl_routing.utils.isl_data_loader import *
-from src.isl_routing.utils.circuit_utils import *
+from src.qlosure.mapping.routing import POLY_QMAP
+from src.qlosure.utils.isl_data_loader import *
+from src.qlosure.utils.circuit_utils import *
 
-from src.isl_routing.backend.load_backend import load_backend_edges
+from src.qlosure.backend.load_backend import load_backend_edges
 from time import time
 better_sabre = 0
 better_decay = 0
@@ -40,4 +40,4 @@ def run_single_file(file_path):
 
 if __name__ == "__main__":
     run_single_file(
-        fr"benchmarks/polyhedral/qasmbench-medium/multiply_n13.json")
+        fr"benchmarks/polyhedral/qasmbench-large/bigadder_n18.json")

@@ -1,7 +1,7 @@
 
 import json
 import islpy as isl
-from src.isl_routing.utils.isl_to_python import *
+from src.qlosure.utils.isl_to_python import *
 import os
 import ast
 from time import time

@@ -1,4 +1,4 @@
-from src.isl_routing.utils.python_to_isl import list_to_isl_set
+from src.qlosure.utils.python_to_isl import list_to_isl_set
 from collections import deque
 import random
 

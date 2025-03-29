@@ -1,10 +1,10 @@
-from src.isl_routing.utils.circuit_utils import *
-from src.isl_routing.mapping.heuristic import *
-from src.isl_routing.utils.isl_data_loader import *
-from src.isl_routing.utils.isl_to_python import *
-from src.isl_routing.utils.python_to_isl import *
-from src.isl_routing.graph.graph import *
-from src.isl_routing.mapping.mapping import *
+from src.qlosure.utils.circuit_utils import *
+from src.qlosure.mapping.heuristic import *
+from src.qlosure.utils.isl_data_loader import *
+from src.qlosure.utils.isl_to_python import *
+from src.qlosure.utils.python_to_isl import *
+from src.qlosure.graph.graph import *
+from src.qlosure.mapping.mapping import *
 
 import islpy as isl
 import random
@@ -69,7 +69,6 @@ class POLY_QMAP():
                 self.dag_predecessors_full = copy.deepcopy(successors_full)
 
             self.init_front_layer()
-
             self.qubit_depth = {q: 0 for q in range(self.num_qubits)}
             swap_count = self.execute_sabre_algorithm(
                 heuristic_method, verbose)
