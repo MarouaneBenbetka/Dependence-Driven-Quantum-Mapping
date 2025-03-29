@@ -40,4 +40,4 @@ def run_single_file(file_path):
 
 if __name__ == "__main__":
     run_single_file(
-        fr"benchmarks/polyhedral/queko-bss-54qbt/54QBT_900CYC_QSE_3.json")
+        fr"benchmarks/polyhedral/qasmbench-medium/multiply_n13.json")

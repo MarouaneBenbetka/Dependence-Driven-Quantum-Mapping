@@ -45,10 +45,13 @@ class POLY_QMAP():
         self.results = {}
         min_swaps = float('inf')
 
-        start = time()
         successors2q, dag_predecessors2q, successors_full, dag_predecessors_full = generate_dag(
             self.access, self.write_dict, self.num_qubits, enforce_read_after_read, transitive_reduction)
-        self.dag_dependencies_count = compute_dependencies_length(successors2q)
+        start = time()
+        self.dag_dependencies_count = compute_dependencies_length(
+            successors2q, dag_predecessors2q)
+        # self.dag_dependencies_count = compute_dependencies_length_old(
+        #     successors2q)
 
         print(f"Time to generate DAG: {time()-start} seconds")
 
