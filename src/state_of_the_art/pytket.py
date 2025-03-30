@@ -7,7 +7,7 @@ from pytket._tket.unit_id import Node
 
 
 
-def run_pyket(data,edges,initial_mapping=None):
+def run_pytket(data,edges,initial_mapping=None):
     circuit = circuit_from_qasm_str(data["qasm_code"])
     architecture = Architecture(edges)
 
