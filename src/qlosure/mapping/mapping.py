@@ -48,6 +48,7 @@ def generate_trivial_initial_mapping(num_qubits: int):
 
     return isl_mapping, mapping, reverse_mapping
 
+
 def generate_sabre_initial_mapping(qasm_code, backned_edges):
     circuit = QuantumCircuit.from_qasm_str(qasm_code)
     dag_circuit = circuit_to_dag(circuit)
@@ -78,10 +79,11 @@ def generate_cirq_initial_mapping(qasm_code):
         sycamore_device = cg.Sycamore
         device_graph = sycamore_device.metadata.nx_graph
         edges = list(device_graph.edges())
-        all_qubits = sorted({q for edge in edges for q in edge}, key=lambda q: (q.row, q.col))
+        all_qubits = sorted(
+            {q for edge in edges for q in edge}, key=lambda q: (q.row, q.col))
         qubit_to_index = {qubit: idx for idx, qubit in enumerate(all_qubits)}
         return qubit_to_index
-    
+
     circuit = circuit_from_qasm(qasm_code)
 
     # Use the Sycamore device connectivity for routing.
@@ -90,10 +92,11 @@ def generate_cirq_initial_mapping(qasm_code):
     router = cirq.RouteCQC(device_graph)
 
     # Route the circuit; this produces an initial mapping from logical qubits to physical qubits.
-    routed_circuit, initial_mapping, final_mapping = router.route_circuit(circuit)
-    
-    
-    logical_qubits_sorted = sorted(initial_mapping.keys(), key=lambda q: q.name)
+    routed_circuit, initial_mapping, final_mapping = router.route_circuit(
+        circuit)
+
+    logical_qubits_sorted = sorted(
+        initial_mapping.keys(), key=lambda q: q.name)
     logical_to_int = {q: i for i, q in enumerate(logical_qubits_sorted)}
 
     # 2. Get the physical qubit to integer mapping from the device.
@@ -102,20 +105,19 @@ def generate_cirq_initial_mapping(qasm_code):
     # 3. Build the ISL mapping string and Python dictionaries.
     isl_mapping_str = ""
     mapping = {}         # logical (int) -> physical (int)
-    reverse_mapping = {} # physical (int) -> logical (int)
+    reverse_mapping = {}  # physical (int) -> logical (int)
     for logical_qubit, physical_qubit in initial_mapping.items():
         logical_index = logical_to_int[logical_qubit]
         physical_index = physical_qubit_to_int[physical_qubit]
         isl_mapping_str += f"q[{logical_index}] -> [{physical_index}];"
         mapping[logical_index] = physical_index
         reverse_mapping[physical_index] = logical_index
-        
+
     isl_mapping_str = "{" + isl_mapping_str + "}"
-    isl_mapping = isl.Map(isl_mapping_str)  
-    
-    return isl_mapping,mapping,reverse_mapping
-    
-    
+    isl_mapping = isl.Map(isl_mapping_str)
+
+    return isl_mapping, mapping, reverse_mapping
+
 
 def swap_logical_physical_mappings(logical_to_physical, physical_to_logical, swap_pair, inplace=False):
 
@@ -153,6 +155,3 @@ def swap_logical_physical_isl_mapping_path(isl_mapping, swap_path_map):
         return isl_mapping
     other_mapping = isl_mapping.subtract_range(swap_path_map.domain())
     return isl_mapping.apply_range(swap_path_map).union(other_mapping)
-
-
-

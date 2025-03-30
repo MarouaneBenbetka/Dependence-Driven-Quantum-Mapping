@@ -2,9 +2,10 @@ import islpy as isl
 import networkx as nx
 import itertools
 from collections import defaultdict
-from src.isl_routing.graph.dag import DAG
-from src.isl_routing.utils.isl_to_python import isl_set_to_python_set
-from src.isl_routing.utils.python_to_isl import dict_to_isl_map
+from src.qlosure.graph.dag import DAG
+from src.qlosure.utils.isl_to_python import isl_set_to_python_set
+from src.qlosure.utils.python_to_isl import dict_to_isl_map
+import time
 
 
 def extract_disconnected_edges_map(edges):
@@ -155,10 +156,8 @@ def distance_map(distance_matrix):
     return isl.Map("{"+map_str+"}")
 
 
-def generate_dag(read, write, num_qubits, no_read_dep, transitive_reduction=False,backward= False):
+def generate_dag(read, write, num_qubits, enforce_read_after_read=True, transitive_reduction=False):
 
-    dag = DAG(num_qubits=num_qubits,
-              nodes_dict=read, write=write, no_read_dep=no_read_dep, transitive_reduction=transitive_reduction,backward=backward)
-    isl_dag = dict_to_isl_map(dag.successors)
-    return isl_dag, dag.successors, dag.predecessors
-
+    dag = DAG(read_dependencies=read, write_dependencies=write, enforce_read_after_read=enforce_read_after_read,
+              transitive_reduction=transitive_reduction, num_qubits=num_qubits)
+    return dag.successors_2q, dag.predecessors_2q, dag.successors_full, dag.predecessors_full

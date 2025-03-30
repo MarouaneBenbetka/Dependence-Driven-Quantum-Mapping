@@ -50,7 +50,7 @@ def generate_swap_candidates(active_qubits, backend):
     return candidates
 
 
-def compute_dependencies_length(graph):
+def compute_dependencies_length_old(graph):
     memo = {}
 
     def dfs(node):
@@ -67,3 +67,28 @@ def compute_dependencies_length(graph):
     for node in graph:
         dependencies_length[node] = len(dfs(node))
     return dependencies_length
+
+
+def compute_dependencies_length(graph, predecessors,):
+    out_degree = {}
+    for node in graph:
+        out_degree[node] = len(graph.get(node, []))
+
+    queue = deque(node for node, deg in out_degree.items() if deg == 0)
+
+    transitive_dependents = {node: set() for node in graph}
+
+    while queue:
+        x = queue.popleft()
+
+        for p in predecessors.get(x, []):
+            transitive_dependents[p].update(transitive_dependents[x])
+            transitive_dependents[p].add(x)
+
+            out_degree[p] -= 1
+            if out_degree[p] == 0:
+                queue.append(p)
+
+    dependents_length = {
+        node: len(transitive_dependents[node]) for node in graph}
+    return dependents_length

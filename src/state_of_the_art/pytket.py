@@ -7,7 +7,7 @@ from pytket._tket.unit_id import Node
 
 
 
-def run_pyket(data,edges,initial_mapping=None):
+def run_pytket(data,edges,initial_mapping=None):
     circuit = circuit_from_qasm_str(data["qasm_code"])
     architecture = Architecture(edges)
 
@@ -15,16 +15,15 @@ def run_pyket(data,edges,initial_mapping=None):
         mapping = {q: Node(i) for i, q in enumerate(circuit.qubits)}
         place_with_map(circuit, mapping)
 
-    original_circuit = circuit.copy()
 
     routing_pass = RoutingPass(architecture)
-
-    pre_decompose_circuit = original_circuit.copy()
-    routing_pass.apply(pre_decompose_circuit)
-    swap_count = sum(1 for gate in pre_decompose_circuit.get_commands() 
+    routing_pass.apply(circuit)
+    
+    
+    swap_count = sum(1 for gate in circuit.get_commands() 
                     if gate.op.type == OpType.SWAP)
 
     return {
         "swaps": swap_count,
-        "depth": pre_decompose_circuit.depth()
+        "depth": circuit.depth()
     }
