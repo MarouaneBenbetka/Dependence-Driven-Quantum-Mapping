@@ -17,10 +17,9 @@ def run_single_file(file_path):
     edges = load_backend_edges("ibm_sherbrooke")
 
     data = json_file_to_isl(file_path)
-    start = time()
+
     poly_mapper = POLY_QMAP(
         edges, data, use_isl=False)
-    print(f"Time to load: {time()-start}")
 
     start = time()
     closure_swap_count = poly_mapper.run(
@@ -41,4 +40,4 @@ def run_single_file(file_path):
 
 if __name__ == "__main__":
     run_single_file(
-        fr"benchmarks/polyhedral/queko-bss-81qbt/81QBT_900CYC_QSE_5.json")
+        fr"benchmarks/polyhedral/queko-bss-81qbt/81QBT_100CYC_QSE_1.json")

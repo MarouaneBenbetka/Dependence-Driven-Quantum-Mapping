@@ -131,9 +131,10 @@ def compute_dependencies_length_bitset(graph, predecessors):
                 if out_degree[p] == 0:
                     queue.append(p)
 
-    dependents_length = {}
+    dependents_length = [0]*(max(all_nodes)+1)
     for node in all_nodes:
         i = index_of[node]
+
         dependents_length[node] = bit_reach[i].bit_count()
 
     return dependents_length

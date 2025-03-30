@@ -160,4 +160,4 @@ def generate_dag(read, write, num_qubits, enforce_read_after_read=True, transiti
 
     dag = DAG(read_dependencies=read, write_dependencies=write, enforce_read_after_read=enforce_read_after_read,
               transitive_reduction=transitive_reduction, num_qubits=num_qubits)
-    return dag.successors_2q, dag.predecessors_2q, dag.successors_full, dag.predecessors_full
+    return dag.successors_2q, dag.predecessors_2q, dag.successors_full, dag.predecessors_full, dag.access2q

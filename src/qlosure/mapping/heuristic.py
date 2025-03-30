@@ -1,6 +1,7 @@
 from src.qlosure.utils.python_to_isl import list_to_isl_set
 from collections import deque
 import random
+import time
 
 
 def paths_poly_heuristic(front_layer, extended_layer, mapping, distance_matrix, access, swaps):
@@ -62,18 +63,22 @@ def closure_poly_heuristic(front_layer, extended_layer, mapping, distance_matrix
     max_decay = max(decay_parameter[gate[0]], decay_parameter[gate[1]])
 
     f_distance = 0
+
     for g in front_layer:
         q1, q2 = access[g]
         Q1, Q2 = mapping[q1], mapping[q2]
+        deps = deps_count[g]
 
-        f_distance += (deps_count[g]+1) * distance_matrix[Q1][Q2]
+        f_distance += (deps+1) * distance_matrix[Q1][Q2]
 
     e_distance = 0
     for g in extended_layer:
         q1, q2 = access[g]
         Q1, Q2 = mapping[q1], mapping[q2]
         layer_factor = extended_layer_index.get(g, 0) + 1
-        e_distance += (deps_count[g]+1) * \
+
+        deps = deps_count[g]
+        e_distance += (deps+1) * \
             distance_matrix[Q1][Q2] * 1/layer_factor
 
     H = max_decay * (f_distance / front_layer_size + W *
@@ -106,7 +111,6 @@ def create_extended_successor_set(front_points, dag, access, extended_set_size=4
 
 
 def create_leveled_extended_successor_set(front_points, dag, access, extended_set_size=40):
-    extended_set_size = extended_set_size * 5
     visited = []
     layer_index = {}
     queue = deque()

@@ -20,6 +20,8 @@ class DAG:
         self.read_dependencies = read_dependencies
         self.schedule = sorted(read_dependencies.keys())
 
+        self.access2q = []
+
         self.predecessors_full: DefaultDict[int, Set[int]] = defaultdict(set)
         self.successors_full: DefaultDict[int, Set[int]] = defaultdict(set)
 
@@ -34,10 +36,8 @@ class DAG:
         self._build_edges_2q()
 
         if transitive_reduction:
-            start = time.time()
             # self._transitive_reduction_2q()
             self.transitive_reduction_2q_bitset()
-            print("Transitive reduction time:", time.time() - start)
 
     def _build_edges_full(self) -> None:
 
@@ -108,9 +108,14 @@ class DAG:
     def _build_edges_2q(self) -> None:
         """Build the 2-qubit DAG by collapsing out single-qubit nodes 
         from the full DAG structure."""
+        two_qubit_nodes = [node for node in self.schedule if len(
+            self.read_dependencies[node]) == 2]
+        max_node = max(two_qubit_nodes) if two_qubit_nodes else 1
+        self.access2q = [[]]*(max_node+1)
+        for node in two_qubit_nodes:
+            q1, q2 = self.read_dependencies[node]
+            self.access2q[node] = [q1, q2]
 
-        two_qubit_nodes = [
-            n for n in self.schedule if len(self.read_dependencies[n]) == 2]
         two_qubit_set = set(two_qubit_nodes)
 
         self.successors_2q = defaultdict(set)

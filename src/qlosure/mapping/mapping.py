@@ -14,14 +14,18 @@ from qiskit.converters import circuit_to_dag
 
 def generate_random_initial_mapping(num_qubits: int):
     """
-    Generate a random mapping from logical qubits to physical qubits.
+    Generate a random mapping from logical qubits to physical qubits, as arrays.
+    - mapping[logical] = physical
+    - reverse_mapping[physical] = logical
     """
     logical_qubits = list(range(num_qubits))
     physical_qubits = list(range(num_qubits))
     random.shuffle(physical_qubits)
 
-    mapping = {}
-    reverse_mapping = {}
+    # Initialize arrays
+    mapping = [-1] * num_qubits
+    reverse_mapping = [-1] * num_qubits
+
     for logical_qubit, physical_qubit in zip(logical_qubits, physical_qubits):
         mapping[logical_qubit] = physical_qubit
         reverse_mapping[physical_qubit] = logical_qubit
@@ -31,96 +35,122 @@ def generate_random_initial_mapping(num_qubits: int):
 
 def generate_trivial_initial_mapping(num_qubits: int):
     """
-    Generate a trivial mapping from logical qubits to physical qubits.
+    Generate a trivial mapping from logical qubits to physical qubits (arrays).
+    - mapping[logical] = logical
+    - reverse_mapping[logical] = logical
     """
-    logical_qubits = list(range(num_qubits))
-    physical_qubits = list(range(num_qubits))
-
-    mapping = {}
-    reverse_mapping = {}
-    for logical_qubit, physical_qubit in zip(logical_qubits, physical_qubits):
-        mapping[logical_qubit] = physical_qubit
-        reverse_mapping[physical_qubit] = logical_qubit
-
+    mapping = list(range(num_qubits))          # mapping[i] = i
+    reverse_mapping = list(range(num_qubits))  # reverse_mapping[i] = i
     return mapping, reverse_mapping
 
 
-def generate_sabre_initial_mapping(qasm_code, backned_edges):
+def generate_sabre_initial_mapping(qasm_code, backend_edges, num_qubits):
+    """
+    Use Qiskit's SabreLayout to generate an initial layout, returned as arrays.
+    - mapping[logical] = physical
+    - reverse_mapping[physical] = logical
+    """
     circuit = QuantumCircuit.from_qasm_str(qasm_code)
     dag_circuit = circuit_to_dag(circuit)
-    coupling_map = CouplingMap(backned_edges)
+    coupling_map = CouplingMap(backend_edges)
     sabre_layout = SabreLayout(coupling_map, seed=21)
     sabre_layout.run(dag_circuit)
 
     layout = sabre_layout.property_set["layout"]
 
-    mapping = {}
-    reverse_mapping = {}
+    # Figure out how many qubits are in use (excluding ancillas).
+    # You could also just assume 'num_qubits = circuit.num_qubits'.
+    # For safety, we go by the max qubit index found in the layout.
+    max_index = -1
     for v in layout._v2p:
         if v._register._name != "ancilla":
-            mapping[v._index] = layout._v2p[v]
-            reverse_mapping[layout._v2p[v]] = v._index
+            if v._index > max_index:
+                max_index = v._index
+            if layout._v2p[v] > max_index:
+                max_index = layout._v2p[v]
+
+    # Initialize array-based mappings
+    mapping = [-1] * num_qubits
+    reverse_mapping = [-1] * num_qubits
+
+    for v in layout._v2p:
+        # Skip ancilla qubits
+        if v._register._name == "ancilla":
+            continue
+
+        logical_idx = v._index
+        physical_idx = layout._v2p[v]
+        if logical_idx < num_qubits and physical_idx < num_qubits:
+            mapping[logical_idx] = physical_idx
+            reverse_mapping[physical_idx] = logical_idx
 
     return mapping, reverse_mapping
 
 
 def generate_cirq_initial_mapping(qasm_code):
+    """
+    Generate an initial mapping using Cirq's RouteCQC on Sycamore connectivity.
+    Return array-based mappings:
+    - mapping[logical] = physical
+    - reverse_mapping[physical] = logical
+    """
     def get_physical_qubit_to_index():
         """
         Constructs a mapping from physical qubits (GridQubits) on the Sycamore device
-        to integer indices based on sorted order (by row, then column).
+        to integer indices based on sorted order (row, then column).
         """
         sycamore_device = cg.Sycamore
         device_graph = sycamore_device.metadata.nx_graph
         edges = list(device_graph.edges())
-        all_qubits = sorted(
-            {q for edge in edges for q in edge}, key=lambda q: (q.row, q.col))
-        qubit_to_index = {qubit: idx for idx, qubit in enumerate(all_qubits)}
-        return qubit_to_index
+        all_qubits = sorted({q for edge in edges for q in edge},
+                            key=lambda q: (q.row, q.col))
+        return {qubit: idx for idx, qubit in enumerate(all_qubits)}
 
     circuit = circuit_from_qasm(qasm_code)
-
-    # Use the Sycamore device connectivity for routing.
     sycamore_device = cg.Sycamore
     device_graph = sycamore_device.metadata.nx_graph
-    router = cirq.RouteCQC(device_graph)
 
-    # Route the circuit; this produces an initial mapping from logical qubits to physical qubits.
+    # Route the circuit
+    router = cirq.RouteCQC(device_graph)
     routed_circuit, initial_mapping, final_mapping = router.route_circuit(
         circuit)
 
+    # Sort logical qubits by name to get consistent integer labels
     logical_qubits_sorted = sorted(
         initial_mapping.keys(), key=lambda q: q.name)
     logical_to_int = {q: i for i, q in enumerate(logical_qubits_sorted)}
 
-    # 2. Get the physical qubit to integer mapping from the device.
+    # Get the physical qubit to integer mapping from the device
     physical_qubit_to_int = get_physical_qubit_to_index()
 
-    # 3. Build the ISL mapping string and Python dictionaries.
+    # Determine how large our mapping arrays need to be
+    max_logical = max(logical_to_int.values()) if logical_to_int else 0
+    max_physical = max(physical_qubit_to_int.values()
+                       ) if physical_qubit_to_int else 0
+    size = max(max_logical, max_physical) + 1
+    mapping = [-1] * size
+    reverse_mapping = [-1] * size
 
-    mapping = {}         # logical (int) -> physical (int)
-    reverse_mapping = {}  # physical (int) -> logical (int)
     for logical_qubit, physical_qubit in initial_mapping.items():
-        logical_index = logical_to_int[logical_qubit]
-        physical_index = physical_qubit_to_int[physical_qubit]
-        mapping[logical_index] = physical_index
-        reverse_mapping[physical_index] = logical_index
+        logical_idx = logical_to_int[logical_qubit]
+        physical_idx = physical_qubit_to_int[physical_qubit]
+        mapping[logical_idx] = physical_idx
+        reverse_mapping[physical_idx] = logical_idx
 
     return mapping, reverse_mapping
 
 
 def swap_logical_physical_mappings(logical_to_physical, physical_to_logical, swap_pair, inplace=False):
-
-    updated_mapping = logical_to_physical if inplace else logical_to_physical.copy()
+    updated_mapping = logical_to_physical if inplace else logical_to_physical[:]
     physical_1, physical_2 = swap_pair
 
-    logical_1 = physical_to_logical.get(physical_1, None)
-    logical_2 = physical_to_logical.get(physical_2, None)
+    logical_1 = physical_to_logical[physical_1]
+    logical_2 = physical_to_logical[physical_2]
 
-    if logical_1 is not None:
+    if logical_1 != -1:
         updated_mapping[logical_1] = physical_2
 
-    if logical_2 is not None:
+    if logical_2 != -1:
         updated_mapping[logical_2] = physical_1
 
     if inplace:
