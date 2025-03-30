@@ -9,20 +9,25 @@ def dict_to_isl_map(input_dict: dict, chunk_size: int = 50) -> isl.UnionMap:
     """
     entries = []
     for key, values in input_dict.items():
-        for val in values:
-            entries.append(f"[{key}]->[{val}]")
-    
+        if isinstance(values, (list, tuple, set)):
+            for val in values:
+                entries.append(f"[{key}]->[{val}]")
+        else:
+            entries.append(f"[{key}]->[{values}]")
+
     if not entries:
         return isl.UnionMap("{}")
-    
-    chunks = [entries[i:i + chunk_size] for i in range(0, len(entries), chunk_size)]
-    
+
+    chunks = [entries[i:i + chunk_size]
+              for i in range(0, len(entries), chunk_size)]
+
     union_map = isl.UnionMap("{}")
     for chunk in chunks:
         isl_map = isl.Map("{" + ";".join(chunk) + "}")
         union_map = union_map.union(isl_map)
-    
+
     return union_map
+
 
 def list_to_isl_set(input_list):
     if not input_list:
@@ -35,6 +40,7 @@ def list_to_isl_set(input_list):
     set_str = "{" + ";".join(point_strings) + "}"
 
     return isl.Set(set_str)
+
 
 def int_to_isl_set(input):
     return isl.Set("{" + f"[{input}]" + "}")

@@ -19,20 +19,18 @@ def run_single_file(file_path):
     data = json_file_to_isl(file_path)
     start = time()
     poly_mapper = POLY_QMAP(
-        edges, data)
+        edges, data, use_isl=False)
     print(f"Time to load: {time()-start}")
 
+    start = time()
     closure_swap_count = poly_mapper.run(
         heuristic_method="closure", verbose=1, initial_mapping_method="sabre", num_iter=1)
-
-    closure_swap_count2 = poly_mapper.run(
-        heuristic_method="closure", verbose=1, initial_mapping_method="sabre", num_iter=1, enforce_read_after_read=False)
+    print(f"Time to run closure: {time()-start}")
 
     sabre_swap_count = run_sabre(data, edges)["swap_count"]
 
     print(f"File: {file_path}")
     print(f"Closure Swap Count: {closure_swap_count}")
-    print(f"Closure Swap Count (No READ-READ): {closure_swap_count2}")
     print(
         f"Saber Swap Count {sabre_swap_count}")
     print("-"*20)
@@ -40,4 +38,4 @@ def run_single_file(file_path):
 
 if __name__ == "__main__":
     run_single_file(
-        fr"benchmarks/polyhedral/qasmbench-large/bigadder_n18.json")
+        fr"benchmarks/polyhedral/queko-bss-81qbt/81QBT_900CYC_QSE_9.json")

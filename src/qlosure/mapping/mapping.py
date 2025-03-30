@@ -19,16 +19,14 @@ def generate_random_initial_mapping(num_qubits: int):
     logical_qubits = list(range(num_qubits))
     physical_qubits = list(range(num_qubits))
     random.shuffle(physical_qubits)
-    isl_mapping_str = ""
+
     mapping = {}
     reverse_mapping = {}
     for logical_qubit, physical_qubit in zip(logical_qubits, physical_qubits):
-        isl_mapping_str += f"q[{logical_qubit}] -> [{physical_qubit}];"
         mapping[logical_qubit] = physical_qubit
         reverse_mapping[physical_qubit] = logical_qubit
-    isl_mapping = isl.Map("{"+isl_mapping_str+"}")
 
-    return isl_mapping, mapping, reverse_mapping
+    return mapping, reverse_mapping
 
 
 def generate_trivial_initial_mapping(num_qubits: int):
@@ -37,16 +35,14 @@ def generate_trivial_initial_mapping(num_qubits: int):
     """
     logical_qubits = list(range(num_qubits))
     physical_qubits = list(range(num_qubits))
-    isl_mapping_str = ""
+
     mapping = {}
     reverse_mapping = {}
     for logical_qubit, physical_qubit in zip(logical_qubits, physical_qubits):
-        isl_mapping_str += f"q[{logical_qubit}] -> [{physical_qubit}];"
         mapping[logical_qubit] = physical_qubit
         reverse_mapping[physical_qubit] = logical_qubit
-    isl_mapping = isl.Map("{"+isl_mapping_str+"}")
 
-    return isl_mapping, mapping, reverse_mapping
+    return mapping, reverse_mapping
 
 
 def generate_sabre_initial_mapping(qasm_code, backned_edges):
@@ -60,14 +56,12 @@ def generate_sabre_initial_mapping(qasm_code, backned_edges):
 
     mapping = {}
     reverse_mapping = {}
-    map_str = ""
     for v in layout._v2p:
         if v._register._name != "ancilla":
-            map_str += f"q[{v._index}] -> [{layout._v2p[v]}];"
             mapping[v._index] = layout._v2p[v]
             reverse_mapping[layout._v2p[v]] = v._index
 
-    return isl.Map("{"+map_str+"}"), mapping, reverse_mapping
+    return mapping, reverse_mapping
 
 
 def generate_cirq_initial_mapping(qasm_code):
@@ -103,20 +97,16 @@ def generate_cirq_initial_mapping(qasm_code):
     physical_qubit_to_int = get_physical_qubit_to_index()
 
     # 3. Build the ISL mapping string and Python dictionaries.
-    isl_mapping_str = ""
+
     mapping = {}         # logical (int) -> physical (int)
     reverse_mapping = {}  # physical (int) -> logical (int)
     for logical_qubit, physical_qubit in initial_mapping.items():
         logical_index = logical_to_int[logical_qubit]
         physical_index = physical_qubit_to_int[physical_qubit]
-        isl_mapping_str += f"q[{logical_index}] -> [{physical_index}];"
         mapping[logical_index] = physical_index
         reverse_mapping[physical_index] = logical_index
 
-    isl_mapping_str = "{" + isl_mapping_str + "}"
-    isl_mapping = isl.Map(isl_mapping_str)
-
-    return isl_mapping, mapping, reverse_mapping
+    return mapping, reverse_mapping
 
 
 def swap_logical_physical_mappings(logical_to_physical, physical_to_logical, swap_pair, inplace=False):

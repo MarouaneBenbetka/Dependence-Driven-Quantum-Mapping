@@ -20,7 +20,6 @@ class DAG:
 
         self.predecessors_full: DefaultDict[int, Set[int]] = defaultdict(set)
         self.successors_full: DefaultDict[int, Set[int]] = defaultdict(set)
-        self.first_layer_full: List[int] = []
 
         self.enforce_read_after_read = enforce_read_after_read
         self.write_dependencies = write_dependencies
@@ -29,7 +28,6 @@ class DAG:
 
         self.predecessors_2q: DefaultDict[int, Set[int]] = defaultdict(set)
         self.successors_2q: DefaultDict[int, Set[int]] = defaultdict(set)
-        self.first_layer_2q: List[int] = []
 
         self._build_edges_2q()
 
@@ -129,11 +127,6 @@ class DAG:
                     self.predecessors_2q[x].add(n)
                 else:
                     queue.extend(self.successors_full[x])
-
-        self.first_layer_2q = []
-        for n in two_qubit_nodes:
-            if not self.predecessors_2q[n]:
-                self.first_layer_2q.append(n)
 
     def _transitive_reduction_2q(self) -> None:
         order = self.schedule  # topological order

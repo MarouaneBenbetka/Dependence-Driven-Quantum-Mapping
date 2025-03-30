@@ -15,10 +15,13 @@ import copy
 
 
 class POLY_QMAP():
-    def __init__(self, edges, data) -> None:
+    def __init__(self, edges, data, use_isl=False, with_circuit=False) -> None:
 
         self.backend_connections = set(tuple(edge) for edge in edges)
         self.backend = build_backend_graph(edges)
+
+        self.use_isl = use_isl
+        self.with_circuit = with_circuit
 
         self.data = data
 
@@ -37,7 +40,9 @@ class POLY_QMAP():
         self.front_layer = None
         self.extended_layer = None
 
-        self.circuit = QuantumCircuit(self.num_qubits - 1)
+        if with_circuit:
+            self.circuit = QuantumCircuit(self.num_qubits - 1)
+
         self.results = {}
 
     def run(self, heuristic_method=None, enforce_read_after_read=True, transitive_reduction=True, initial_mapping_method="sabre", num_iter=1, verbose=0):
@@ -45,15 +50,15 @@ class POLY_QMAP():
         self.results = {}
         min_swaps = float('inf')
 
+        start = time()
         successors2q, dag_predecessors2q, successors_full, dag_predecessors_full = generate_dag(
             self.access, self.write_dict, self.num_qubits, enforce_read_after_read, transitive_reduction)
+        print(f"Time to generate DAG: {time()-start}")
+
         start = time()
         self.dag_dependencies_count = compute_dependencies_length(
             successors2q, dag_predecessors2q)
-        # self.dag_dependencies_count = compute_dependencies_length_old(
-        #     successors2q)
-
-        print(f"Time to generate DAG: {time()-start} seconds")
+        print(f"Time to compute dependencies: {time()-start}")
 
         for i in range(2*(num_iter-1)+1):
             if i % 2 == 0:
@@ -61,17 +66,20 @@ class POLY_QMAP():
                 self.dag_predecessors2q = dag_predecessors2q
                 self.dag_full = successors_full
                 self.dag_predecessors_full = copy.deepcopy(
-                    dag_predecessors_full)
+                    dag_predecessors_full) if num_iter > 1 else dag_predecessors_full
             else:
                 self.dag2q = dag_predecessors2q
                 self.dag_predecessors2q = successors2q
                 self.dag_full = dag_predecessors_full
-                self.dag_predecessors_full = copy.deepcopy(successors_full)
+                self.dag_predecessors_full = copy.deepcopy(
+                    successors_full) if num_iter > 1 else successors_full
 
             self.init_front_layer()
             self.qubit_depth = {q: 0 for q in range(self.num_qubits)}
+
             swap_count = self.execute_sabre_algorithm(
                 heuristic_method, verbose)
+
             if i % 2 == 0:
                 min_swaps = min(min_swaps, swap_count)
             self.results[i] = {"swap_count": swap_count,
@@ -80,20 +88,24 @@ class POLY_QMAP():
 
     def init_mapping(self, method="trivial"):
         if method == "random":
-            self.isl_mapping, self.mapping_dict, self.reverse_mapping_dict = generate_random_initial_mapping(
+            self.mapping_dict, self.reverse_mapping_dict = generate_random_initial_mapping(
                 self.num_qubits)
+
         elif method == "trivial":
-            self.isl_mapping, self.mapping_dict, self.reverse_mapping_dict = generate_trivial_initial_mapping(
+            self.mapping_dict, self.reverse_mapping_dict = generate_trivial_initial_mapping(
                 self.num_qubits)
         elif method == "sabre":
-            self.isl_mapping, self.mapping_dict, self.reverse_mapping_dict = generate_sabre_initial_mapping(
+            self.mapping_dict, self.reverse_mapping_dict = generate_sabre_initial_mapping(
                 self.data["qasm_code"], self.backend_connections)
         elif method == "cirq":
-            self.isl_mapping, self.mapping_dict, self.reverse_mapping_dict = generate_cirq_initial_mapping(
+            self.mapping_dict, self.reverse_mapping_dict = generate_cirq_initial_mapping(
                 self.data["qasm_code"])
         else:
             raise ValueError(
                 f"Unknown mapping initialization method: {method}")
+
+        if self.use_isl:
+            self.isl_mapping = dict_to_isl_map(self.mapping_dict)
 
     def init_front_layer(self):
         self.front_layer = set()
@@ -142,7 +154,8 @@ class POLY_QMAP():
             phys_q = self.mapping_dict[q]
             new_depth = self.qubit_depth.get(phys_q, 0) + 1
             self.qubit_depth[phys_q] = new_depth
-            self.circuit.h(phys_q)
+            if self.with_circuit:
+                self.circuit.h(phys_q)
             return True
 
         q1, q2 = self.access[gate]
@@ -156,7 +169,8 @@ class POLY_QMAP():
             self.qubit_depth[phys_q1] = new_depth
             self.qubit_depth[phys_q2] = new_depth
 
-            self.circuit.cx(phys_q1, phys_q2)
+            if self.with_circuit:
+                self.circuit.cx(phys_q1, phys_q2)
 
             return True
         return False
@@ -171,14 +185,11 @@ class POLY_QMAP():
             self.front_layer.discard(gate)
 
     def apply_heuristic(self, huristic_method, verbose=0):
-        if huristic_method not in ["decay",  "lookahead", "max_focus", "more_excuted", "closure"]:
+        if huristic_method not in ["decay",  "max_focus", "more_excuted", "closure"]:
             raise ValueError("Invalid heuristic method provided")
 
         if huristic_method == "decay":
             return self._apply_decay_heuristic()
-
-        if huristic_method == "lookahead":
-            return self._apply_lookahead_heuristic()
 
         if huristic_method == "max_focus":
             return self._apply_max_focus_heuristic()
@@ -221,51 +232,9 @@ class POLY_QMAP():
 
         best_swap_gate = find_min_score_swap_gate(heuristic_score)
 
-        self.isl_mapping = swap_logical_physical_isl_mapping(
-            self.isl_mapping, best_swap_gate)
-        swap_logical_physical_mappings(
-            self.mapping_dict, self.reverse_mapping_dict, best_swap_gate, inplace=True
-        )
-
-        self.decay_parameter[best_swap_gate[0]] += 0.001
-        self.decay_parameter[best_swap_gate[1]] += 0.001
-
-        self.update_depth(best_swap_gate[0], best_swap_gate[1])
-
-        return 1
-
-    def _apply_lookahead_heuristic(self):
-
-        lookahead_paths = create_lookahead_path_set(
-            self.front_layer, self.dag2q, self.dag_predecessors2q
-        )
-        logical_qubits = [
-            q for gate in self.front_layer for q in self.access[gate]]
-        physical_qubits = set(self.mapping_dict[q] for q in logical_qubits)
-
-        candidate_swaps = generate_swap_candidates(
-            physical_qubits, self.backend)
-
-        heuristic_score = {}
-        for swap_gate in candidate_swaps:
-            temp_mapping_dict = swap_logical_physical_mappings(
-                self.mapping_dict, self.reverse_mapping_dict, swap_gate
-            )
-            for path in lookahead_paths:
-                for node in self.front_layer:
-                    score = lookahead_poly_heuristic(
-                        node,
-                        self.front_layer,
-                        path,
-                        temp_mapping_dict,
-                        self.distance_matrix,
-                        self.access,
-                        self.decay_parameter,
-                        swap_gate
-                    )
-                    heuristic_score[swap_gate] = score
-
-        best_swap_gate = find_min_score_swap_gate(heuristic_score)
+        if self.use_isl:
+            self.isl_mapping = swap_logical_physical_isl_mapping(
+                self.isl_mapping, best_swap_gate)
 
         swap_logical_physical_mappings(
             self.mapping_dict, self.reverse_mapping_dict, best_swap_gate, inplace=True
@@ -273,6 +242,7 @@ class POLY_QMAP():
 
         self.decay_parameter[best_swap_gate[0]] += 0.001
         self.decay_parameter[best_swap_gate[1]] += 0.001
+
         self.update_depth(best_swap_gate[0], best_swap_gate[1])
 
         return 1
@@ -308,8 +278,9 @@ class POLY_QMAP():
 
         best_swap_gate = find_min_score_swap_gate(heuristic_score)
 
-        self.isl_mapping = swap_logical_physical_isl_mapping(
-            self.isl_mapping, best_swap_gate)
+        if self.use_isl:
+            self.isl_mapping = swap_logical_physical_isl_mapping(
+                self.isl_mapping, best_swap_gate)
         swap_logical_physical_mappings(
             self.mapping_dict, self.reverse_mapping_dict, best_swap_gate, inplace=True
         )
@@ -349,8 +320,9 @@ class POLY_QMAP():
 
         best_swap_gate = find_min_score_swap_gate(heuristic_score)
 
-        self.isl_mapping = swap_logical_physical_isl_mapping(
-            self.isl_mapping, best_swap_gate)
+        if self.use_isl:
+            self.isl_mapping = swap_logical_physical_isl_mapping(
+                self.isl_mapping, best_swap_gate)
         swap_logical_physical_mappings(
             self.mapping_dict, self.reverse_mapping_dict, best_swap_gate, inplace=True
         )
@@ -385,8 +357,9 @@ class POLY_QMAP():
 
         best_swap_gate = find_min_score_swap_gate(heuristic_score)
 
-        self.isl_mapping = swap_logical_physical_isl_mapping(
-            self.isl_mapping, best_swap_gate)
+        if self.use_isl:
+            self.isl_mapping = swap_logical_physical_isl_mapping(
+                self.isl_mapping, best_swap_gate)
         swap_logical_physical_mappings(
             self.mapping_dict, self.reverse_mapping_dict, best_swap_gate, inplace=True
         )
@@ -406,7 +379,8 @@ class POLY_QMAP():
         self.qubit_depth[q1] = new_depth
         self.qubit_depth[q2] = new_depth
 
-        self.circuit.swap(q1, q2)
+        if self.with_circuit:
+            self.circuit.swap(q1, q2)
 
     def get_circuit_depth(self):
         return max(self.qubit_depth.values())
