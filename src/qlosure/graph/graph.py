@@ -88,7 +88,52 @@ def compute_dependencies_length(graph, predecessors,):
             out_degree[p] -= 1
             if out_degree[p] == 0:
                 queue.append(p)
+    dependents_length = defaultdict(int)
+    for node in graph:
+        dependents_length[node] = len(transitive_dependents[node])
 
-    dependents_length = {
-        node: len(transitive_dependents[node]) for node in graph}
+    return dependents_length
+
+
+def compute_dependencies_length_bitset(graph, predecessors):
+
+    all_nodes = list(graph.keys())
+    index_of = {}
+    for i, node in enumerate(all_nodes):
+        index_of[node] = i
+
+    n = len(all_nodes)
+
+    out_degree = {}
+    for node in all_nodes:
+        out_degree[node] = len(graph.get(node, []))
+    queue = deque([node for node in all_nodes if out_degree[node] == 0])
+
+    bit_reach = [0] * n
+
+    while queue:
+        x = queue.popleft()
+        x_i = index_of[x]
+
+        for p in predecessors.get(x, []):
+            p_i = index_of[p]
+
+            before = bit_reach[p_i]
+            bit_reach[p_i] |= bit_reach[x_i]
+            bit_reach[p_i] |= (1 << x_i)
+
+            if bit_reach[p_i] != before:
+                out_degree[p] -= 1
+                if out_degree[p] == 0:
+                    queue.append(p)
+            else:
+                out_degree[p] -= 1
+                if out_degree[p] == 0:
+                    queue.append(p)
+
+    dependents_length = {}
+    for node in all_nodes:
+        i = index_of[node]
+        dependents_length[node] = bit_reach[i].bit_count()
+
     return dependents_length

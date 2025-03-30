@@ -2,6 +2,8 @@ from collections import defaultdict
 from typing import Dict, List, Set, DefaultDict, Optional
 from tqdm import tqdm
 import copy
+import numpy as np
+import time
 
 
 class DAG:
@@ -32,7 +34,10 @@ class DAG:
         self._build_edges_2q()
 
         if transitive_reduction:
-            self._transitive_reduction_2q()
+            start = time.time()
+            # self._transitive_reduction_2q()
+            self.transitive_reduction_2q_bitset()
+            print("Transitive reduction time:", time.time() - start)
 
     def _build_edges_full(self) -> None:
 
@@ -131,7 +136,7 @@ class DAG:
     def _transitive_reduction_2q(self) -> None:
         order = self.schedule  # topological order
         reachable = {node: set() for node in order}
-
+        cpt = 0
         for u in reversed(order):
             if u not in self.predecessors_2q and u not in self.successors_2q:
                 continue
@@ -139,6 +144,7 @@ class DAG:
             new_succ = set()
             for v in self.successors_2q[u]:
                 if v in reachable[u]:
+                    cpt += 1
                     continue
                 else:
                     new_succ.add(v)
@@ -151,6 +157,51 @@ class DAG:
         for u, sucs in self.successors_2q.items():
             for v in sucs:
                 self.predecessors_2q[v].add(u)
+
+    def transitive_reduction_2q_bitset(self):
+
+        order = self.schedule
+        index_of = {}
+        for i, node in enumerate(order):
+            index_of[node] = i
+
+        n = len(order)
+
+        successors_indexed = [[] for _ in range(n)]
+        for u, sucset in self.successors_2q.items():
+            u_i = index_of[u]
+            successors_indexed[u_i] = [index_of[v] for v in sucset]
+
+        bit_reach = [0] * n
+
+        skipped_edges = 0
+
+        for u_i in reversed(range(n)):
+            new_succ = []
+            for v_i in successors_indexed[u_i]:
+                if bit_reach[u_i] & (1 << v_i):
+                    skipped_edges += 1
+                    continue
+
+                new_succ.append(v_i)
+                bit_reach[u_i] |= bit_reach[v_i]
+                bit_reach[u_i] |= (1 << v_i)
+
+            successors_indexed[u_i] = new_succ
+
+        new_successors = defaultdict(set)
+        for node, u_i in index_of.items():
+            new_successors[node] = {order[v_i]
+                                    for v_i in successors_indexed[u_i]}
+
+        self.successors_2q = new_successors
+
+        # STEP 5: Rebuild predecessors_2q from successors_2q
+        new_predecessors = defaultdict(set)
+        for u, sucs in self.successors_2q.items():
+            for v in sucs:
+                new_predecessors[v].add(u)
+        self.predecessors_2q = new_predecessors
 
     def print_dag_full(self) -> None:
         print("=== FULL DAG ===")

@@ -44,21 +44,18 @@ class POLY_QMAP():
             self.circuit = QuantumCircuit(self.num_qubits - 1)
 
         self.results = {}
+        self.instruction_times = defaultdict(int)
 
     def run(self, heuristic_method=None, enforce_read_after_read=True, transitive_reduction=True, initial_mapping_method="sabre", num_iter=1, verbose=0):
         self.init_mapping(method=initial_mapping_method)
         self.results = {}
         min_swaps = float('inf')
 
-        start = time()
         successors2q, dag_predecessors2q, successors_full, dag_predecessors_full = generate_dag(
             self.access, self.write_dict, self.num_qubits, enforce_read_after_read, transitive_reduction)
-        print(f"Time to generate DAG: {time()-start}")
 
-        start = time()
-        self.dag_dependencies_count = compute_dependencies_length(
+        self.dag_dependencies_count = compute_dependencies_length_bitset(
             successors2q, dag_predecessors2q)
-        print(f"Time to compute dependencies: {time()-start}")
 
         for i in range(2*(num_iter-1)+1):
             if i % 2 == 0:
@@ -335,17 +332,25 @@ class POLY_QMAP():
 
     def _apply_closure_score_heuristic(self):
 
+        start = time()
         logical_qubits = [
             q for gate in self.front_layer for q in self.access[gate]]
         physical_qubits = set(self.mapping_dict[q] for q in logical_qubits)
+        self.instruction_times["get_logical_qubits"] += time() - start
 
+        start = time()
         self.extended_layer, extended_layer_index = create_leveled_extended_successor_set(
             self.front_layer, self.dag2q, self.access, len(physical_qubits)*2
         )
+        self.instruction_times["create_extended_successor_set"] += time() - \
+            start
 
+        start = time()
         candidate_swaps = generate_swap_candidates(
             physical_qubits, self.backend)
+        self.instruction_times["generate_swap_candidates"] += time() - start
 
+        start = time()
         heuristic_score = {}
         for swap_gate in candidate_swaps:
             temp_mapping_dict = swap_logical_physical_mappings(
@@ -355,18 +360,29 @@ class POLY_QMAP():
                                            self.distance_matrix, self.access, self.decay_parameter, self.dag_dependencies_count, extended_layer_index, swap_gate)
             heuristic_score[swap_gate] = score
 
+        self.instruction_times["get_heuristic_score"] += time() - start
+
+        start = time()
         best_swap_gate = find_min_score_swap_gate(heuristic_score)
+        self.instruction_times["find_best_swap_gate"] += time() - start
 
         if self.use_isl:
             self.isl_mapping = swap_logical_physical_isl_mapping(
                 self.isl_mapping, best_swap_gate)
+
+        start = time()
         swap_logical_physical_mappings(
             self.mapping_dict, self.reverse_mapping_dict, best_swap_gate, inplace=True
         )
+        self.instruction_times["swap_logical_physical_mappings"] += time() - \
+            start
 
         self.decay_parameter[best_swap_gate[0]] += 0.001
         self.decay_parameter[best_swap_gate[1]] += 0.001
+
+        start = time()
         self.update_depth(best_swap_gate[0], best_swap_gate[1])
+        self.instruction_times["update_depth"] += time() - start
 
         return 1
 
