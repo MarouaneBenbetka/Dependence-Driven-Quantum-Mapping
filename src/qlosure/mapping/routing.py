@@ -47,7 +47,7 @@ class POLY_QMAP():
         self.results = {}
         self.instruction_times = defaultdict(int)
 
-    def run(self, heuristic_method=None, enforce_read_after_read=True, transitive_reduction=True, initial_mapping_method="sabre", num_iter=1, verbose=0):
+    def run(self, heuristic_method=None, enforce_read_after_read=True, transitive_reduction=True, initial_mapping_method="sabre", dag_mode="default", num_iter=1, verbose=0):
         self.init_mapping(method=initial_mapping_method)
         self.results = {}
         min_swaps = float('inf')
@@ -55,19 +55,30 @@ class POLY_QMAP():
         successors2q, dag_predecessors2q, successors_full, dag_predecessors_full, self.access2q = generate_dag(
             self.access, self.write_dict, self.num_qubits, enforce_read_after_read, transitive_reduction)
 
+        if not enforce_read_after_read and dag_mode == "hybrid":
+            successors2q_rar_included, dag_predecessors2q_rar_included, _, _, _ = generate_dag(
+                self.access, self.write_dict, self.num_qubits, enforce_read_after_read=True, transitive_reduction=transitive_reduction)
+        else:
+            successors2q_rar_included = successors2q
+            dag_predecessors2q_rar_included = dag_predecessors2q
+
         self.dag_dependencies_count = compute_dependencies_length_bitset(
-            successors2q, dag_predecessors2q)
+            successors2q_rar_included, dag_predecessors2q_rar_included)
 
         for i in range(2*(num_iter-1)+1):
             if i % 2 == 0:
                 self.dag2q = successors2q
                 self.dag_predecessors2q = dag_predecessors2q
+                self.dag2q_restricted = successors2q_rar_included
+                self.dag_predecessors2q_restricted = dag_predecessors2q_rar_included
                 self.dag_full = successors_full
                 self.dag_predecessors_full = copy.deepcopy(
                     dag_predecessors_full) if num_iter > 1 else dag_predecessors_full
             else:
                 self.dag2q = dag_predecessors2q
                 self.dag_predecessors2q = successors2q
+                self.dag2q_restricted = dag_predecessors2q_rar_included
+                self.dag_predecessors2q_restricted = successors2q_rar_included
                 self.dag_full = dag_predecessors_full
                 self.dag_predecessors_full = copy.deepcopy(
                     successors_full) if num_iter > 1 else successors_full
@@ -338,7 +349,7 @@ class POLY_QMAP():
         physical_qubits = set(self.mapping_dict[q] for q in logical_qubits)
 
         self.extended_layer, extended_layer_index = create_leveled_extended_successor_set(
-            self.front_layer, self.dag2q, self.access2q, len(
+            self.front_layer, self.dag2q_restricted, self.access2q, len(
                 physical_qubits)*5
         )
 

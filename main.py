@@ -24,20 +24,26 @@ def run_single_file(file_path):
     start = time()
     closure_swap_count = poly_mapper.run(
         heuristic_method="closure", verbose=1, initial_mapping_method="sabre", num_iter=1)
-    print(f"Time to run closure: {time()-start}")
 
-    for key, t in poly_mapper.instruction_times.items():
-        print(f"{key}: {t}ms")
+    closure_swap_count_no_rar = poly_mapper.run(
+        heuristic_method="closure", verbose=1, initial_mapping_method="sabre", enforce_read_after_read=False, num_iter=1)
+
+    closure_swap_count_no_rar_hybrid = poly_mapper.run(
+        heuristic_method="closure", verbose=1, initial_mapping_method="sabre", enforce_read_after_read=False, dag_mode="hybrid", num_iter=1)
+
+    print(f"Time to run closure: {time()-start}")
 
     sabre_swap_count = run_sabre(data, edges)["swap_count"]
 
     print(f"File: {file_path}")
     print(f"Closure Swap Count: {closure_swap_count}")
+    print(f"Closure Swap Count no rar: {closure_swap_count_no_rar}")
     print(
-        f"Saber Swap Count {sabre_swap_count}")
+        f"Closure Swap Count no rar hybrid: {closure_swap_count_no_rar_hybrid}")
+    print(f"Saber Swap Count {sabre_swap_count}")
     print("-"*20)
 
 
 if __name__ == "__main__":
     run_single_file(
-        fr"benchmarks/polyhedral/queko-bss-81qbt/81QBT_100CYC_QSE_1.json")
+        fr"benchmarks/polyhedral/queko-bss-20qbt/20QBT_500CYC_QSE_6.json")
