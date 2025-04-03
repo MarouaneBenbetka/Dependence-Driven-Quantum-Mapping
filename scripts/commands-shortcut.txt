@@ -1,0 +1,3 @@
+sbatch --job-name=queko-bss-16qbt scripts/cache_values.sh queko-bss-16qbt
+sbatch --job-name=queko-bss-16qbt scripts/bechmark_runner.sh
+
