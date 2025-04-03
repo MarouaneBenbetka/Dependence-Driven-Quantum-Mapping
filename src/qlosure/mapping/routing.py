@@ -63,11 +63,18 @@ class POLY_QMAP():
             successors2q_rar_included = successors2q
             dag_predecessors2q_rar_included = dag_predecessors2q
 
-        self.dag_dependencies_count = compute_dependencies_length_bitset(
+        dag_forward_dependencies_count = compute_dependencies_length_bitset(
             successors2q_rar_included, dag_predecessors2q_rar_included)
+
+        if num_iter > 1:
+            dag_backward_dependencies_count = compute_dependencies_length_bitset(
+                dag_predecessors2q_rar_included, successors2q_rar_included)
+        else:
+            dag_backward_dependencies_count = dag_forward_dependencies_count
 
         for i in range(2*(num_iter-1)+1):
             if i % 2 == 0:
+                self.dag_dependencies_count = dag_forward_dependencies_count
                 self.dag2q = successors2q
                 self.dag_predecessors2q = dag_predecessors2q
                 self.dag2q_restricted = successors2q_rar_included
@@ -76,6 +83,7 @@ class POLY_QMAP():
                 self.dag_predecessors_full = copy.deepcopy(
                     dag_predecessors_full) if num_iter > 1 else dag_predecessors_full
             else:
+                self.dag_dependencies_count = dag_backward_dependencies_count
                 self.dag2q = dag_predecessors2q
                 self.dag_predecessors2q = successors2q
                 self.dag2q_restricted = dag_predecessors2q_rar_included

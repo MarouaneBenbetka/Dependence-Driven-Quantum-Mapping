@@ -26,10 +26,10 @@ def run_single_file(file_path):
         heuristic_method="closure", verbose=1, initial_mapping_method="sabre", num_iter=1)
 
     closure_swap_count_own_mapping_no_rar, closure_depth_own_mapping_no_rar = poly_mapper.run(
-        heuristic_method="closure", verbose=1, initial_mapping_method="random", enforce_read_after_read=False, num_iter=3)
+        heuristic_method="closure", verbose=1, initial_mapping_method="random", enforce_read_after_read=False, num_iter=5)
 
     closure_swap_count_own_mapping, closure_depth_own_mapping = poly_mapper.run(
-        heuristic_method="closure", verbose=1, initial_mapping_method="random",  num_iter=3)
+        heuristic_method="closure", verbose=1, initial_mapping_method="random",  num_iter=5)
 
     print(f"Time to run closure: {time()-start}")
 
@@ -52,4 +52,4 @@ def run_single_file(file_path):
 
 if __name__ == "__main__":
     run_single_file(
-        fr"benchmarks/polyhedral/queko-bss-20qbt/20QBT_500CYC_QSE_6.json")
+        fr"benchmarks/polyhedral/queko-bss-16qbt/16QBT_200CYC_QSE_4.json")
