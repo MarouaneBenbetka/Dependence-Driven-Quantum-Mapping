@@ -51,6 +51,7 @@ class POLY_QMAP():
         self.init_mapping(method=initial_mapping_method)
         self.results = {}
         min_swaps = float('inf')
+        min_depth = float('inf')
 
         successors2q, dag_predecessors2q, successors_full, dag_predecessors_full, self.access2q = generate_dag(
             self.access, self.write_dict, self.num_qubits, enforce_read_after_read, transitive_reduction)
@@ -90,10 +91,13 @@ class POLY_QMAP():
                 heuristic_method, verbose)
 
             if i % 2 == 0:
-                min_swaps = min(min_swaps, swap_count)
-            self.results[i] = {"swap_count": swap_count,
-                               "circuit_depth": self.get_circuit_depth()}
-        return min_swaps
+                if swap_count < min_swaps:
+                    min_swaps = min(min_swaps, swap_count)
+                    min_depth = min(min_depth, self.get_circuit_depth())
+                elif swap_count == min_swaps:
+                    min_depth = min(min_depth, self.get_circuit_depth())
+
+        return min_swaps, min_depth
 
     def init_mapping(self, method="trivial"):
         if method == "random":

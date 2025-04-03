@@ -22,14 +22,14 @@ def run_single_file(file_path):
         edges, data, use_isl=False)
 
     start = time()
-    closure_swap_count = poly_mapper.run(
+    closure_swap_count, closure_depth = poly_mapper.run(
         heuristic_method="closure", verbose=1, initial_mapping_method="sabre", num_iter=1)
 
-    closure_swap_count_no_rar = poly_mapper.run(
-        heuristic_method="closure", verbose=1, initial_mapping_method="sabre", enforce_read_after_read=False, num_iter=1)
+    closure_swap_count_own_mapping_no_rar, closure_depth_own_mapping_no_rar = poly_mapper.run(
+        heuristic_method="closure", verbose=1, initial_mapping_method="random", enforce_read_after_read=False, num_iter=3)
 
-    closure_swap_count_no_rar_hybrid = poly_mapper.run(
-        heuristic_method="closure", verbose=1, initial_mapping_method="sabre", enforce_read_after_read=False, dag_mode="hybrid", num_iter=1)
+    closure_swap_count_own_mapping, closure_depth_own_mapping = poly_mapper.run(
+        heuristic_method="closure", verbose=1, initial_mapping_method="random",  num_iter=3)
 
     print(f"Time to run closure: {time()-start}")
 
@@ -37,11 +37,17 @@ def run_single_file(file_path):
 
     print(f"File: {file_path}")
     print(f"Closure Swap Count: {closure_swap_count}")
-    print(f"Closure Swap Count no rar: {closure_swap_count_no_rar}")
     print(
-        f"Closure Swap Count no rar hybrid: {closure_swap_count_no_rar_hybrid}")
+        f"Closure Swap Count (own mapping): {closure_swap_count_own_mapping}")
+    print(
+        f"Closure Swap Count (own mapping no rar): {closure_swap_count_own_mapping_no_rar}")
     print(f"Saber Swap Count {sabre_swap_count}")
     print("-"*20)
+    print(f"Closure Depth: {closure_depth}")
+    print(
+        f"Closure Depth (own mapping): {closure_depth_own_mapping}")
+    print(
+        f"Closure Depth (own mapping no rar): {closure_depth_own_mapping_no_rar}")
 
 
 if __name__ == "__main__":
