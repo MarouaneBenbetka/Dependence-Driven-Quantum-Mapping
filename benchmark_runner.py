@@ -2,12 +2,12 @@ import os
 import csv
 import argparse
 import datetime
-from time import time
-
+import time
+from tqdm import tqdm
 from qiskit.providers.fake_provider import Fake27QPulseV1, Fake5QV1, Fake20QV1
 from qiskit_ibm_runtime import QiskitRuntimeService
 
-from state_of_the_art.sabre import run_sabre
+from src.state_of_the_art.sabre import run_sabre
 from src.qlosure.mapping.routing import POLY_QMAP
 from src.qlosure.utils.isl_data_loader import json_file_to_isl
 from src.qlosure.utils.circuit_utils import *
@@ -19,26 +19,17 @@ def run_single_file(file_path, initial_mapping_method="sabre"):
     data = json_file_to_isl(file_path)
 
     poly_mapper = POLY_QMAP(edges, data)
-    poly_swap_count = poly_mapper.run(
-        heuristic_method="decay", verbose=0, initial_mapping_method=initial_mapping_method)
-
+    start = time.time()
     closure_swap_count = poly_mapper.run(
         heuristic_method="closure", verbose=0, initial_mapping_method=initial_mapping_method)
-
-    more_excuted_swap_count = poly_mapper.run(
-        heuristic_method="more_excuted", verbose=0, initial_mapping_method=initial_mapping_method)
+    closure_time = time.time() - start
 
     sabre_swap_count = 0
-    sabre_results = run_sabre(data, edges)
-
-    if initial_mapping_method == "sabre":
-        sabre_swap_count = sabre_results['SabreLayout + SingleTrialSWAP']
-    else:
-        sabre_swap_count = sabre_results['TrivialLayout + SingleTrialSWAP']
+    sabre_swap_count = run_sabre(data, edges,layout=initial_mapping_method)["swap_count"]
 
     print(f"File: {file_path}")
 
-    return file_path, poly_swap_count, more_excuted_swap_count, closure_swap_count, sabre_swap_count
+    return file_path,  closure_swap_count, sabre_swap_count, closure_time
 
 
 if __name__ == "__main__":
@@ -59,15 +50,15 @@ if __name__ == "__main__":
             f"Benchmark folder '{benchmark_dir}' does not exist.")
 
     date_id = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    csv_file = f"experiment_results/results_{benchmark_name}_{initial_mapping_method}_{date_id}.csv"
+    csv_file = f"experiment_results/results_{benchmark_name}_{initial_mapping_method}_{date_id}_fast.csv"
 
     with open(csv_file, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["file_path", "decay", "more_executed",
-                        "closure", "sabre_swap_count"])
+        writer.writerow(["file_path",
+                        "closure", "sabre_swap_count","closure_time"])
 
         # Walk recursively through the benchmark directory.
-        for root, dirs, files in os.walk(benchmark_dir):
+        for root, dirs, files in tqdm(os.walk(benchmark_dir)):
             for file in files:
                 if file.endswith(".json"):
                     file_path = os.path.join(root, file)

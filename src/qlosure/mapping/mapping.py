@@ -1,10 +1,7 @@
 
 import random
 import islpy as isl
-import cirq
-import cirq_google as cg
 import networkx as nx
-from cirq.contrib.qasm_import import circuit_from_qasm
 
 from qiskit import QuantumCircuit
 from qiskit.transpiler import CouplingMap
@@ -83,59 +80,6 @@ def generate_sabre_initial_mapping(qasm_code, backend_edges, num_qubits):
         if logical_idx < num_qubits and physical_idx < num_qubits:
             mapping[logical_idx] = physical_idx
             reverse_mapping[physical_idx] = logical_idx
-
-    return mapping, reverse_mapping
-
-
-def generate_cirq_initial_mapping(qasm_code):
-    """
-    Generate an initial mapping using Cirq's RouteCQC on Sycamore connectivity.
-    Return array-based mappings:
-    - mapping[logical] = physical
-    - reverse_mapping[physical] = logical
-    """
-    def get_physical_qubit_to_index():
-        """
-        Constructs a mapping from physical qubits (GridQubits) on the Sycamore device
-        to integer indices based on sorted order (row, then column).
-        """
-        sycamore_device = cg.Sycamore
-        device_graph = sycamore_device.metadata.nx_graph
-        edges = list(device_graph.edges())
-        all_qubits = sorted({q for edge in edges for q in edge},
-                            key=lambda q: (q.row, q.col))
-        return {qubit: idx for idx, qubit in enumerate(all_qubits)}
-
-    circuit = circuit_from_qasm(qasm_code)
-    sycamore_device = cg.Sycamore
-    device_graph = sycamore_device.metadata.nx_graph
-
-    # Route the circuit
-    router = cirq.RouteCQC(device_graph)
-    routed_circuit, initial_mapping, final_mapping = router.route_circuit(
-        circuit)
-
-    # Sort logical qubits by name to get consistent integer labels
-    logical_qubits_sorted = sorted(
-        initial_mapping.keys(), key=lambda q: q.name)
-    logical_to_int = {q: i for i, q in enumerate(logical_qubits_sorted)}
-
-    # Get the physical qubit to integer mapping from the device
-    physical_qubit_to_int = get_physical_qubit_to_index()
-
-    # Determine how large our mapping arrays need to be
-    max_logical = max(logical_to_int.values()) if logical_to_int else 0
-    max_physical = max(physical_qubit_to_int.values()
-                       ) if physical_qubit_to_int else 0
-    size = max(max_logical, max_physical) + 1
-    mapping = [-1] * size
-    reverse_mapping = [-1] * size
-
-    for logical_qubit, physical_qubit in initial_mapping.items():
-        logical_idx = logical_to_int[logical_qubit]
-        physical_idx = physical_qubit_to_int[physical_qubit]
-        mapping[logical_idx] = physical_idx
-        reverse_mapping[physical_idx] = logical_idx
 
     return mapping, reverse_mapping
 
