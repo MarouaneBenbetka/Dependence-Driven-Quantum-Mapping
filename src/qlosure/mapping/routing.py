@@ -15,7 +15,7 @@ import copy
 
 
 class Qlosure():
-    def __init__(self, edges, data, use_isl=False, with_circuit=False) -> None:
+    def __init__(self, edges, data, use_isl=False, with_circuit=True) -> None:
 
         self.backend_connections = set(tuple(edge) for edge in edges)
         self.backend = build_backend_graph(edges)

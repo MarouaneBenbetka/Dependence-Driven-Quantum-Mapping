@@ -600,7 +600,7 @@ def plots(benchmark, methods,layout,backends,our_method= "Qlosure"):
     
 
 def compute_average_depth_ratio(benchmark, methods, layout,backend):
-    folder_path = "../../experiment_results/" + benchmark 
+    folder_path = "../experiment_results/" + benchmark 
     avg_ratios = {}
     
     for method in methods:
@@ -775,114 +775,85 @@ def plot_grouped_scatter_with_noise(data_grouped, ylabel, title,
     plt.yticks(fontsize=font_size)
     plt.tight_layout()
     plt.show() 
-def get_data_avg(benchmarks, methods, layout, backend):
-    # Initialize dictionaries to store raw results
-    raw_data = {
-        'qops': [],
-        'files': [],
-        'swaps': {method: [] for method in methods},
-        'depth': {method: [] for method in methods}
+
+def plot_grouped_scatter_with_noise(data_grouped, ylabel, title,
+                                   font_size=21,
+                                   marker_size=100):
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from matplotlib.ticker import FuncFormatter
+    
+    plt.figure(figsize=(10, 6))
+    plt.rcParams.update({'font.size': font_size})
+    
+    # Fixed color and marker per method
+    method_colors = {
+        "sabre": "#1f77b4",    # blue
+        "cirq": "#ff7f0e",     # orange
+        "qmap": "#2ca02c",     # green
+        "pytket": "#d62728",   # red
+        "Qlosure": "#9467bd",  # purple
     }
-    
-    # Iterate over each benchmark
-    for benchmark in benchmarks:
-        folder_path = os.path.join("../../experiment_results", benchmark)
-        
-        # Read benchmark files to extract qops values
-        benchmark_files = []
-        for file_path in glob.glob(os.path.join(folder_path, "*.json")):
-            file_name = os.path.basename(file_path)
-            benchmark_files.append(file_name)
-        
-        # Process each method's CSV file to get data
-        for method in methods:
-            file_path = os.path.join(folder_path, f"{method}.csv")
-            try:
-                with open(file_path, newline='') as csvfile:
-                    reader = csv.DictReader(csvfile)
-                    for row in reader:
-                        # Only collect data for this file if we're on the first method
-                        # (to avoid duplicating qops and file entries)
-                        if method == methods[0]:
-                            if 'qops' in row and row['qops']:
-                                try:
-                                    raw_data['qops'].append(int(row['qops']))
-                                    raw_data['files'].append(row.get('file_path', ''))
-                                except ValueError:
-                                    print(f"Invalid qops value in {file_path}: {row['qops']}")
-                                    raw_data['qops'].append(0)
-                                    raw_data['files'].append(row.get('file_path', ''))
-                            else:
-                                # If qops not found, use 0 as default
-                                raw_data['qops'].append(0)
-                                raw_data['files'].append(row.get('file_path', ''))
-                        
-                        # Collect swap and depth data for this method
-                        swap_key = f"{backend}_swaps_{layout}"
-                        depth_key = f"{backend}_depth_{layout}"
-                        
-                        # Handle non-numeric values (like 'timeout' or 'error')
-                        swap_val = row.get(swap_key, "error")
-                        depth_val = row.get(depth_key, "error")
-                        
-                        raw_data['swaps'][method].append(swap_val)
-                        raw_data['depth'][method].append(depth_val)
-            except FileNotFoundError:
-                print(f"File {file_path} not found.")
-            except Exception as e:
-                print(f"An error occurred processing {file_path}: {e}")
-    
-    # Process the collected data to handle 'timeout' and 'error' entries
-    for method in methods:
-        # Find max values to use for non-numeric entries
-        numeric_swaps = [int(val) for val in raw_data['swaps'][method] if str(val).isdigit()]
-        max_swaps = max(numeric_swaps, default=0) if numeric_swaps else 0
-        
-        numeric_depth = [int(val) for val in raw_data['depth'][method] if str(val).isdigit()]
-        max_depth = max(numeric_depth, default=0) if numeric_depth else 0
-        
-        # Replace non-numeric values with the maximum values
-        for i in range(len(raw_data['swaps'][method])):
-            if not str(raw_data['swaps'][method][i]).isdigit():
-                raw_data['swaps'][method][i] = max_swaps
-            else:
-                raw_data['swaps'][method][i] = int(raw_data['swaps'][method][i])
-                
-        for i in range(len(raw_data['depth'][method])):
-            if not str(raw_data['depth'][method][i]).isdigit():
-                raw_data['depth'][method][i] = max_depth
-            else:
-                raw_data['depth'][method][i] = int(raw_data['depth'][method][i])
-    
-    # Group by qops value and compute averages
-    qops_groups = defaultdict(list)
-    for i, qops in enumerate(raw_data['qops']):
-        qops_groups[qops].append(i)
-    
-    # Calculate averages for each qops group
-    avg_results = {
-        'qops': [],
-        'swaps': {method: [] for method in methods},
-        'depth': {method: [] for method in methods}
+
+    method_markers = {
+        "sabre": "o",
+        "cirq": "s",
+        "qmap": "^",
+        "pytket": "*",
+        "Qlosure": "D",
     }
-    
-    # Sort qops values in descending order
-    sorted_qops = sorted(qops_groups.keys(), reverse=True)
-    
-    for qops in sorted_qops:
-        indices = qops_groups[qops]
-        avg_results['qops'].append(qops)
+
+    for i, (method, depth_dict) in enumerate(data_grouped.items()):
+        color = method_colors.get(method, "#333333")  # fallback to gray
+        marker = method_markers.get(method, "o")      # fallback to circle
         
-        for method in methods:
-            # Calculate average swaps for this qops value
-            avg_swaps = sum(raw_data['swaps'][method][i] for i in indices) / len(indices)
-            avg_results['swaps'][method].append(round(avg_swaps, 2))
-            
-            # Calculate average depth for this qops value
-            avg_depth = sum(raw_data['depth'][method][i] for i in indices) / len(indices)
-            avg_results['depth'][method].append(round(avg_depth, 2))
+        all_depths = sorted(depth_dict.keys())
+        all_vals = [depth_dict[d] for d in all_depths]
+        
+        x = []
+        y = []
+        for d, values in zip(all_depths, all_vals):
+            x.extend([d] * len(values))
+            y.extend(values)
+        
+        plt.scatter(x, y,
+                    s=marker_size,
+                    alpha=0.5,
+                    color=color,
+                    marker=marker,
+                    label=method)
+        
+        # Mean and std band
+        means = [np.mean(v) for v in all_vals]
+        stds = [np.std(v) for v in all_vals]
+        plt.plot(all_depths, means,
+                 color=color,
+                 linewidth=2)
+        plt.fill_between(all_depths,
+                         np.array(means) - np.array(stds),
+                         np.array(means) + np.array(stds),
+                         color=color,
+                         alpha=0)
+
+    # Formatter for y-axis (e.g., 1000 -> 1k)
+    def thousands_formatter(x, pos):
+        return f'{int(x/1000)}k' if x >= 1000 else f'{int(x)}'
     
-    return avg_results['swaps'], avg_results['depth'], avg_results['qops']
+    formatter = FuncFormatter(thousands_formatter)
+    plt.gca().yaxis.set_major_formatter(formatter)
+
+    # Axis labels and title
+    plt.xlabel("Initial depth", fontsize=25)
+    plt.ylabel(ylabel, fontsize=25)
+    plt.title(title, fontsize=font_size + 2)
+
+    # Styling
+    plt.grid(True, linestyle='--', alpha=0.6)
+    plt.legend(fontsize=font_size)
+    plt.xticks(fontsize=font_size)
+    plt.yticks(fontsize=font_size)
+    plt.tight_layout()
+    plt.show()
 
 def get_data_grouped_by_circuit_depth(benchmarks, methods, layout, backends):
     # Will return: {method: {original_depth: [values...]}}
@@ -890,7 +861,7 @@ def get_data_grouped_by_circuit_depth(benchmarks, methods, layout, backends):
     depth_grouped = {method: defaultdict(list) for method in methods}
     
     for bench in benchmarks:
-        folder = os.path.join("../../experiment_results", bench)
+        folder = os.path.join("../experiment_results", bench)
         for backend in backends:
             for method in methods:
                 path = os.path.join(folder, f"{method}.csv")
@@ -931,7 +902,7 @@ def get_data_900(benchmarks, methods, layout, backend, target_depth=900):
 
     # Iterate over each benchmark
     for benchmark in benchmarks:
-        folder_path = os.path.join("../../experiment_results", benchmark)
+        folder_path = os.path.join("../experiment_results", benchmark)
 
         for method in methods:
             file_path = os.path.join(folder_path, f"{method}.csv")
@@ -1032,7 +1003,7 @@ def get_data(benchmarks, methods, layout, backends):
     
     # Iterate over each benchmark and method
     for benchmark in benchmarks:
-        folder = os.path.join("../../experiment_results", benchmark)
+        folder = os.path.join("../experiment_results", benchmark)
         for method in methods:
             for backend in backends:
                 path = os.path.join(folder, f"{method}.csv")
@@ -1214,7 +1185,7 @@ def read_and_sort(csv_file):
     return df.sort_values(by='qops').reset_index(drop=True)
 
 def load_circuit_from_json(file_path):
-    with open("../../"+file_path, 'r') as f:
+    with open("../"+file_path, 'r') as f:
         data = json.load(f)
     return QuantumCircuit.from_qasm_str(data["qasm_code"])
 
@@ -1343,7 +1314,7 @@ def collect_connectivity_data_for_multi_methods(benchmarks, methods, edges, outp
     for benchmark in benchmarks:
         method_dfs = {}
         for method in methods:
-            csv_path = f"../../experiment_results/{benchmark}/{method}.csv"
+            csv_path = f"../experiment_results/{benchmark}/{method}.csv"
             method_dfs[method] = read_and_sort(csv_path)
         
         baseline_method = methods[0]
@@ -1390,7 +1361,7 @@ def improvment(benchmarks,methods,layout,backends,our_method="Qlosure"):
 
     for benchmark in benchmarks:
         for backend in backends:
-            folder = os.path.join("../../experiment_results", benchmark)
+            folder = os.path.join("../experiment_results", benchmark)
             for method in methods:
                 path = os.path.join(folder, f"{method}.csv")
                 try:
@@ -1463,7 +1434,7 @@ def time_plot(banchmark="queko_54"):
     from matplotlib.ticker import FuncFormatter
 
 
-    df = pd.read_csv('../../experiment_results/queko-bss-54qbt/all_time.csv')
+    df = pd.read_csv('../experiment_results/queko-bss-54qbt/excution_time.csv')
     data_grouped = {
         'Sherbrooke': {},
         'Ankaa 3': {},
@@ -1556,9 +1527,9 @@ def plot_ablation_results(methods,benchmark="queko-bss-81qbt",backend="sherbrook
         return
         
     if backend =="sherbrooke":
-        df = pd.read_csv("../../experiment_results/queko-bss-81qbt/abl_study_sherbrooke.csv")
+        df = pd.read_csv("../experiment_results/queko-bss-81qbt/abl_study_sherbrooke.csv")
     elif backend == "ankaa":
-        df = pd.read_csv("../../experiment_results/queko-bss-81qbt/abl_study_ankaa.csv")
+        df = pd.read_csv("../experiment_results/queko-bss-81qbt/abl_study_ankaa.csv")
     else:
         print("Unsupported backend. Use 'sherbrooke' or 'ankaa'.")
         return
