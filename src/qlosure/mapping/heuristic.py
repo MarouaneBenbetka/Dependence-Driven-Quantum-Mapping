@@ -2,7 +2,8 @@ from src.qlosure.utils.python_to_isl import list_to_isl_set
 from collections import deque
 import random
 import time
-
+import math
+from collections import defaultdict
 
 def paths_poly_heuristic(front_layer, extended_layer, mapping, distance_matrix, access, swaps):
 
@@ -57,6 +58,248 @@ def decay_poly_heuristic(front_layer, extended_layer, mapping, distance_matrix, 
 
 def closure_poly_heuristic(front_layer, extended_layer, mapping, distance_matrix, access, decay_parameter, deps_count, extended_layer_index, gate):
     W = 1
+    # 1) max decay
+    max_decay = max(decay_parameter[gate[0]],
+                    decay_parameter[gate[1]])
+
+    # 2) front-layer normalization
+    f_distance = 0
+    for g in front_layer:
+        q1, q2 = access[g]
+        Q1, Q2 = mapping[q1], mapping[q2]
+        deps = deps_count[g]
+        #print(f"     for {g} , dep : {deps},Qops {Q1,Q2}, dist :{distance_matrix[Q1][Q2]}")
+        f_distance +=  (deps+1) * distance_matrix[Q1][Q2]
+    f_norm = f_distance / len(front_layer) if front_layer else 0
+
+    # 3) bucket extended_layer by layer
+    layer_sums = defaultdict(float)
+    layer_counts = defaultdict(int)
+    for g in extended_layer:
+        idx = extended_layer_index.get(g, 0)
+        q1, q2 = access[g]
+        Q1, Q2 = mapping[q1], mapping[q2]
+        deps = deps_count[g]
+        #print(f"     for {g} , dep : {deps},Qops {Q1,Q2}, dist :{distance_matrix[Q1][Q2]}, index {idx}")
+        weight = (deps+1) * distance_matrix[Q1][Q2] 
+        layer_sums[idx] += weight
+        #print("layer_sums :",layer_sums)
+        layer_counts[idx] += 1
+    #print("f nor :",f_norm)
+    
+    # 4) normalize each bucket, then average
+    if layer_counts:
+        layer_decay = {i: i for i in layer_counts}
+        e_norm = sum(
+            layer_sums[i] / (layer_counts[i] * (layer_decay[i]+1))
+            for i in layer_counts
+        )
+    else:
+        e_norm = 0
+    # 5) final heuristic
+    
+    
+    H = max_decay *(f_norm + W * e_norm)
+    return H
+
+
+
+def closure_poly_heuristic(front_layer, extended_layer, mapping, distance_matrix, access, decay_parameter, deps_count, extended_layer_index, gate):
+    max_decay = max(decay_parameter[gate[0]],
+                    decay_parameter[gate[1]])
+
+    f_distance = 0
+    for g in front_layer:
+        q1, q2 = access[g]
+        Q1, Q2 = mapping[q1], mapping[q2]
+        deps = deps_count[g]
+        f_distance +=  (deps+1) * distance_matrix[Q1][Q2]
+    f_norm = f_distance / len(front_layer) if front_layer else 0
+
+    layer_sums = defaultdict(float)
+    layer_counts = defaultdict(int)
+    for g in extended_layer:
+        idx = extended_layer_index.get(g, 0)
+        q1, q2 = access[g]
+        Q1, Q2 = mapping[q1], mapping[q2]
+        deps = deps_count[g]
+        weight = (deps+1) * distance_matrix[Q1][Q2] 
+        layer_sums[idx] += weight
+        layer_counts[idx] += 1
+
+    
+    if layer_counts:
+        layer_decay = {i: i for i in layer_counts}
+        e_norm = sum(
+            layer_sums[i] / (layer_counts[i] * (layer_decay[i]))
+            for i in layer_counts
+        )
+    else:
+        e_norm = 0
+    
+    
+    H = max_decay *(f_norm + e_norm)
+    return H
+
+
+
+
+def with_depth_poly_heuristic(front_layer, extended_layer, mapping, distance_matrix, access, decay_parameter, deps_count, extended_layer_index, gate,qubits_depth):
+    λ = 0.25
+    max_decay = max(decay_parameter[gate[0]],
+                    decay_parameter[gate[1]])
+
+    max_depth = max(qubits_depth[gate[0]],qubits_depth[gate[1]])
+    f_distance = 0
+    for g in front_layer:
+        q1, q2 = access[g]
+        Q1, Q2 = mapping[q1], mapping[q2]
+        deps = deps_count[g]
+        f_distance +=  (deps+1) * distance_matrix[Q1][Q2]
+    f_norm = f_distance / len(front_layer) if front_layer else 0
+
+    layer_sums = defaultdict(float)
+    layer_counts = defaultdict(int)
+    for g in extended_layer:
+        idx = extended_layer_index.get(g, 0)
+        q1, q2 = access[g]
+        Q1, Q2 = mapping[q1], mapping[q2]
+        deps = deps_count[g]
+        weight = (deps+1) * distance_matrix[Q1][Q2] 
+        layer_sums[idx] += weight
+        layer_counts[idx] += 1
+    
+    if layer_counts:
+        layer_decay = {i: i for i in layer_counts}
+        e_norm = sum(
+            layer_sums[i] / (layer_counts[i] * (layer_decay[i]))
+            for i in layer_counts
+        )
+    else:
+        e_norm = 0
+    
+    
+    swap_score  = max_decay * (f_norm + e_norm)
+    depth_score = max_decay * max_depth
+
+    H = (1-λ)*swap_score + λ*depth_score
+    return H
+
+
+
+def macro_gates_poly_heuristic(front_layer, extended_layer, mapping, distance_matrix, access, decay_parameter, deps_count, extended_layer_index, gate,qubits_depth,macro_gates):
+    λ = 0.25
+    max_decay = max(decay_parameter[gate[0]],
+                    decay_parameter[gate[1]])
+
+    max_depth = max(qubits_depth[gate[0]],qubits_depth[gate[1]])
+    
+    macro_g = macro_gates.get(gate) 
+    f_distance = 0
+    for g in front_layer:
+        q1, q2 = access[g]
+        Q1, Q2 = mapping[q1], mapping[q2]
+        deps = deps_count[g]
+        g_group = macro_gates.get(g)
+        if g_group == macro_g:
+            f_distance += (deps+1) * distance_matrix[Q1][Q2]
+        else:
+            f_distance += (deps+1) * distance_matrix[Q1][Q2] / 1.5
+    f_norm = f_distance / len(front_layer) if front_layer else 0
+
+    layer_sums = defaultdict(float)
+    layer_counts = defaultdict(int)
+    for g in extended_layer:
+        idx = extended_layer_index.get(g, 0)
+        q1, q2 = access[g]
+        Q1, Q2 = mapping[q1], mapping[q2]
+        deps = deps_count[g]
+        g_group = macro_gates.get(g)
+        if g_group == macro_g:
+            weight = (deps+1) * distance_matrix[Q1][Q2]
+        else:
+            weight = (deps+1) * distance_matrix[Q1][Q2] / 1.5
+        layer_sums[idx] += weight
+        layer_counts[idx] += 1
+    
+    if layer_counts:
+        layer_decay = {i: i for i in layer_counts}
+        e_norm = sum(
+            layer_sums[i] / (layer_counts[i] * (layer_decay[i]))
+            for i in layer_counts
+        )
+    else:
+        e_norm = 0
+    
+    
+    swap_score  = max_decay * (f_norm + e_norm)
+    depth_score = max_decay * max_depth
+
+    H = (1-λ)*swap_score + λ*depth_score
+
+    return H
+
+
+
+def fixed_extended_layer_heuristic(front_layer, extended_layer, mapping, distance_matrix, access, decay_parameter, deps_count, extended_layer_index, gate):
+    W = 1
+    front_layer_size = len(front_layer)
+    extended_layer_size = len(extended_layer)
+
+    max_decay = max(decay_parameter[gate[0]], decay_parameter[gate[1]])
+
+    f_distance = 0
+
+    for g in front_layer:
+        q1, q2 = access[g]
+        Q1, Q2 = mapping[q1], mapping[q2]
+
+        f_distance +=  distance_matrix[Q1][Q2]
+
+    e_distance = 0
+    for g in extended_layer:
+        q1, q2 = access[g]
+        Q1, Q2 = mapping[q1], mapping[q2]
+        
+        e_distance +=  distance_matrix[Q1][Q2]
+
+    H = max_decay * (f_distance / front_layer_size + W *
+                     ((e_distance / extended_layer_size) if extended_layer_size else 0))
+
+    return H
+
+
+
+def distance_only_poly_heuristic(front_layer, extended_layer, mapping, distance_matrix, access, decay_parameter, deps_count, extended_layer_index, gate):
+    W = 1
+    front_layer_size = len(front_layer)
+    extended_layer_size = len(extended_layer)
+
+    max_decay = max(decay_parameter[gate[0]], decay_parameter[gate[1]])
+
+    f_distance = 0
+
+    for g in front_layer:
+        q1, q2 = access[g]
+        Q1, Q2 = mapping[q1], mapping[q2]
+
+        f_distance +=  distance_matrix[Q1][Q2]
+
+    e_distance = 0
+    for g in extended_layer:
+        q1, q2 = access[g]
+        Q1, Q2 = mapping[q1], mapping[q2]
+        
+        e_distance +=  distance_matrix[Q1][Q2]
+
+    H = max_decay * (f_distance / front_layer_size + W *
+                     ((e_distance / extended_layer_size) if extended_layer_size else 0))
+
+    return H
+
+
+def dep_weight_poly_heuristic(front_layer, extended_layer, mapping, distance_matrix, access, decay_parameter, deps_count, extended_layer_index, gate):
+    W = 1
     front_layer_size = len(front_layer)
     extended_layer_size = len(extended_layer)
 
@@ -79,14 +322,64 @@ def closure_poly_heuristic(front_layer, extended_layer, mapping, distance_matrix
 
         deps = deps_count[g]
         e_distance += (deps+1) * \
-            distance_matrix[Q1][Q2] * 1/layer_factor
+            distance_matrix[Q1][Q2] 
 
     H = max_decay * (f_distance / front_layer_size + W *
                      ((e_distance / extended_layer_size) if extended_layer_size else 0))
 
     return H
 
+def layered_poly_closure_heuristic(front_layer, extended_layer,
+                              mapping, distance_matrix, access,
+                              decay_parameter, deps_count,
+                              extended_layer_index, gate):
+    W = 1
+    # 1) max decay
+    max_decay = max(decay_parameter[gate[0]],
+                    decay_parameter[gate[1]])
 
+    # 2) front-layer normalization
+    f_distance = 0
+    for g in front_layer:
+        q1, q2 = access[g]
+        Q1, Q2 = mapping[q1], mapping[q2]
+        deps = deps_count[g]
+        #print(f"     for {g} , dep : {deps},Qops {Q1,Q2}, dist :{distance_matrix[Q1][Q2]}")
+        f_distance +=  distance_matrix[Q1][Q2]
+    f_norm = f_distance / len(front_layer) if front_layer else 0
+
+    # 3) bucket extended_layer by layer
+    layer_sums = defaultdict(float)
+    layer_counts = defaultdict(int)
+    for g in extended_layer:
+        idx = extended_layer_index.get(g, 0)
+        q1, q2 = access[g]
+        Q1, Q2 = mapping[q1], mapping[q2]
+        deps = deps_count[g]
+        #print(f"     for {g} , dep : {deps},Qops {Q1,Q2}, dist :{distance_matrix[Q1][Q2]}, index {idx}")
+        weight =  distance_matrix[Q1][Q2] 
+        layer_sums[idx] += weight
+        #print("layer_sums :",layer_sums)
+        layer_counts[idx] += 1
+    #print("f nor :",f_norm)
+    
+    # 4) normalize each bucket, then average
+    if layer_counts:
+        layer_decay = {i: i for i in layer_counts}
+        e_norm = sum(
+            layer_sums[i] / (layer_counts[i] * (layer_decay[i]+1))
+            for i in layer_counts
+        )
+    else:
+        e_norm = 0
+    # 5) final heuristic
+    
+    
+    H = max_decay *(f_norm + W * e_norm)
+    return H
+    
+    
+    
 def create_extended_successor_set(front_points, dag, access, extended_set_size=40):
     extended_set_size = extended_set_size * 5
 

@@ -42,7 +42,11 @@ def compute_distance_matrix(graph: DefaultDict[int, Set[int]]):
 
 def generate_swap_candidates(active_qubits, backend):
     candidates = []
-
+    #for qubit, neighbors in backend.items():
+    #    for neighbor in neighbors:
+    #        candidates.append((qubit, neighbor))
+            
+    #return candidates
     for qubit in active_qubits:
         for neighbor in backend[qubit]:
             candidates.append((qubit, neighbor))

@@ -214,6 +214,41 @@ def time_to_schedule(_schedule):
 
 
 
+def group_schedule(_schedule):
+
+    result = defaultdict(list)
+
+    dim_set = isl.dim_type.set
+    to_str = isl.Val.to_str
+    to_py =  isl.Val.to_python
+
+    def bs_to_key(bs):
+        name = bs.get_tuple_name().lower()
+        n_dims = bs.dim(dim_set)
+        coords = [to_str(bs.sample_point().get_coordinate_val(dim_set, i)) for i in range(n_dims)]
+        return name
+
+            
+    def map_callback(_map):
+        def map_to_dict(b):
+
+            def callback(_point) -> None:
+                _m = _point.to_set().unwrap()
+                domain = to_py(_m.domain().sample_point().get_coordinate_val(dim_set, 0))
+                range = bs_to_key(_m.range())
+                result[domain].append(range)
+
+            b.foreach_point(callback)
+
+        for b in _map.get_basic_sets():
+            map_to_dict(b)
+
+
+    _schedule.wrap().foreach_set(map_callback)
+    
+    return result
+
+
 def read2access(read,schedule):
     t2s = time_to_schedule(schedule.reverse())
     s2q= shedule_to_qubits(read)

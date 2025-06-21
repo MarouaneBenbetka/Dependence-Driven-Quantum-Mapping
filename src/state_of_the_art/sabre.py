@@ -103,45 +103,5 @@ def run_sabre(data, edges, layout="sabre", trial="single"):
     swap_count = swapped_circuit.count_ops().get("swap", 0)
     circuit_depth = swapped_circuit.depth()
 
-    return {"swap_count": swap_count, "circuit_depth": circuit_depth}
+    return {"swaps": swap_count, "depth": circuit_depth,"circuit": swapped_circuit}    
 
-
-def run_sabre2(data, edges):
-    circuit = QuantumCircuit.from_qasm_str(data["qasm_code"])
-    # Create coupling map
-    coupling_map = CouplingMap(edges)
-
-    layout = get_layout(coupling_map, circuit)
-    # Step 1: Apply the given layout to the circuit
-    layout_pass = PassManager([
-        SetLayout(layout),      # Set the predetermined layout
-        ApplyLayout()           # Apply the layout to modify qubit indices
-    ])
-    mapped_circuit = layout_pass.run(circuit)
-
-    # Step 2: Run SabreSwap for routing
-    sabre_swap = SabreSwap(
-        coupling_map,
-        seed=21,
-        heuristic="decay",
-        trials=1
-    )
-
-    swap_pass = PassManager(sabre_swap)
-    optimized_circuit = swap_pass.run(mapped_circuit)
-
-    # Count the number of swap gates
-    swap_count = optimized_circuit.count_ops().get("swap", 0)
-
-    multi_sabre_swap = SabreSwap(
-        coupling_map,
-        seed=21,
-        heuristic="decay",
-    )
-
-    multi_swap_pass = PassManager(multi_sabre_swap)
-    multi_optimized_circuit = multi_swap_pass.run(mapped_circuit)
-
-    # Count the number of swap gates
-    multi_swap_count = multi_optimized_circuit.count_ops().get("swap", 0)
-    return swap_count, multi_swap_count
