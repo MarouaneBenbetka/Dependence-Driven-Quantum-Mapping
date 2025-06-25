@@ -14,8 +14,8 @@ from time import time
 import copy
 
 
-class POLY_QMAP():
-    def __init__(self, edges, data, use_isl=False, with_circuit=False) -> None:
+class Qlosure():
+    def __init__(self, edges, data, use_isl=False, with_circuit=True) -> None:
 
         self.backend_connections = set(tuple(edge) for edge in edges)
         self.backend = build_backend_graph(edges)
@@ -29,6 +29,7 @@ class POLY_QMAP():
         self.num_qubits = len(self.distance_matrix) + 1
 
         self.access, self.write_dict = self.data["read"], self.data["write"]
+        self.macro_gates = self.data.get("macro_gates", {})
         self.access2q = None
 
         self.decay_parameter = [1 for _ in range(self.num_qubits)]
@@ -47,7 +48,7 @@ class POLY_QMAP():
         self.results = {}
         self.instruction_times = defaultdict(int)
 
-    def run(self, heuristic_method=None, enforce_read_after_read=True, transitive_reduction=True, initial_mapping_method="sabre", dag_mode="default", num_iter=1, verbose=0):
+    def run(self, heuristic_method="Qlosure", enforce_read_after_read=True, transitive_reduction=True, initial_mapping_method="sabre", dag_mode="default", num_iter=1,param=5, verbose=0):
         self.init_mapping(method=initial_mapping_method)
         self.results = {}
         min_swaps = float('inf')
@@ -94,10 +95,10 @@ class POLY_QMAP():
 
             self.init_front_layer()
             self.qubit_depth = {q: 0 for q in range(self.num_qubits)}
-
+            start = time()
             swap_count = self.execute_sabre_algorithm(
-                heuristic_method, verbose)
-
+                heuristic_method,param, verbose)
+            exec_time = time()-start
             if i % 2 == 0:
                 if swap_count < min_swaps:
                     min_swaps = min(min_swaps, swap_count)
@@ -105,7 +106,7 @@ class POLY_QMAP():
                 elif swap_count == min_swaps:
                     min_depth = min(min_depth, self.get_circuit_depth())
 
-        return min_swaps, min_depth
+        return min_swaps, min_depth,exec_time
 
     def init_mapping(self, method="trivial"):
         if method == "random":
@@ -134,12 +135,12 @@ class POLY_QMAP():
             if len(self.dag_predecessors_full[gate]) == 0:
                 self.front_layer.add(gate)
 
-    def execute_sabre_algorithm(self, huristic_method, verbose):
+    def execute_sabre_algorithm(self, huristic_method,param, verbose):
         swap_count = 0
         total_gates = len(self.access)
         self.decay_parameter = [1 for _ in range(self.num_qubits)]
 
-        with tqdm(total=total_gates, desc="Executing Gates", mininterval=0.1, disable=(verbose == 0), leave=False) as pbar:
+        with tqdm(total=total_gates, desc="Running Qlosure", mininterval=0.1, disable=(verbose == 0), leave=True) as pbar:
             while len(self.front_layer) > 0:
 
                 ready_to_execute_gates = self.extract_ready_to_execute_gate_list()
@@ -154,7 +155,7 @@ class POLY_QMAP():
                 else:
 
                     local_swap_count = self.apply_heuristic(
-                        huristic_method, verbose=verbose)
+                        huristic_method,param, verbose=verbose)
 
                     swap_count += local_swap_count
 
@@ -176,7 +177,7 @@ class POLY_QMAP():
             new_depth = self.qubit_depth.get(phys_q, 0) + 1
             self.qubit_depth[phys_q] = new_depth
             if self.with_circuit:
-                self.circuit.h(phys_q)
+                self.circuit.x(phys_q)
             return True
 
         q1, q2 = self.access[gate]
@@ -191,7 +192,7 @@ class POLY_QMAP():
             self.qubit_depth[phys_q2] = new_depth
 
             if self.with_circuit:
-                self.circuit.cx(phys_q1, phys_q2)
+                self.circuit.cx(min(q1,q2), max(q1,q2))
 
             return True
         return False
@@ -205,9 +206,9 @@ class POLY_QMAP():
 
             self.front_layer.discard(gate)
 
-    def apply_heuristic(self, huristic_method, verbose=0):
-        if huristic_method not in ["decay",  "max_focus", "more_excuted", "closure"]:
-            raise ValueError("Invalid heuristic method provided")
+    def apply_heuristic(self, huristic_method,param, verbose=0):
+        if huristic_method not in ["decay",  "max_focus", "more_excuted", "Qlosure","dep_weighted","layer_adjusted","distance_only","fixed_extended_layer","with_depth","macro_gates"]:
+            raise ValueError(f"Invalid heuristic method provided {huristic_method}. ")
 
         if huristic_method == "decay":
             return self._apply_decay_heuristic()
@@ -218,8 +219,25 @@ class POLY_QMAP():
         if huristic_method == "more_excuted":
             return self._apply_more_excuted_heuristic()
 
-        if huristic_method == "closure":
-            return self._apply_closure_score_heuristic()
+        if huristic_method == "Qlosure":
+            return self._apply_closure_score_heuristic(param)
+    
+        if huristic_method == "dep_weighted":
+            return self._apply_dep_weight_closure_heuristic(param)
+        
+        if huristic_method == "layer_adjusted":
+            return self._apply_layered_closure_heuristic(param)
+        
+        if huristic_method == "distance_only":
+            return self._apply_distance_closure_heuristic()
+        
+        if huristic_method == "fixed_extended_layer":
+            return self._apply_fixed_extended_layer_heuristic()
+        
+        if huristic_method == "with_depth":
+            return self._apply_with_depth_heuristic(param)
+        if huristic_method == "macro_gates":
+            return self._apply_macro_gates_heuristic(param)
 
     def _apply_decay_heuristic(self):
 
@@ -354,7 +372,7 @@ class POLY_QMAP():
 
         return 1
 
-    def _apply_closure_score_heuristic(self):
+    def _apply_with_depth_heuristic(self,param):
 
         logical_qubits = [
             q for gate in self.front_layer for q in self.access2q[gate]]
@@ -362,7 +380,90 @@ class POLY_QMAP():
 
         self.extended_layer, extended_layer_index = create_leveled_extended_successor_set(
             self.front_layer, self.dag2q_restricted, self.access2q, len(
-                physical_qubits)*5
+                physical_qubits)*param
+        )
+
+        candidate_swaps = generate_swap_candidates(
+            physical_qubits, self.backend)
+
+        heuristic_score = {}
+        for swap_gate in candidate_swaps:
+            temp_mapping_dict = swap_logical_physical_mappings(
+                self.mapping_dict, self.reverse_mapping_dict, swap_gate
+            )
+
+            score = with_depth_poly_heuristic(self.front_layer, self.extended_layer, temp_mapping_dict,
+                                           self.distance_matrix, self.access2q, self.decay_parameter, self.dag_dependencies_count, extended_layer_index, swap_gate,self.qubit_depth)
+            heuristic_score[swap_gate] = score
+
+        best_swap_gate = find_min_score_swap_gate(heuristic_score)
+
+        if self.use_isl:
+            self.isl_mapping = swap_logical_physical_isl_mapping(
+                self.isl_mapping, best_swap_gate)
+
+        swap_logical_physical_mappings(
+            self.mapping_dict, self.reverse_mapping_dict, best_swap_gate, inplace=True
+        )
+
+        self.decay_parameter[best_swap_gate[0]] += 0.001
+        self.decay_parameter[best_swap_gate[1]] += 0.001
+
+        self.update_depth(best_swap_gate[0], best_swap_gate[1])
+
+        return 1
+
+    def _apply_macro_gates_heuristic(self,param):
+
+        logical_qubits = [
+            q for gate in self.front_layer for q in self.access2q[gate]]
+        physical_qubits = set(self.mapping_dict[q] for q in logical_qubits)
+
+        self.extended_layer, extended_layer_index = create_leveled_extended_successor_set(
+            self.front_layer, self.dag2q_restricted, self.access2q, len(
+                physical_qubits)*param
+        )
+
+        candidate_swaps = generate_swap_candidates(
+            physical_qubits, self.backend)
+
+        heuristic_score = {}
+        for swap_gate in candidate_swaps:
+            temp_mapping_dict = swap_logical_physical_mappings(
+                self.mapping_dict, self.reverse_mapping_dict, swap_gate
+            )
+
+            score = macro_gates_poly_heuristic(self.front_layer, self.extended_layer, temp_mapping_dict,
+                                           self.distance_matrix, self.access2q, self.decay_parameter, self.dag_dependencies_count, extended_layer_index, swap_gate,self.qubit_depth,self.macro_gates)
+            heuristic_score[swap_gate] = score
+
+        best_swap_gate = find_min_score_swap_gate(heuristic_score)
+
+        if self.use_isl:
+            self.isl_mapping = swap_logical_physical_isl_mapping(
+                self.isl_mapping, best_swap_gate)
+
+        swap_logical_physical_mappings(
+            self.mapping_dict, self.reverse_mapping_dict, best_swap_gate, inplace=True
+        )
+
+        self.decay_parameter[best_swap_gate[0]] += 0.001
+        self.decay_parameter[best_swap_gate[1]] += 0.001
+
+        self.update_depth(best_swap_gate[0], best_swap_gate[1])
+
+        return 1
+
+
+    def _apply_closure_score_heuristic(self,param):
+
+        logical_qubits = [
+            q for gate in self.front_layer for q in self.access2q[gate]]
+        physical_qubits = set(self.mapping_dict[q] for q in logical_qubits)
+
+        self.extended_layer, extended_layer_index = create_leveled_extended_successor_set(
+            self.front_layer, self.dag2q_restricted, self.access2q, len(
+                physical_qubits)*param
         )
 
         candidate_swaps = generate_swap_candidates(
@@ -394,6 +495,190 @@ class POLY_QMAP():
         self.update_depth(best_swap_gate[0], best_swap_gate[1])
 
         return 1
+
+    def _apply_distance_closure_heuristic(self):
+        #print("dag : ",self.dag_dependencies_count)
+        #print("distance matrix : ",self.distance_matrix)
+        logical_qubits = [
+            q for gate in self.front_layer for q in self.access2q[gate]]
+        physical_qubits = set(self.mapping_dict[q] for q in logical_qubits)
+
+        self.extended_layer, extended_layer_index = create_leveled_extended_successor_set(
+            self.front_layer, self.dag2q_restricted, self.access2q, len(
+                physical_qubits)*5
+        )
+
+        candidate_swaps = generate_swap_candidates(
+            physical_qubits, self.backend)
+        #print("swaps candidates", candidate_swaps)
+        heuristic_score = {}
+        for swap_gate in candidate_swaps:
+            temp_mapping_dict = swap_logical_physical_mappings(
+                self.mapping_dict, self.reverse_mapping_dict, swap_gate
+            )
+            #print("for swap gate", swap_gate)
+            score = distance_only_poly_heuristic(self.front_layer, self.extended_layer, temp_mapping_dict,
+                                           self.distance_matrix, self.access2q, self.decay_parameter, self.dag_dependencies_count, extended_layer_index, swap_gate)
+            heuristic_score[swap_gate] = score
+            
+            #print("score", score)
+
+        best_swap_gate = find_min_score_swap_gate(heuristic_score)
+        #print("best swap gate", best_swap_gate)
+        #print("------------------")
+        if self.use_isl:
+            self.isl_mapping = swap_logical_physical_isl_mapping(
+                self.isl_mapping, best_swap_gate)
+
+        swap_logical_physical_mappings(
+            self.mapping_dict, self.reverse_mapping_dict, best_swap_gate, inplace=True
+        )
+
+        self.decay_parameter[best_swap_gate[0]] += 0.001
+        self.decay_parameter[best_swap_gate[1]] += 0.001
+
+        self.update_depth(best_swap_gate[0], best_swap_gate[1])
+
+        return 1
+
+
+
+    def _apply_dep_weight_closure_heuristic(self,param):
+        #print("dag : ",self.dag_dependencies_count)
+        #print("distance matrix : ",self.distance_matrix)
+        logical_qubits = [
+            q for gate in self.front_layer for q in self.access2q[gate]]
+        physical_qubits = set(self.mapping_dict[q] for q in logical_qubits)
+
+        self.extended_layer, extended_layer_index = create_leveled_extended_successor_set(
+            self.front_layer, self.dag2q_restricted, self.access2q, len(
+                physical_qubits)*param
+        )
+
+        candidate_swaps = generate_swap_candidates(
+            physical_qubits, self.backend)
+        #print("swaps candidates", candidate_swaps)
+        heuristic_score = {}
+        for swap_gate in candidate_swaps:
+            temp_mapping_dict = swap_logical_physical_mappings(
+                self.mapping_dict, self.reverse_mapping_dict, swap_gate
+            )
+            #print("for swap gate", swap_gate)
+            score = dep_weight_poly_heuristic(self.front_layer, self.extended_layer, temp_mapping_dict,
+                                           self.distance_matrix, self.access2q, self.decay_parameter, self.dag_dependencies_count, extended_layer_index, swap_gate)
+            heuristic_score[swap_gate] = score
+            
+            #print("score", score)
+
+        best_swap_gate = find_min_score_swap_gate(heuristic_score)
+        #print("best swap gate", best_swap_gate)
+        #print("------------------")
+        if self.use_isl:
+            self.isl_mapping = swap_logical_physical_isl_mapping(
+                self.isl_mapping, best_swap_gate)
+
+        swap_logical_physical_mappings(
+            self.mapping_dict, self.reverse_mapping_dict, best_swap_gate, inplace=True
+        )
+
+        self.decay_parameter[best_swap_gate[0]] += 0.001
+        self.decay_parameter[best_swap_gate[1]] += 0.001
+
+        self.update_depth(best_swap_gate[0], best_swap_gate[1])
+
+        return 1
+
+
+    def _apply_layered_closure_heuristic(self,param):
+        #print("dag : ",self.dag_dependencies_count)
+        #print("distance matrix : ",self.distance_matrix)
+        logical_qubits = [
+            q for gate in self.front_layer for q in self.access2q[gate]]
+        physical_qubits = set(self.mapping_dict[q] for q in logical_qubits)
+
+        self.extended_layer, extended_layer_index = create_leveled_extended_successor_set(
+            self.front_layer, self.dag2q_restricted, self.access2q, len(
+                physical_qubits)*param
+        )
+
+        candidate_swaps = generate_swap_candidates(
+            physical_qubits, self.backend)
+        #print("swaps candidates", candidate_swaps)
+        heuristic_score = {}
+        for swap_gate in candidate_swaps:
+            temp_mapping_dict = swap_logical_physical_mappings(
+                self.mapping_dict, self.reverse_mapping_dict, swap_gate
+            )
+            #print("for swap gate", swap_gate)
+            score = layered_poly_closure_heuristic(self.front_layer, self.extended_layer, temp_mapping_dict,
+                                           self.distance_matrix, self.access2q, self.decay_parameter, self.dag_dependencies_count, extended_layer_index, swap_gate)
+            heuristic_score[swap_gate] = score
+            
+            #print("score", score)
+        
+        best_swap_gate = find_min_score_swap_gate(heuristic_score)
+        #print("best swap gate", best_swap_gate)
+        #print("------------------")
+        if self.use_isl:
+            self.isl_mapping = swap_logical_physical_isl_mapping(
+                self.isl_mapping, best_swap_gate)
+
+        swap_logical_physical_mappings(
+            self.mapping_dict, self.reverse_mapping_dict, best_swap_gate, inplace=True
+        )
+
+        self.decay_parameter[best_swap_gate[0]] += 0.001
+        self.decay_parameter[best_swap_gate[1]] += 0.001
+
+        self.update_depth(best_swap_gate[0], best_swap_gate[1])
+
+        return 1
+
+
+    def _apply_fixed_extended_layer_heuristic(self):
+        #print("dag : ",self.dag_dependencies_count)
+        #print("distance matrix : ",self.distance_matrix)
+        logical_qubits = [
+            q for gate in self.front_layer for q in self.access2q[gate]]
+        physical_qubits = set(self.mapping_dict[q] for q in logical_qubits)
+
+        self.extended_layer, extended_layer_index = create_leveled_extended_successor_set(
+            self.front_layer, self.dag2q_restricted, self.access2q, 20
+        )
+
+        candidate_swaps = generate_swap_candidates(
+            physical_qubits, self.backend)
+        #print("swaps candidates", candidate_swaps)
+        heuristic_score = {}
+        for swap_gate in candidate_swaps:
+            temp_mapping_dict = swap_logical_physical_mappings(
+                self.mapping_dict, self.reverse_mapping_dict, swap_gate
+            )
+            #print("for swap gate", swap_gate)
+            score = distance_only_poly_heuristic(self.front_layer, self.extended_layer, temp_mapping_dict,
+                                           self.distance_matrix, self.access2q, self.decay_parameter, self.dag_dependencies_count, extended_layer_index, swap_gate)
+            heuristic_score[swap_gate] = score
+            
+            #print("score", score)
+
+        best_swap_gate = find_min_score_swap_gate(heuristic_score)
+        #print("best swap gate", best_swap_gate)
+        #print("------------------")
+        if self.use_isl:
+            self.isl_mapping = swap_logical_physical_isl_mapping(
+                self.isl_mapping, best_swap_gate)
+
+        swap_logical_physical_mappings(
+            self.mapping_dict, self.reverse_mapping_dict, best_swap_gate, inplace=True
+        )
+
+        self.decay_parameter[best_swap_gate[0]] += 0.001
+        self.decay_parameter[best_swap_gate[1]] += 0.001
+
+        self.update_depth(best_swap_gate[0], best_swap_gate[1])
+
+        return 1
+
 
     def update_depth(self, q1, q2):
 
